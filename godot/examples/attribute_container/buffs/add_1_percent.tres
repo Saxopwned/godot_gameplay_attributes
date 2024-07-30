@@ -5,6 +5,8 @@
 [resource]
 attribute_name = "attribute_000"
 buff_name = "add_1_percent"
-duration = 4.05004e+27
+duration = 0.0
 operation = ExtResource("1_vk5ue")
+max_applies = 0
+transient = true
 unique = false
