@@ -159,6 +159,17 @@ void AttributeOperation::set_value(const float p_value)
 
 #pragma endregion
 
+#pragma region AttributeBuffBase
+
+void AttributeBuffBase::_bind_methods()
+{
+	/// binds virtuals to godot
+	GDVIRTUAL_BIND(_applies_to, "attribute_set");
+	GDVIRTUAL_BIND(_operate, "values", "attribute_set");
+}
+
+#pragma endregion
+
 #pragma region AttributeBuff
 
 void AttributeBuff::_bind_methods()
@@ -179,10 +190,6 @@ void AttributeBuff::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_max_applies", "p_value"), &AttributeBuff::set_max_applies);
 	ClassDB::bind_method(D_METHOD("set_transient", "p_value"), &AttributeBuff::set_transient);
 	ClassDB::bind_method(D_METHOD("set_unique", "p_value"), &AttributeBuff::set_unique);
-
-	/// binds virtuals to godot
-	GDVIRTUAL_BIND(_applies_to, "attribute_set");
-	GDVIRTUAL_BIND(_operate, "values");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
@@ -695,15 +702,22 @@ TypedArray<float> RuntimeBuff::operate(const TypedArray<RuntimeAttribute> &p_run
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(buff, _operate)) {
 		TypedArray<AttributeOperation> operations = TypedArray<AttributeOperation>();
 		TypedArray<float> attribute_values = TypedArray<float>();
+		Ref<AttributeSet> attribute_set = nullptr;
 
 		for (int i = 0; i < p_runtime_attributes.size(); i++) {
 			Ref<RuntimeAttribute> runtime_attribute = p_runtime_attributes[i];
+
+			if (attribute_set == nullptr) {
+				attribute_set = runtime_attribute->attribute_set;
+			}
+
 			attribute_values.push_back(runtime_attribute->get_value());
 		}
 
 		ERR_FAIL_COND_V_MSG(attribute_values.size() == 0, attribute_values, "_operate returning values are empty, cannot operate on them.");
+		ERR_FAIL_COND_V_MSG(attribute_set.is_null(), values, "Attribute set is null, cannot operate on runtime attributes. This is certainly a bug.");
 
-		if (GDVIRTUAL_CALL_PTR(buff, _operate, attribute_values, operations)) {
+		if (GDVIRTUAL_CALL_PTR(buff, _operate, attribute_values, attribute_set, operations)) {
 			ERR_FAIL_COND_V_MSG(operations.size() == 0, values, "_operate returning operations are empty, cannot operate on them.");
 
 			for (int i = 0; i < operations.size(); i++) {

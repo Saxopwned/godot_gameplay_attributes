@@ -199,10 +199,24 @@ namespace gga
 		int count() const;
 	};
 
+	class AttributeBuffBase : public Resource {
+		GDCLASS(AttributeBuffBase, Resource);
+
+	public:
+		/// @brief Changes which attributes the buff applies to.
+		GDVIRTUAL1RC(TypedArray<AttributeBase>, _applies_to, Ref<AttributeSet>);
+		/// @brief Changes the operation to apply. If overridden, an array of AttributeOperation must be returned. This will skip the operation property.
+		GDVIRTUAL2RC(TypedArray<AttributeOperation>, _operate, TypedArray<float>, Ref<AttributeSet>);
+
+	protected:
+		/// @brief Bind methods to Godot.
+		static void _bind_methods();
+	};
+
 	/// @brief Attribute buff.
-	class AttributeBuff : public Resource
+	class AttributeBuff : public AttributeBuffBase
 	{
-		GDCLASS(AttributeBuff, Resource);
+		GDCLASS(AttributeBuff, AttributeBuffBase);
 
 		friend class RuntimeBuff;
 
@@ -228,11 +242,6 @@ namespace gga
 	public:
 		// equal operator overload
 		bool operator==(const Ref<AttributeBuff> &buff) const;
-
-		/// @brief Changes which attributes the buff applies to.
-		GDVIRTUAL1RC(TypedArray<AttributeBase>, _applies_to, Ref<AttributeSet>);
-		/// @brief Changes the operation to apply. If overridden, an array of AttributeOperation must be returned. This will skip the operation property.
-		GDVIRTUAL1RC(TypedArray<AttributeOperation>, _operate, TypedArray<float>);
 
 		/// @brief Returns the result of the operation on the base value.
 		/// @param base_value The base value to operate on. It's the attribute underlying value.
