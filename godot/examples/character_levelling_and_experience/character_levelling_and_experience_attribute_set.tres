@@ -1,9 +1,9 @@
 [gd_resource type="AttributeSet" load_steps=9 format=3 uid="uid://c6t2qdut1vu6m"]
 
-[ext_resource type="Script" uid="uid://dg8o83xcimj6h" path="res://examples/character_levelling_and_experience/attributes/level.gd" id="1_505y3"]
-[ext_resource type="Script" uid="uid://dpik2kp4330jc" path="res://examples/character_levelling_and_experience/attributes/experience.gd" id="2_15ala"]
-[ext_resource type="Script" uid="uid://bwfl3vcarngvt" path="res://examples/character_levelling_and_experience/attributes/next_level.gd" id="3_2bqk6"]
-[ext_resource type="Script" uid="uid://bf01w3xvm842v" path="res://examples/character_levelling_and_experience/attributes/next_level_experience.gd" id="4_67j2d"]
+[ext_resource type="Script" uid="uid://be6oumsljc6tu" path="res://examples/character_levelling_and_experience/attributes/level.gd" id="1_505y3"]
+[ext_resource type="Script" uid="uid://cu82acwv4is0f" path="res://examples/character_levelling_and_experience/attributes/experience.gd" id="2_15ala"]
+[ext_resource type="Script" uid="uid://g88fl15fe0ka" path="res://examples/character_levelling_and_experience/attributes/next_level.gd" id="3_2bqk6"]
+[ext_resource type="Script" uid="uid://cpyksrbvr1yf8" path="res://examples/character_levelling_and_experience/attributes/next_level_experience.gd" id="4_67j2d"]
 
 [sub_resource type="Attribute" id="Attribute_505y3"]
 script = ExtResource("1_505y3")

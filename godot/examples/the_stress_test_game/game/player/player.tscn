@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://x3tfcm4wi1u2"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/player/player.gd" id="1_pbqcu"]
+[ext_resource type="Script" uid="uid://u1ljsaqyr45r" path="res://examples/the_stress_test_game/game/player/player.gd" id="1_pbqcu"]
 [ext_resource type="AttributeSet" uid="uid://nswjdhjxocg1" path="res://examples/the_stress_test_game/game/player/player_attribute_set.tres" id="2_fuwfl"]
 [ext_resource type="Texture2D" uid="uid://cwksubrx8xh1c" path="res://examples/the_stress_test_game/kenney_tiny-dungeon/Tiles/tile_0084.png" id="3_doy2s"]
 

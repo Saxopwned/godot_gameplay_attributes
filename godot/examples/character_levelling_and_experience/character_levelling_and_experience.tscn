@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://ceq8dy34akh8j"]
 
-[ext_resource type="Script" uid="uid://dywkn11u0fcdw" path="res://examples/character_levelling_and_experience/character_levelling_and_experience.gd" id="1_dtuwy"]
+[ext_resource type="Script" uid="uid://bxh7j5l3y5iru" path="res://examples/character_levelling_and_experience/character_levelling_and_experience.gd" id="1_dtuwy"]
 [ext_resource type="AttributeSet" uid="uid://c6t2qdut1vu6m" path="res://examples/character_levelling_and_experience/character_levelling_and_experience_attribute_set.tres" id="2_dtuwy"]
 
 [node name="CharacterLevellingAndExperience" type="Control"]

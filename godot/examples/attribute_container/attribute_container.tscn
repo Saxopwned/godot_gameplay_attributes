@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://4lm2ofr1pb88"]
 
-[ext_resource type="Script" path="res://examples/attribute_container/attribute_container.gd" id="1_x7rde"]
+[ext_resource type="Script" uid="uid://x8prrurj03ni" path="res://examples/attribute_container/attribute_container.gd" id="1_x7rde"]
 
 [sub_resource type="Attribute" id="Attribute_jndah"]
 initial_value = 50.0

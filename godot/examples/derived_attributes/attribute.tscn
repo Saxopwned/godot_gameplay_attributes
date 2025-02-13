@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dpjb2ak76mp4b"]
 
-[ext_resource type="Script" path="res://examples/derived_attributes/attribute.gd" id="1_hjtsv"]
+[ext_resource type="Script" uid="uid://41g6tpnn806s" path="res://examples/derived_attributes/attribute.gd" id="1_hjtsv"]
 
 [node name="Attribute" type="HBoxContainer"]
 anchors_preset = 10

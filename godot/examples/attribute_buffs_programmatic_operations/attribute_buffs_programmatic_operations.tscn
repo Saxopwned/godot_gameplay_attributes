@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://d2kctykbvpmr1"]
 
-[ext_resource type="Script" path="res://examples/attribute_buffs_programmatic_operations/attribute_buffs_programmatic_operations.gd" id="1_n1i5o"]
+[ext_resource type="Script" uid="uid://bgbb4d6h8us4c" path="res://examples/attribute_buffs_programmatic_operations/attribute_buffs_programmatic_operations.gd" id="1_n1i5o"]
 
 [sub_resource type="Attribute" id="Attribute_kvqnj"]
 initial_value = 49.0

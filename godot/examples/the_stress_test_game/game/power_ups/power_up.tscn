@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cqbfduronibb5"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/power_ups/power_up.gd" id="1_xg7bb"]
+[ext_resource type="Script" uid="uid://hxg6sjomispl" path="res://examples/the_stress_test_game/game/power_ups/power_up.gd" id="1_xg7bb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cuqt2"]
 

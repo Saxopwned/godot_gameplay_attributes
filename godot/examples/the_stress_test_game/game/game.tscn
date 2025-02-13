@@ -1,11 +1,11 @@
 [gd_scene load_steps=9 format=3 uid="uid://8wxe6g2jwwxu"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/game.gd" id="1_a0mos"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/mobs.gd" id="2_g0rfa"]
+[ext_resource type="Script" uid="uid://c1wnognovtpxf" path="res://examples/the_stress_test_game/game/game.gd" id="1_a0mos"]
+[ext_resource type="Script" uid="uid://bv2453mkapp3k" path="res://examples/the_stress_test_game/game/mobs.gd" id="2_g0rfa"]
 [ext_resource type="PackedScene" uid="uid://x3tfcm4wi1u2" path="res://examples/the_stress_test_game/game/player/player.tscn" id="2_ho6o3"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/game_mode.gd" id="3_uvbcx"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/mob/mob_type.gd" id="5_0psn8"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/projectile_spawner.gd" id="6_f22ae"]
+[ext_resource type="Script" uid="uid://c22fui0oiwmcy" path="res://examples/the_stress_test_game/game/game_mode.gd" id="3_uvbcx"]
+[ext_resource type="Script" uid="uid://bxn2yen4ceew8" path="res://examples/the_stress_test_game/game/mob/mob_type.gd" id="5_0psn8"]
+[ext_resource type="Script" uid="uid://bipc1mxs0j7nv" path="res://examples/the_stress_test_game/game/projectile_spawner.gd" id="6_f22ae"]
 [ext_resource type="Resource" uid="uid://bqk0er6gflwv2" path="res://examples/the_stress_test_game/game/mob/mobs/type000/mob_000_resource.tres" id="6_i5h1m"]
 [ext_resource type="Resource" uid="uid://e0jhpmsckr07" path="res://examples/the_stress_test_game/game/mob/mobs/type001/mob_001_resource.tres" id="7_82f10"]
 

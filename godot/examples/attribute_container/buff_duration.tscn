@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://mmdhssiowdvi"]
 
-[ext_resource type="Script" path="res://examples/attribute_container/buff_duration.gd" id="1_tm0md"]
+[ext_resource type="Script" uid="uid://2g5lgrtuvvpo" path="res://examples/attribute_container/buff_duration.gd" id="1_tm0md"]
 
 [node name="BuffDuration" type="ProgressBar"]
 custom_minimum_size = Vector2(0, 20)

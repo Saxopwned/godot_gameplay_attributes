@@ -1,6 +1,6 @@
 [configuration]
 entry_symbol = "gdextension_init"
-compatibility_minimum = 4.3
+compatibility_minimum = 4.4
 reloadable = true
 
 [libraries]
