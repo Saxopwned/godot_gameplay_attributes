@@ -49,6 +49,7 @@ void AttributeOperation::_bind_methods()
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("multiply", "p_value"), &AttributeOperation::multiply);
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("percentage", "p_value"), &AttributeOperation::percentage);
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("subtract", "p_value"), &AttributeOperation::subtract);
+	ClassDB::bind_static_method("AttributeOperation", D_METHOD("forcefully_set_value", "p_value"), &AttributeOperation::forcefully_set_value);
 
 	/// binds properties
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "operand", PROPERTY_HINT_ENUM, "Add:0,Divide:1,Multiply:2,Percentage:3,Subtract:4"), "set_operand", "get_operand");
@@ -60,6 +61,7 @@ void AttributeOperation::_bind_methods()
 	BIND_ENUM_CONSTANT(OP_MULTIPLY);
 	BIND_ENUM_CONSTANT(OP_PERCENTAGE);
 	BIND_ENUM_CONSTANT(OP_SUBTRACT);
+	BIND_ENUM_CONSTANT(OP_SET);
 }
 
 Ref<AttributeOperation> AttributeOperation::create(const OperationType p_operand, const float p_value)
@@ -100,6 +102,11 @@ Ref<AttributeOperation> AttributeOperation::subtract(const float p_value)
 	return create(OP_SUBTRACT, p_value);
 }
 
+Ref<AttributeOperation> AttributeOperation::forcefully_set_value(const float p_value)
+{
+	return create(OP_SET, p_value);
+}
+
 int AttributeOperation::get_operand() const
 {
 	return (int)operand;
@@ -123,6 +130,8 @@ float AttributeOperation::operate(float p_base_value) const
 			return p_base_value + ((p_base_value / 100) * value);
 		case OP_SUBTRACT:
 			return p_base_value - value;
+		case OP_SET:
+			return value;
 		default:
 			return p_base_value;
 	}
@@ -145,6 +154,9 @@ void AttributeOperation::set_operand(const int p_value)
 			break;
 		case 4:
 			operand = OP_SUBTRACT;
+			break;
+		case 5:
+			operand = OP_SET;
 			break;
 		default:
 			operand = OP_ADD;
@@ -711,7 +723,9 @@ TypedArray<float> RuntimeBuff::operate(const TypedArray<RuntimeAttribute> &p_run
 				attribute_set = runtime_attribute->attribute_set;
 			}
 
-			attribute_values.push_back(runtime_attribute->get_value());
+			// We are passing the buffed value because a derived attribute 
+			// must always be calculated from the buffed value of the attributes.
+			attribute_values.push_back(runtime_attribute->get_buffed_value());
 		}
 
 		ERR_FAIL_COND_V_MSG(attribute_values.size() == 0, attribute_values, "_operate returning values are empty, cannot operate on them.");

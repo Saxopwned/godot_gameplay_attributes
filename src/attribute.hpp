@@ -55,6 +55,8 @@ namespace gga
 		OP_PERCENTAGE = 3,
 		/// @brief Subtract operation.
 		OP_SUBTRACT = 4,
+		/// @brief Sets the value directly. USE THIS WITH CAUTION.
+		OP_SET = 5,
 	};
 
 	/// @brief Attribute operation.
@@ -99,6 +101,10 @@ namespace gga
 		/// @param p_value The value to subtract.
 		/// @return The new instance of AttributeOperation.
 		static Ref<AttributeOperation> subtract(const float p_value);
+		/// @brief Returns a new instance of AttributeOperation with the set operation.
+		/// @param p_value The value to set.
+		/// @return The new instance of AttributeOperation.
+		static Ref<AttributeOperation> forcefully_set_value(const float p_value);
 
 		/// @brief Get the operand.
 		/// @return The operand.
