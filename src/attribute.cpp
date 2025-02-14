@@ -841,7 +841,9 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 			}
 		}
 
-		emit_signal("attribute_changed", this, prev_value, value);
+		if (!Math::is_equal_approx(prev_value, value)) {
+			emit_signal("attribute_changed", this, prev_value, value);
+		}
 	}
 
 	return true;

@@ -108,7 +108,6 @@ void AttributeContainer::notify_derived_attributes(Ref<RuntimeAttribute> p_runti
 {
 	if (derived_attributes.has(p_runtime_attribute->get_attribute()->get_attribute_name())) {
 		TypedArray<RuntimeAttribute> derived = derived_attributes[p_runtime_attribute->get_attribute()->get_attribute_name()];
-		Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
 
 		for (int i = 0; i < derived.size(); i++) {
 			Ref<RuntimeAttribute> derived_attribute = derived[i];

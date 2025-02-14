@@ -29,6 +29,7 @@ func _ready() -> void:
 
 
 func _handle_attribute_changed(_attribute: RuntimeAttribute, _previous_value: float, _new_value: float) -> void:
+	print(_attribute.attribute.attribute_name, _previous_value, _new_value)
 	update_view()
 
 
