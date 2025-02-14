@@ -28,12 +28,7 @@ func _ready() -> void:
 	update_view()
 
 
-func _handle_attribute_changed(attribute: RuntimeAttribute, previous_value: float, new_value: float) -> void:
-	print("Attribute {0} updated with new value {1}. Older value is {2}".format({
-		0: attribute.attribute.attribute_name,
-		1: new_value,
-		2: previous_value
-	}))
+func _handle_attribute_changed(_attribute: RuntimeAttribute, _previous_value: float, _new_value: float) -> void:
 	update_view()
 
 

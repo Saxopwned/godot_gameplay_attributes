@@ -1,11 +1,15 @@
-[gd_resource type="Resource" script_class="PowerUpResource" load_steps=4 format=3 uid="uid://cmdbpv5edlggr"]
+[gd_resource type="Resource" script_class="PowerUpResource" load_steps=5 format=3 uid="uid://cmdbpv5edlggr"]
 
-[ext_resource type="Script" uid="uid://iuklsurycesn" path="res://examples/the_stress_test_game/game/power_ups/power_up_resource.gd" id="1_e4nqt"]
+[ext_resource type="Script" uid="uid://c10wo7vcm2y2o" path="res://examples/the_stress_test_game/game/power_ups/power_up_resource.gd" id="1_e4nqt"]
 [ext_resource type="Texture2D" uid="uid://b237god0a1vo2" path="res://examples/the_stress_test_game/kenney_tiny-dungeon/Tiles/tile_0103.png" id="2_txoyb"]
+
+[sub_resource type="AttributeOperation" id="AttributeOperation_kd31d"]
+value = 1.0
 
 [sub_resource type="AttributeBuff" id="AttributeBuff_lbg58"]
 attribute_name = "damage"
 buff_name = "Damage power up"
+operation = SubResource("AttributeOperation_kd31d")
 transient = true
 
 [resource]

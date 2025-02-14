@@ -7,7 +7,7 @@ const SCALE 				:= 1.5
 
 
 func calculate_next(current_level: float) -> float:
-	return ((current_level * SCALE) ** 1.5) * EXPERIENCE_PER_LEVEL
+	return round(((current_level * SCALE) ** 1.5) * EXPERIENCE_PER_LEVEL)
 
 
 func _init(_attribute_name := ATTRIBUTE_NAME) -> void:

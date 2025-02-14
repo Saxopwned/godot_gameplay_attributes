@@ -402,6 +402,7 @@ namespace gga
 		GDCLASS(RuntimeBuff, RefCounted);
 
 	protected:
+		friend class AttributeContainer;
 		friend class RuntimeAttribute;
 
 		static void _bind_methods();
@@ -415,11 +416,11 @@ namespace gga
 		/// @brief Returns the attributes the buff applies to.
 		/// @param p_attribute_set The attribute set to check.
 		/// @return The attributes the buff applies to.
-		TypedArray<RuntimeAttribute> applies_to(const AttributeContainer *p_attribute_container) const;
+		Ref<RuntimeAttribute> applies_to(const AttributeContainer *p_attribute_container) const;
 		/// @brief Operate on the runtime attributes.
 		/// @param p_runtime_attributes The runtime attributes to operate on.
 		/// @return The operated runtime values.
-		TypedArray<float> operate(const TypedArray<RuntimeAttribute> &p_runtime_attributes) const;
+		float operate(const Ref<RuntimeAttribute> &p_runtime_attributes) const;
 
 	public:
 		static Ref<RuntimeBuff> from_buff(const Ref<AttributeBuff> &p_buff);
