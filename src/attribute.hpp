@@ -329,14 +329,6 @@ namespace gga
 		/// @return The minimum value of the attribute.
 		GDVIRTUAL1RC(float, _get_initial_value, PackedFloat32Array);
 		virtual float get_initial_value() const = 0;
-		/// @brief Get the maximum value of the attribute.
-		/// @return The maximum value of the attribute.
-		GDVIRTUAL1RC(float, _get_max_value, Ref<AttributeSet>);
-		virtual float get_max_value() const = 0;
-		/// @brief Get the minimum value of the attribute.
-		/// @return The minimum value of the attribute.
-		GDVIRTUAL1RC(float, _get_min_value, Ref<AttributeSet>);
-		virtual float get_min_value() const = 0;
 
 		/// @brief Get the buffs affecting the attribute.
 		/// @return The buffs affecting the attribute.
@@ -361,39 +353,21 @@ namespace gga
 		static void _bind_methods();
 		/// @brief The initial value of the attribute.
 		float initial_value = 0.000000f;
-		/// @brief The maximum value of the attribute.
-		float max_value = 0.000000f;
-		/// @brief The minimum value of the attribute.
-		float min_value = 0.000000f;
 
 	public:
 		/// @brief Create an attribute from some parameters.
 		/// @param p_attribute_name The attribute name.
 		/// @param p_initial_value The initial value.
-		/// @param p_min_value The minimum value.
-		/// @param p_max_value The maximum value.
 		/// @return The new instance of Attribute.
-		static Ref<Attribute> create(const String &p_attribute_name, const float p_initial_value, const float p_min_value, const float p_max_value);
+		static Ref<Attribute> create(const String &p_attribute_name, const float p_initial_value);
 
 		// getters/setters
 		/// @brief Get the initial value of the attribute.
 		/// @return The initial value of the attribute.
 		float get_initial_value() const override;
-		/// @brief Get the maximum value of the attribute.
-		/// @return The maximum value of the attribute.
-		float get_max_value() const override;
-		/// @brief Get the minimum value of the attribute.
-		/// @return The minimum value of the attribute.
-		float get_min_value() const override;
 		/// @brief Set the initial value of the attribute.
 		/// @param p_value The initial value of the attribute.
 		void set_initial_value(const float p_value);
-		/// @brief Set the maximum value of the attribute.
-		/// @param p_value The maximum value of the attribute.
-		void set_max_value(const float p_value);
-		/// @brief Set the minimum value of the attribute.
-		/// @param p_value The minimum value of the attribute.
-		void set_min_value(const float p_value);
 	};
 
 	/// @brief Runtime buff. Using class because structs seems to not be allowed in Godot yet.
@@ -532,12 +506,6 @@ namespace gga
 		/// @brief Get the initial value of the attribute.
 		/// @return The initial value of the attribute.
 		float get_initial_value() const;
-		/// @brief Get the minimum value of the attribute.
-		/// @return The minimum value of the attribute.
-		float get_min_value() const;
-		/// @brief Get the maximum value of the attribute.
-		/// @return The maximum value of the attribute.
-		float get_max_value() const;
 		/// @brief Gets the value of the attribute.
 		/// @return The value of the attribute.
 		float get_value();
