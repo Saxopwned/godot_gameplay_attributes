@@ -1,11 +1,11 @@
 [gd_resource type="AttributeSet" load_steps=14 format=3 uid="uid://nswjdhjxocg1"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/damage.gd" id="1_env54"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/health.gd" id="2_bsj7q"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/health_regen.gd" id="3_jc603"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/movement_speed.gd" id="4_7xcs8"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/stamina.gd" id="5_pm2dq"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/pickup_radius.gd" id="7_ivnag"]
+[ext_resource type="Script" uid="uid://cvmby57ney2gw" path="res://examples/the_stress_test_game/game/attributes/damage.gd" id="1_env54"]
+[ext_resource type="Script" uid="uid://c5muy00fqhllu" path="res://examples/the_stress_test_game/game/attributes/health.gd" id="2_bsj7q"]
+[ext_resource type="Script" uid="uid://dq34yb2om1g03" path="res://examples/the_stress_test_game/game/attributes/health_regen.gd" id="3_jc603"]
+[ext_resource type="Script" uid="uid://dxxgjnap8mu3b" path="res://examples/the_stress_test_game/game/attributes/movement_speed.gd" id="4_7xcs8"]
+[ext_resource type="Script" uid="uid://dkymt6ho0w4ge" path="res://examples/the_stress_test_game/game/attributes/stamina.gd" id="5_pm2dq"]
+[ext_resource type="Script" uid="uid://nvbhd8twbxk8" path="res://examples/the_stress_test_game/game/attributes/pickup_radius.gd" id="7_ivnag"]
 
 [sub_resource type="Attribute" id="Attribute_o56mt"]
 initial_value = 4.0

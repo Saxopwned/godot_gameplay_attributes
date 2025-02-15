@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cqvwn1f5hh0lg"]
 
-[ext_resource type="Script" path="res://examples/derived_attributes/derived_attributes.gd" id="1_7kkyc"]
+[ext_resource type="Script" uid="uid://cikycemruupka" path="res://examples/derived_attributes/derived_attributes.gd" id="1_7kkyc"]
 [ext_resource type="AttributeSet" uid="uid://fcvopdysvkug" path="res://examples/derived_attributes/attributes/resources/attributes.tres" id="2_u0b81"]
 
 [node name="DerivedAttributes" type="VBoxContainer"]

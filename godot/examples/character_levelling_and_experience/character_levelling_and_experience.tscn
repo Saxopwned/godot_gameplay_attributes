@@ -1,0 +1,70 @@
+[gd_scene load_steps=3 format=3 uid="uid://ceq8dy34akh8j"]
+
+[ext_resource type="Script" uid="uid://bxh7j5l3y5iru" path="res://examples/character_levelling_and_experience/character_levelling_and_experience.gd" id="1_dtuwy"]
+[ext_resource type="AttributeSet" uid="uid://c6t2qdut1vu6m" path="res://examples/character_levelling_and_experience/character_levelling_and_experience_attribute_set.tres" id="2_dtuwy"]
+
+[node name="CharacterLevellingAndExperience" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dtuwy")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="LevelsHBoxContainer" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CurrentLevel" type="Label" parent="CenterContainer/VBoxContainer/LevelsHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="NextLevel" type="Label" parent="CenterContainer/VBoxContainer/LevelsHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ExperienceVBoxContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CurrentExperience" type="Label" parent="CenterContainer/VBoxContainer/ExperienceVBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="NextLevelExperience" type="Label" parent="CenterContainer/VBoxContainer/ExperienceVBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ParametersHBoxContainer" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MinimumValue" type="SpinBox" parent="CenterContainer/VBoxContainer/ParametersHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+step = 0.5
+alignment = 2
+
+[node name="MaximumValue" type="SpinBox" parent="CenterContainer/VBoxContainer/ParametersHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+step = 0.5
+alignment = 2
+
+[node name="IncreaseExperience" type="Button" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "MORE EXP!"
+
+[node name="AttributeContainer" type="AttributeContainer" parent="."]
+attribute_set = ExtResource("2_dtuwy")
+unique_name_in_owner = true

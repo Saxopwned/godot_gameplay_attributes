@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://vwe01ud4t85i"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/projectile/projectile.gd" id="1_tvmok"]
+[ext_resource type="Script" uid="uid://c1qf8pq5dt7mp" path="res://examples/the_stress_test_game/game/projectile/projectile.gd" id="1_tvmok"]
 [ext_resource type="Texture2D" uid="uid://b237god0a1vo2" path="res://examples/the_stress_test_game/kenney_tiny-dungeon/Tiles/tile_0103.png" id="2_cj551"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_8q7eq"]

@@ -11,7 +11,7 @@ func _applies_to(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 
 
-func _operate(values: Array[float]) -> Array[AttributeOperation]:
+func _operate(values: Array[float], _attribute_set: AttributeSet) -> Array[AttributeOperation]:
 	if (values.size() == 0):
 		return [AttributeOperation.add(0), AttributeOperation.add(0)]
 	

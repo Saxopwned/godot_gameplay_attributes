@@ -97,9 +97,10 @@ You can create your own custom attribute buff/debuff by creating a script that i
 This class provides two virtuals you have to implement: 
 
 - `_applies_to(attribute_set: AttributeSet) -> Array[AttributeBase]` that will define to which attribute the buff will be applied.
-- `_operate(values: Array[float]) -> Array[AttributeOperation]` that will define how the buff will modify the attributes.
+- `_operate(values: Array[float], attribute_set: AttributeSet) -> Array[AttributeOperation]` that will define how the buff will modify the attributes.
+  - The `values` parameter is an array of the buffed values of the subscribed attributes (at runtime) that the buff will use.
 
-You can find an example [here](godot/examples/attribute_buffs_programmatic_operations/buffs/damage_to_health_and_armor.gd)
+You can find an example [here](godot/examples/character_levelling_and_experience/experience_buff.gd)
 
 This is good for mechanics where there is some kind of buff/debuff mitigation, like a shield that will absorb some damage before it reaches the health of a character, or movement speed that will be reduced by a debuff.
 

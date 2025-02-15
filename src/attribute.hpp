@@ -55,6 +55,8 @@ namespace gga
 		OP_PERCENTAGE = 3,
 		/// @brief Subtract operation.
 		OP_SUBTRACT = 4,
+		/// @brief Sets the value directly. USE THIS WITH CAUTION.
+		OP_SET = 5,
 	};
 
 	/// @brief Attribute operation.
@@ -99,6 +101,10 @@ namespace gga
 		/// @param p_value The value to subtract.
 		/// @return The new instance of AttributeOperation.
 		static Ref<AttributeOperation> subtract(const float p_value);
+		/// @brief Returns a new instance of AttributeOperation with the set operation.
+		/// @param p_value The value to set.
+		/// @return The new instance of AttributeOperation.
+		static Ref<AttributeOperation> forcefully_set_value(const float p_value);
 
 		/// @brief Get the operand.
 		/// @return The operand.
@@ -199,10 +205,24 @@ namespace gga
 		int count() const;
 	};
 
+	class AttributeBuffBase : public Resource {
+		GDCLASS(AttributeBuffBase, Resource);
+
+	public:
+		/// @brief Changes which attributes the buff applies to.
+		GDVIRTUAL1RC(TypedArray<AttributeBase>, _applies_to, Ref<AttributeSet>);
+		/// @brief Changes the operation to apply. If overridden, an array of AttributeOperation must be returned. This will skip the operation property.
+		GDVIRTUAL2RC(TypedArray<AttributeOperation>, _operate, TypedArray<float>, Ref<AttributeSet>);
+
+	protected:
+		/// @brief Bind methods to Godot.
+		static void _bind_methods();
+	};
+
 	/// @brief Attribute buff.
-	class AttributeBuff : public Resource
+	class AttributeBuff : public AttributeBuffBase
 	{
-		GDCLASS(AttributeBuff, Resource);
+		GDCLASS(AttributeBuff, AttributeBuffBase);
 
 		friend class RuntimeBuff;
 
@@ -228,11 +248,6 @@ namespace gga
 	public:
 		// equal operator overload
 		bool operator==(const Ref<AttributeBuff> &buff) const;
-
-		/// @brief Changes which attributes the buff applies to.
-		GDVIRTUAL1RC(TypedArray<AttributeBase>, _applies_to, Ref<AttributeSet>);
-		/// @brief Changes the operation to apply. If overridden, an array of AttributeOperation must be returned. This will skip the operation property.
-		GDVIRTUAL1RC(TypedArray<AttributeOperation>, _operate, TypedArray<float>);
 
 		/// @brief Returns the result of the operation on the base value.
 		/// @param base_value The base value to operate on. It's the attribute underlying value.
@@ -387,6 +402,7 @@ namespace gga
 		GDCLASS(RuntimeBuff, RefCounted);
 
 	protected:
+		friend class AttributeContainer;
 		friend class RuntimeAttribute;
 
 		static void _bind_methods();
@@ -400,11 +416,11 @@ namespace gga
 		/// @brief Returns the attributes the buff applies to.
 		/// @param p_attribute_set The attribute set to check.
 		/// @return The attributes the buff applies to.
-		TypedArray<RuntimeAttribute> applies_to(const AttributeContainer *p_attribute_container) const;
+		Ref<RuntimeAttribute> applies_to(const AttributeContainer *p_attribute_container) const;
 		/// @brief Operate on the runtime attributes.
 		/// @param p_runtime_attributes The runtime attributes to operate on.
 		/// @return The operated runtime values.
-		TypedArray<float> operate(const TypedArray<RuntimeAttribute> &p_runtime_attributes) const;
+		float operate(const Ref<RuntimeAttribute> &p_runtime_attributes) const;
 
 	public:
 		static Ref<RuntimeBuff> from_buff(const Ref<AttributeBuff> &p_buff);

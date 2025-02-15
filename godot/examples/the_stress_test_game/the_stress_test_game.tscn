@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://b2yfl5ptmb1he"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/the_stress_test_game.gd" id="1_v6iak"]
+[ext_resource type="Script" uid="uid://ctdkf1w01j750" path="res://examples/the_stress_test_game/the_stress_test_game.gd" id="1_v6iak"]
 [ext_resource type="PackedScene" uid="uid://8wxe6g2jwwxu" path="res://examples/the_stress_test_game/game/game.tscn" id="1_vcc6y"]
 [ext_resource type="PackedScene" uid="uid://bhnef4115hrm4" path="res://examples/the_stress_test_game/gameover_screen.tscn" id="2_f854s"]
 

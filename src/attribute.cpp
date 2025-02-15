@@ -49,6 +49,7 @@ void AttributeOperation::_bind_methods()
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("multiply", "p_value"), &AttributeOperation::multiply);
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("percentage", "p_value"), &AttributeOperation::percentage);
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("subtract", "p_value"), &AttributeOperation::subtract);
+	ClassDB::bind_static_method("AttributeOperation", D_METHOD("forcefully_set_value", "p_value"), &AttributeOperation::forcefully_set_value);
 
 	/// binds properties
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "operand", PROPERTY_HINT_ENUM, "Add:0,Divide:1,Multiply:2,Percentage:3,Subtract:4"), "set_operand", "get_operand");
@@ -60,6 +61,7 @@ void AttributeOperation::_bind_methods()
 	BIND_ENUM_CONSTANT(OP_MULTIPLY);
 	BIND_ENUM_CONSTANT(OP_PERCENTAGE);
 	BIND_ENUM_CONSTANT(OP_SUBTRACT);
+	BIND_ENUM_CONSTANT(OP_SET);
 }
 
 Ref<AttributeOperation> AttributeOperation::create(const OperationType p_operand, const float p_value)
@@ -100,6 +102,11 @@ Ref<AttributeOperation> AttributeOperation::subtract(const float p_value)
 	return create(OP_SUBTRACT, p_value);
 }
 
+Ref<AttributeOperation> AttributeOperation::forcefully_set_value(const float p_value)
+{
+	return create(OP_SET, p_value);
+}
+
 int AttributeOperation::get_operand() const
 {
 	return (int)operand;
@@ -123,6 +130,8 @@ float AttributeOperation::operate(float p_base_value) const
 			return p_base_value + ((p_base_value / 100) * value);
 		case OP_SUBTRACT:
 			return p_base_value - value;
+		case OP_SET:
+			return value;
 		default:
 			return p_base_value;
 	}
@@ -146,6 +155,9 @@ void AttributeOperation::set_operand(const int p_value)
 		case 4:
 			operand = OP_SUBTRACT;
 			break;
+		case 5:
+			operand = OP_SET;
+			break;
 		default:
 			operand = OP_ADD;
 			break;
@@ -155,6 +167,17 @@ void AttributeOperation::set_operand(const int p_value)
 void AttributeOperation::set_value(const float p_value)
 {
 	value = p_value;
+}
+
+#pragma endregion
+
+#pragma region AttributeBuffBase
+
+void AttributeBuffBase::_bind_methods()
+{
+	/// binds virtuals to godot
+	GDVIRTUAL_BIND(_applies_to, "attribute_set");
+	GDVIRTUAL_BIND(_operate, "values", "attribute_set");
 }
 
 #pragma endregion
@@ -179,10 +202,6 @@ void AttributeBuff::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_max_applies", "p_value"), &AttributeBuff::set_max_applies);
 	ClassDB::bind_method(D_METHOD("set_transient", "p_value"), &AttributeBuff::set_transient);
 	ClassDB::bind_method(D_METHOD("set_unique", "p_value"), &AttributeBuff::set_unique);
-
-	/// binds virtuals to godot
-	GDVIRTUAL_BIND(_applies_to, "attribute_set");
-	GDVIRTUAL_BIND(_operate, "values");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
@@ -655,73 +674,22 @@ bool RuntimeBuff::equals_to(const Ref<AttributeBuff> &p_buff) const
 	return buff == p_buff;
 }
 
-TypedArray<RuntimeAttribute> RuntimeBuff::applies_to(const AttributeContainer *p_attribute_container) const
+Ref<RuntimeAttribute> RuntimeBuff::applies_to(const AttributeContainer *p_attribute_container) const
 {
-	TypedArray<RuntimeAttribute> attributes = TypedArray<RuntimeAttribute>();
-	Ref<AttributeSet> attribute_set = p_attribute_container->get_attribute_set();
+	Ref<RuntimeAttribute> attribute = p_attribute_container->get_attribute_by_name(buff->get_attribute_name());
 
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(buff, _applies_to)) {
-		TypedArray<AttributeBase> _attributes = TypedArray<AttributeBase>();
+	ERR_FAIL_COND_V_MSG(attribute.is_null(), attribute, "Attribute not found in attribute set.");
+	ERR_FAIL_COND_V_MSG(!attribute.is_valid(), attribute, "Attribute reference is not valid.");
 
-		if (GDVIRTUAL_CALL_PTR(buff, _applies_to, attribute_set, _attributes)) {
-			for (int i = 0; i < _attributes.size(); i++) {
-				Ref<AttributeBase> attribute_base = _attributes[i];
-				Ref<RuntimeAttribute> attribute = p_attribute_container->get_attribute_by_name(attribute_base->get_attribute_name());
-				ERR_FAIL_COND_V_MSG(attribute.is_null(), attributes, "Attribute not found in attribute set.");
-				attributes.push_back(attribute);
-			}
-		}
-	} else {
-		Ref<RuntimeAttribute> attribute = p_attribute_container->get_attribute_by_name(buff->get_attribute_name());
-
-		ERR_FAIL_COND_V_MSG(attribute.is_null(), attributes, "Attribute not found in attribute set.");
-		ERR_FAIL_COND_V_MSG(!attribute.is_valid(), attributes, "Attribute reference is not valid.");
-
-		attributes.push_back(attribute);
-	}
-
-	ERR_FAIL_COND_V_EDMSG(attributes.size() == 0, attributes, "Overloaded _applies_to returned 0 attributes.");
-
-	return attributes;
+	return attribute;
 }
 
-TypedArray<float> RuntimeBuff::operate(const TypedArray<RuntimeAttribute> &p_runtime_attributes) const
+float RuntimeBuff::operate(const Ref<RuntimeAttribute> &p_runtime_attribute) const
 {
-	ERR_FAIL_COND_V_MSG(!buff.is_valid(), TypedArray<float>(), "Buff is not valid, cannot operate on runtime attributes.");
-	ERR_FAIL_COND_V_MSG(p_runtime_attributes.size() == 0, TypedArray<float>(), "Runtime attributes are empty, cannot operate on them.");
+	ERR_FAIL_COND_V_MSG(!buff.is_valid(), 0.0f, "Buff is not valid, cannot operate on runtime attributes.");
+	ERR_FAIL_NULL_V_MSG(p_runtime_attribute, 0.0f, "Runtime attribute is null, cannot operate on it.");
 
-	TypedArray<float> values = TypedArray<float>();
-
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(buff, _operate)) {
-		TypedArray<AttributeOperation> operations = TypedArray<AttributeOperation>();
-		TypedArray<float> attribute_values = TypedArray<float>();
-
-		for (int i = 0; i < p_runtime_attributes.size(); i++) {
-			Ref<RuntimeAttribute> runtime_attribute = p_runtime_attributes[i];
-			attribute_values.push_back(runtime_attribute->get_value());
-		}
-
-		ERR_FAIL_COND_V_MSG(attribute_values.size() == 0, attribute_values, "_operate returning values are empty, cannot operate on them.");
-
-		if (GDVIRTUAL_CALL_PTR(buff, _operate, attribute_values, operations)) {
-			ERR_FAIL_COND_V_MSG(operations.size() == 0, values, "_operate returning operations are empty, cannot operate on them.");
-
-			for (int i = 0; i < operations.size(); i++) {
-				Ref<AttributeOperation> operation = operations[i];
-				float attribute_value = attribute_values[i];
-				float operation_result = operation->operate(attribute_value);
-
-				values.push_back(operation->operate(attribute_value));
-			}
-		}
-	} else if (p_runtime_attributes.size() > 0) {
-		Ref<AttributeBuff> attribute_buff = buff;
-		Ref<RuntimeAttribute> first_attribute = p_runtime_attributes[0];
-
-		values.push_back(attribute_buff->operate(first_attribute->get_value()));
-	}
-
-	return values;
+	return buff->operate(p_runtime_attribute->value);
 }
 
 Ref<RuntimeBuff> RuntimeBuff::from_buff(const Ref<AttributeBuff> &p_buff)
@@ -749,17 +717,12 @@ bool RuntimeBuff::operator==(const Ref<RuntimeBuff> &p_runtime_buff) const
 
 bool RuntimeBuff::can_apply_to_attribute(const Ref<RuntimeAttribute> &p_attribute) const
 {
-	TypedArray<RuntimeAttribute> _applies_to = applies_to(p_attribute->attribute_container);
+	Ref<RuntimeAttribute> applied_to = applies_to(p_attribute->attribute_container);
 
-	for (int i = 0; i < _applies_to.size(); i++) {
-		Ref<RuntimeAttribute> runtime_attribute = _applies_to[i];
+	ERR_FAIL_NULL_V_MSG(applied_to, false, "Attribute not found in attribute set.");
+	ERR_FAIL_COND_V_MSG(!applied_to.is_valid(), false, "Attribute reference is not valid.");
 
-		if (runtime_attribute->attribute == p_attribute->attribute) {
-			return true;
-		}
-	}
-
-	return false;
+	return applied_to->attribute->get_attribute_name() == p_attribute->attribute->get_attribute_name();
 }
 
 bool RuntimeBuff::can_dequeue() const
@@ -853,45 +816,34 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 	}
 
 	Ref<RuntimeBuff> runtime_buff = RuntimeBuff::from_buff(p_buff);
+
 	ERR_FAIL_COND_V_MSG(runtime_buff.is_null(), false, "Failed to create runtime buff from attribute buff.");
 
 	if (p_buff->get_transient()) {
 		buffs.push_back(runtime_buff);
 		emit_signal("buff_added", runtime_buff);
 	} else {
-		TypedArray<RuntimeAttribute> affected_attributes = runtime_buff->applies_to(attribute_container);
 		float max = attribute->get_max_value();
 		float min = attribute->get_min_value();
 		float prev_value = value;
 
-		ERR_FAIL_COND_V_EDMSG(affected_attributes.size() == 0, false, "Runtime buff does not apply to any attribute.");
-
 		if (runtime_buff->can_apply_to_attribute(this)) {
-			TypedArray<float> values = runtime_buff->operate(affected_attributes);
-			ERR_FAIL_COND_V_MSG(values.size() == 0, false, "Failed to operate on affected attributes.");
-			ERR_FAIL_COND_V_MSG(values.size() != affected_attributes.size(), false, "Operated values size does not match affected attributes size.");
+			float new_value = runtime_buff->operate(this);
 
-			for (int i = 0; i < affected_attributes.size(); i++) {
-				Ref<RuntimeAttribute> affected_attribute = affected_attributes[i];
-				if (affected_attribute->attribute == attribute) {
-					float new_value = values[i];
-
-					if (Math::is_equal_approx(max, min)) {
-						value = new_value;
-					} else if (min < max) {
-						value = Math::clamp(new_value, min, max);
-					} else if (max == 0) {
-						value = new_value > min ? new_value : min;
-					} else {
-						return false;
-					}
-
-					break;
-				}
+			if (Math::is_equal_approx(max, min)) {
+				value = new_value;
+			} else if (min < max) {
+				value = Math::clamp(new_value, min, max);
+			} else if (max == 0) {
+				value = new_value > min ? new_value : min;
+			} else {
+				return false;
 			}
 		}
 
-		emit_signal("attribute_changed", this, prev_value, value);
+		if (!Math::is_equal_approx(prev_value, value)) {
+			emit_signal("attribute_changed", this, prev_value, value);
+		}
 	}
 
 	return true;
@@ -926,20 +878,6 @@ bool RuntimeAttribute::can_receive_buff(const Ref<AttributeBuff> &p_buff) const
 	}
 
 	if (buffs_count >= p_buff->get_max_applies() && p_buff->get_max_applies() > 0) {
-		return false;
-	}
-
-	if (p_buff->is_operate_overridden()) {
-		TypedArray<RuntimeAttribute> applied_to_attributes = RuntimeBuff::from_buff(p_buff)->applies_to(attribute_container);
-
-		for (int i = 0; i < applied_to_attributes.size(); i++) {
-			Ref<RuntimeAttribute> applied_to_attribute = applied_to_attributes[i];
-
-			if (applied_to_attribute->attribute == attribute) {
-				return true;
-			}
-		}
-
 		return false;
 	}
 

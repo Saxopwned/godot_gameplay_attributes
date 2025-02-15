@@ -39,6 +39,7 @@ void gdextension_initialize(ModuleInitializationLevel p_level)
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		/// attributes, resources and operations
 		ClassDB::register_class<gga::AttributeOperation>();
+		ClassDB::register_abstract_class<gga::AttributeBuffBase>();
 		ClassDB::register_class<gga::AttributeBuff>();
 		ClassDB::register_abstract_class<gga::AttributeBase>();
 		ClassDB::register_class<gga::Attribute>();

@@ -31,6 +31,7 @@
 
 #include "attribute.hpp"
 #include "buff_pool_queue.hpp"
+#include "godot_cpp/classes/wrapped.hpp"
 
 using namespace gga;
 
@@ -107,7 +108,6 @@ void AttributeContainer::notify_derived_attributes(Ref<RuntimeAttribute> p_runti
 {
 	if (derived_attributes.has(p_runtime_attribute->get_attribute()->get_attribute_name())) {
 		TypedArray<RuntimeAttribute> derived = derived_attributes[p_runtime_attribute->get_attribute()->get_attribute_name()];
-		Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
 
 		for (int i = 0; i < derived.size(); i++) {
 			Ref<RuntimeAttribute> derived_attribute = derived[i];
@@ -143,54 +143,49 @@ void AttributeContainer::_ready()
 void AttributeContainer::add_attribute(Ref<AttributeBase> p_attribute)
 {
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
+	ERR_FAIL_COND_MSG(has_attribute(p_attribute), "Attribute already exists in the container.");
 
-	if (!has_attribute(p_attribute)) {
-		Ref<RuntimeAttribute> runtime_attribute = memnew(RuntimeAttribute);
+	Ref<RuntimeAttribute> runtime_attribute = memnew(RuntimeAttribute);
 
-		runtime_attribute->attribute_container = this;
-		runtime_attribute->set_attribute(p_attribute);
-		runtime_attribute->set_attribute_set(attribute_set);
-		runtime_attribute->set_buffs(p_attribute->get_buffs());
-		runtime_attribute->set_value(runtime_attribute->get_initial_value());
+	runtime_attribute->attribute_container = this;
+	runtime_attribute->set_attribute(p_attribute);
+	runtime_attribute->set_attribute_set(attribute_set);
+	runtime_attribute->set_buffs(p_attribute->get_buffs());
+	runtime_attribute->set_value(runtime_attribute->get_initial_value());
 
-		Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
-		Callable buff_applied_callable = Callable::create(this, "_on_buff_applied");
-		Callable buff_removed_callable = Callable::create(this, "_on_buff_removed");
+	Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
+	Callable buff_applied_callable = Callable::create(this, "_on_buff_applied");
+	Callable buff_removed_callable = Callable::create(this, "_on_buff_removed");
 
-		if (!runtime_attribute->is_connected("attribute_changed", attribute_changed_callable)) {
-			runtime_attribute->connect("attribute_changed", attribute_changed_callable);
-		}
+	ERR_FAIL_COND_MSG(runtime_attribute->is_connected("attribute_changed", attribute_changed_callable), "Attribute already connected to attribute_changed signal.");
+	ERR_FAIL_COND_MSG(runtime_attribute->is_connected("buff_added", buff_applied_callable), "Attribute already connected to buff_added signal.");
+	ERR_FAIL_COND_MSG(runtime_attribute->is_connected("buff_removed", buff_removed_callable), "Attribute already connected to buff_removed signal.");
 
-		if (!runtime_attribute->is_connected("buff_added", buff_applied_callable)) {
-			runtime_attribute->connect("buff_added", buff_applied_callable);
-		}
+	runtime_attribute->connect("attribute_changed", attribute_changed_callable);
+	runtime_attribute->connect("buff_added", buff_applied_callable);
+	runtime_attribute->connect("buff_removed", buff_removed_callable);
 
-		if (!runtime_attribute->is_connected("buff_removed", buff_removed_callable)) {
-			runtime_attribute->connect("buff_removed", buff_removed_callable);
-		}
+	TypedArray<AttributeBase> base_attributes = runtime_attribute->get_derived_from();
 
-		TypedArray<AttributeBase> base_attributes = runtime_attribute->get_derived_from();
+	if (base_attributes.size() > 0) {
+		int i = 0;
 
-		if (base_attributes.size() > 0) {
-			int i = 0;
+		for (i; i < base_attributes.size(); i++) {
+			Ref<AttributeBase> base_attribute = base_attributes[i];
+			Array _derived;
 
-			for (i; i < base_attributes.size(); i++) {
-				Ref<AttributeBase> base_attribute = base_attributes[i];
-				Array _derived;
-
-				if (derived_attributes.has(base_attribute->get_attribute_name())) {
-					_derived = derived_attributes[base_attribute->get_attribute_name()];
-				} else {
-					_derived = Array();
-					derived_attributes[base_attribute->get_attribute_name()] = _derived;
-				}
-
-				_derived.push_back(runtime_attribute);
+			if (derived_attributes.has(base_attribute->get_attribute_name())) {
+				_derived = derived_attributes[base_attribute->get_attribute_name()];
+			} else {
+				_derived = Array();
+				derived_attributes[base_attribute->get_attribute_name()] = _derived;
 			}
-		}
 
-		attributes[p_attribute->get_attribute_name()] = runtime_attribute;
+			_derived.push_back(runtime_attribute);
+		}
 	}
+
+	attributes[p_attribute->get_attribute_name()] = runtime_attribute;
 }
 
 void AttributeContainer::apply_buff(Ref<AttributeBuff> p_buff)
@@ -198,22 +193,58 @@ void AttributeContainer::apply_buff(Ref<AttributeBuff> p_buff)
 	ERR_FAIL_NULL_MSG(p_buff, "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
 
 	if (p_buff->is_operate_overridden()) {
-		TypedArray<RuntimeAttribute> _attributes = get_attributes();
+		Ref<RuntimeBuff> runtime_buff = RuntimeBuff::from_buff(p_buff);
+		TypedArray<AttributeBase> _attributes = TypedArray<AttributeBase>();
+		TypedArray<RuntimeAttribute> _affected_runtime_attributes = TypedArray<RuntimeAttribute>();
+		TypedArray<float> buffed_values = TypedArray<float>();
+
+		ERR_FAIL_COND_MSG(!GDVIRTUAL_IS_OVERRIDDEN_PTR(p_buff, _applies_to), "Buff must override the _applies_to method to apply to derived attributes.");
+		ERR_FAIL_COND_MSG(!GDVIRTUAL_CALL_PTR(p_buff, _applies_to, attribute_set, _attributes), "An error occurred calling the overridden _applies_to method.");
 
 		for (int i = 0; i < _attributes.size(); i++) {
-			Ref<RuntimeAttribute> runtime_attribute = _attributes[i];
+			Ref<AttributeBase> attribute_base = _attributes[i];
+			Ref<RuntimeAttribute> attribute = get_attribute_by_name(attribute_base->get_attribute_name());
 
-			if (runtime_attribute->add_buff(p_buff) && !Math::is_zero_approx(p_buff->get_duration())) {
-				buff_pool_queue->enqueue(RuntimeBuff::from_buff(p_buff));
+			ERR_FAIL_NULL_MSG(attribute, "Attribute not found in attribute set.");
+
+			_affected_runtime_attributes.push_back(attribute);
+			buffed_values.push_back(attribute->get_buffed_value());
+		}
+
+		TypedArray<AttributeOperation> operations = TypedArray<AttributeOperation>();
+		bool applied = GDVIRTUAL_CALL_PTR(p_buff, _operate, buffed_values, attribute_set, operations);
+
+		ERR_FAIL_COND_MSG(!applied, "An error occurred calling the overridden _operate method.");
+
+		/// we are going to create a new AttributeBuff for each derived attribute affected by the buff
+		/// we will add this buff to each affected runtime attribute.
+		for (int i = 0; i < operations.size(); i++) {
+			Ref<AttributeBuff> derived_buff = memnew(AttributeBuff);
+			Ref<AttributeOperation> operation = memnew(AttributeOperation);
+			Ref<RuntimeAttribute> runtime_attribute = _affected_runtime_attributes[i];
+
+			derived_buff->set_attribute_name(runtime_attribute->get_attribute()->get_attribute_name());
+			derived_buff->set_buff_name(p_buff->get_buff_name());
+			derived_buff->set_duration(p_buff->get_duration());
+			/// since it's a derived operation, we must multiply the max_applies by the number of derived attributes
+			/// affected.
+			derived_buff->set_max_applies(p_buff->get_max_applies() * operations.size());
+			derived_buff->set_transient(p_buff->get_transient());
+
+			derived_buff->set_operation(operations[i]);
+
+			if (runtime_attribute->add_buff(derived_buff) && !Math::is_zero_approx(p_buff->get_duration())) {
+				buff_pool_queue->enqueue(derived_buff);
 			}
 		}
 	} else {
 		Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_buff->get_attribute_name());
 
-		if (runtime_attribute.is_valid() && !runtime_attribute.is_null() && runtime_attribute->add_buff(p_buff)) {
-			if (!Math::is_zero_approx(p_buff->get_duration())) {
-				buff_pool_queue->enqueue(RuntimeBuff::from_buff(p_buff));
-			}
+		ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute not found in the container.");
+		ERR_FAIL_COND_MSG(runtime_attribute.is_null(), "Attribute reference is not valid.");
+
+		if (runtime_attribute->add_buff(p_buff) && !Math::is_zero_approx(p_buff->get_duration())) {
+			buff_pool_queue->enqueue(RuntimeBuff::from_buff(p_buff));
 		}
 	}
 }
@@ -221,21 +252,21 @@ void AttributeContainer::apply_buff(Ref<AttributeBuff> p_buff)
 void AttributeContainer::remove_attribute(Ref<AttributeBase> p_attribute)
 {
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
+	ERR_FAIL_COND_MSG(!has_attribute(p_attribute), "Attribute not found in the container.");
 
-	if (has_attribute(p_attribute)) {
-		Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_name());
+	Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_name());
 
-		ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute not found in the container.");
+	ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute not valid.");
 
-		String attribute_name = runtime_attribute->get_attribute()->get_attribute_name();
+	String attribute_name = runtime_attribute->get_attribute()->get_attribute_name();
 
-		if (attributes.has(attribute_name)) {
-			runtime_attribute->disconnect("attribute_changed", Callable::create(this, "_on_attribute_changed"));
-			runtime_attribute->disconnect("buff_added", Callable::create(this, "_on_buff_applied"));
-			runtime_attribute->disconnect("buff_removed", Callable::create(this, "_on_buff_removed"));
-			attributes.erase(attribute_name);
-		}
-	}
+	ERR_FAIL_COND_MSG(!attributes.has(attribute_name), "Attribute not found. This is a bug, please open an issue.");
+
+	runtime_attribute->disconnect("attribute_changed", Callable::create(this, "_on_attribute_changed"));
+	runtime_attribute->disconnect("buff_added", Callable::create(this, "_on_buff_applied"));
+	runtime_attribute->disconnect("buff_removed", Callable::create(this, "_on_buff_removed"));
+
+	ERR_FAIL_COND_MSG(!attributes.erase(attribute_name), "Failed to remove attribute from container.");
 }
 
 void AttributeContainer::remove_buff(Ref<AttributeBuff> p_buff)
