@@ -1,0 +1,148 @@
+[gd_scene load_steps=6 format=3 uid="uid://xbp3yb6dbf00"]
+
+[ext_resource type="Script" uid="uid://bqvfeyci3uj0n" path="res://examples/dynamic_contrained_attributes/dynamic_contrained_attributes.gd" id="1_5ivuc"]
+[ext_resource type="AttributeSet" uid="uid://dhy342uf3pxb3" path="res://examples/dynamic_contrained_attributes/attribute_sets/constrained_attributes_example_attribute_set.tres" id="2_yvdgj"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5ivuc"]
+font_size = 11
+
+[sub_resource type="LabelSettings" id="LabelSettings_yvdgj"]
+font_size = 15
+
+[sub_resource type="LabelSettings" id="LabelSettings_63dxx"]
+font_size = 10
+
+[node name="DynamicContrainedAttributes" type="CenterContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5ivuc")
+
+[node name="AttributeContainer" type="AttributeContainer" parent="."]
+attribute_set = ExtResource("2_yvdgj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Health" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/Health"]
+layout_mode = 2
+text = "Health"
+label_settings = SubResource("LabelSettings_5ivuc")
+horizontal_alignment = 1
+
+[node name="MinHealth" type="HBoxContainer" parent="VBoxContainer/Health"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="DecrementHealth" type="Button" parent="VBoxContainer/Health/MinHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "-"
+
+[node name="LabelHealth" type="Label" parent="VBoxContainer/Health/MinHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+label_settings = SubResource("LabelSettings_yvdgj")
+horizontal_alignment = 1
+
+[node name="IncrementHealth" type="Button" parent="VBoxContainer/Health/MinHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "+"
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="MinHealthV" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MinHealthV"]
+layout_mode = 2
+text = "Min Health"
+label_settings = SubResource("LabelSettings_5ivuc")
+horizontal_alignment = 1
+
+[node name="MinHealth" type="HBoxContainer" parent="VBoxContainer/MinHealthV"]
+layout_mode = 2
+
+[node name="DecrementMinHealth" type="Button" parent="VBoxContainer/MinHealthV/MinHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "-"
+
+[node name="LabelMinHealth" type="Label" parent="VBoxContainer/MinHealthV/MinHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+label_settings = SubResource("LabelSettings_yvdgj")
+horizontal_alignment = 1
+
+[node name="IncrementMinHealth" type="Button" parent="VBoxContainer/MinHealthV/MinHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "+"
+
+[node name="MaxHealthV" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MaxHealthV"]
+layout_mode = 2
+text = "Max Health"
+label_settings = SubResource("LabelSettings_5ivuc")
+horizontal_alignment = 1
+
+[node name="MaxHealth" type="HBoxContainer" parent="VBoxContainer/MaxHealthV"]
+layout_mode = 2
+
+[node name="DecrementMaxHealth" type="Button" parent="VBoxContainer/MaxHealthV/MaxHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "-"
+
+[node name="LabelMaxHealth" type="Label" parent="VBoxContainer/MaxHealthV/MaxHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+label_settings = SubResource("LabelSettings_yvdgj")
+horizontal_alignment = 1
+
+[node name="IncrementMaxHealth" type="Button" parent="VBoxContainer/MaxHealthV/MaxHealth"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "+"
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="IncrementValue" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/IncrementValue"]
+layout_mode = 2
+text = "Buff value"
+label_settings = SubResource("LabelSettings_63dxx")
+
+[node name="IncrementValue" type="SpinBox" parent="VBoxContainer/IncrementValue"]
+layout_mode = 2
+size_flags_horizontal = 3
+step = 0.5
+value = 1.0
+alignment = 2

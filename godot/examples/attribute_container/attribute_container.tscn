@@ -1,15 +1,26 @@
-[gd_scene load_steps=4 format=3 uid="uid://4lm2ofr1pb88"]
+[gd_scene load_steps=9 format=3 uid="uid://4lm2ofr1pb88"]
 
 [ext_resource type="Script" uid="uid://x8prrurj03ni" path="res://examples/attribute_container/attribute_container.gd" id="1_x7rde"]
+[ext_resource type="Script" uid="uid://8ok3j7pghnt3" path="res://examples/attribute_container/attributes/test_attribute_000.gd" id="2_qdh3y"]
+[ext_resource type="Script" uid="uid://q5g7bm6uyr4s" path="res://examples/attribute_container/attributes/test_attribute_000_constraint_min.gd" id="3_sij85"]
+[ext_resource type="Script" uid="uid://dyf4bvnog4fus" path="res://examples/attribute_container/attributes/test_attribute_000_constraint_max.gd" id="4_hyqij"]
 
-[sub_resource type="Attribute" id="Attribute_jndah"]
+[sub_resource type="Attribute" id="Attribute_gib4c"]
 initial_value = 50.0
-max_value = 100.0
-min_value = 1.4013e-45
-attribute_name = "attribute_000"
+script = ExtResource("2_qdh3y")
+metadata/_custom_type_script = ExtResource("2_qdh3y")
+
+[sub_resource type="Attribute" id="Attribute_0hb5p"]
+script = ExtResource("3_sij85")
+metadata/_custom_type_script = ExtResource("3_sij85")
+
+[sub_resource type="Attribute" id="Attribute_upudh"]
+initial_value = 100.0
+script = ExtResource("4_hyqij")
+metadata/_custom_type_script = ExtResource("4_hyqij")
 
 [sub_resource type="AttributeSet" id="AttributeSet_7dso0"]
-attributes = Array[AttributeBase]([SubResource("Attribute_jndah")])
+attributes = Array[AttributeBase]([SubResource("Attribute_gib4c"), SubResource("Attribute_0hb5p"), SubResource("Attribute_upudh")])
 
 [node name="AttributeContainer" type="VBoxContainer"]
 anchors_preset = 15

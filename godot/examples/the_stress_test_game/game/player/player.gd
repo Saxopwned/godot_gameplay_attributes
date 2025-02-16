@@ -26,8 +26,6 @@ func _ready() -> void:
 	pickup_radius = attribute_container.get_attribute_by_name("pickup_radius")
 
 	if health:
-		progress_bar.max_value = health.attribute.max_value
-		progress_bar.min_value = health.attribute.min_value
 		progress_bar.value = health.get_buffed_value()
 	
 	attribute_container.attribute_changed.connect(func (attribute, _old, new_value):

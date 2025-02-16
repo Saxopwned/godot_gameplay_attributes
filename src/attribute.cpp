@@ -321,9 +321,11 @@ void AttributeBase::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_buffs", "p_buffs"), &AttributeBase::set_buffs);
 
 	/// binds virtuals to godot
+	GDVIRTUAL_BIND(_constrained_by, "attribute_set");
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
 	GDVIRTUAL_BIND(_get_buffed_value, "values");
-	GDVIRTUAL_BIND(_get_initial_value, "attribute_set");
+	GDVIRTUAL_BIND(_get_constrained_value, "buffed_value", "values_constraints");
+	GDVIRTUAL_BIND(_get_initial_value, "values");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
@@ -361,7 +363,7 @@ void AttributeBase::set_buffs(const TypedArray<AttributeBuff> &p_buffs)
 void Attribute::_bind_methods()
 {
 	/// static methods to bind to godot
-	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "initial_value", "min_value", "max_value"), &Attribute::create);
+	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "initial_value"), &Attribute::create);
 
 	/// binds methods to godot
 	ClassDB::bind_method(D_METHOD("get_initial_value"), &Attribute::get_initial_value);
@@ -755,6 +757,8 @@ void RuntimeAttribute::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_attribute_set"), &RuntimeAttribute::get_attribute_set);
 	ClassDB::bind_method(D_METHOD("get_buffed_value"), &RuntimeAttribute::get_buffed_value);
 	ClassDB::bind_method(D_METHOD("get_buffs"), &RuntimeAttribute::get_buffs);
+	ClassDB::bind_method(D_METHOD("get_constrained_by"), &RuntimeAttribute::get_constrained_by);
+	ClassDB::bind_method(D_METHOD("get_constrained_value"), &RuntimeAttribute::get_constrained_value);
 	ClassDB::bind_method(D_METHOD("get_derived_from"), &RuntimeAttribute::get_derived_from);
 	ClassDB::bind_method(D_METHOD("get_initial_value"), &RuntimeAttribute::get_initial_value);
 	ClassDB::bind_method(D_METHOD("get_value"), &RuntimeAttribute::get_value);
@@ -796,6 +800,8 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 		if (runtime_buff->can_apply_to_attribute(this)) {
 			value = runtime_buff->operate(this);
 		}
+
+		value = get_constrained_value();
 
 		if (!Math::is_equal_approx(prev_value, value)) {
 			emit_signal("attribute_changed", this, prev_value, value);
@@ -913,8 +919,6 @@ float RuntimeAttribute::get_buffed_value() const
 		TypedArray<AttributeBase> derived_from = get_derived_from();
 		TypedArray<float> values = TypedArray<float>();
 
-		// todo: rework this. It makes impossible to apply an overridden AttributeBuff to a derived attribute.
-
 		if (derived_from.size() > 0) {
 			for (int i = 0; i < derived_from.size(); i++) {
 				Ref<AttributeBase> derived_attribute = derived_from[i];
@@ -935,6 +939,41 @@ float RuntimeAttribute::get_buffed_value() const
 	}
 
 	return current_value;
+}
+
+TypedArray<AttributeBase> RuntimeAttribute::get_constrained_by() const
+{
+	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _constrained_by)) {
+		TypedArray<AttributeBase> constraining_attributes = TypedArray<AttributeBase>();
+
+		ERR_FAIL_COND_V_MSG(!GDVIRTUAL_CALL_PTR(attribute, _constrained_by, attribute_set, constraining_attributes), constraining_attributes, "_constrained_by errored.");
+
+		return constraining_attributes;
+	}
+
+	return TypedArray<AttributeBase>();
+}
+
+float RuntimeAttribute::get_constrained_value() const
+{
+	float buffed_value = get_buffed_value();
+	float returning_value = buffed_value;
+
+	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_constrained_value)) {
+		TypedArray<AttributeBase> constraining_attributes = get_constrained_by();
+		TypedArray<float> constrained_values = TypedArray<float>();
+
+		ERR_FAIL_COND_V_MSG(constraining_attributes.size() == 0, buffed_value, "_constrained_by method did not return any attributes.");
+
+		for (int i = 0; i < constraining_attributes.size(); i++) {
+			Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
+			constrained_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
+		}
+
+		GDVIRTUAL_CALL_PTR(attribute, _get_constrained_value, buffed_value, constrained_values, returning_value);
+	}
+
+	return returning_value;
 }
 
 TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const

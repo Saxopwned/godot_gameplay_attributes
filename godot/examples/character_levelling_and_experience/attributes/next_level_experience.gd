@@ -26,7 +26,3 @@ func _get_buffed_value(values: PackedFloat32Array) -> float:
 
 func _get_initial_value(values: PackedFloat32Array) -> float:
 	return calculate_next(values[0])
-
-
-func _get_min_value(_attribute_set: AttributeSet) -> float:
-	return 0.0

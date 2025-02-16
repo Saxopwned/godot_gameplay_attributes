@@ -321,10 +321,17 @@ namespace gga
 		/// @return The attribute name.
 		String get_attribute_name() const;
 
+		/// @brief Subscribes to some attributes which will constrain the attribute. Like min/max health on a health attribute.
+		GDVIRTUAL1RC(TypedArray<AttributeBase>, _constrained_by, Ref<AttributeSet>);
 		/// @brief Subscribes to some attributes
 		GDVIRTUAL1RC(TypedArray<AttributeBase>, _derived_from, Ref<AttributeSet>);
 		/// @brief Gets the buffed attribute value. The array passed as argument is the array of RuntimeAttribute instances buffed value.
 		GDVIRTUAL1RC(float, _get_buffed_value, PackedFloat32Array);
+		/// @brief 	Gets the constrained value of the attribute.
+		///			The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed
+		///			by the attribute _constrained_by virtual method.
+		///			NOTE: this is called AFTER that all the buffs are applied to an attribute.
+		GDVIRTUAL2RC(float, _get_constrained_value, float, PackedFloat32Array);
 		/// @brief Get the initial value of the attribute.
 		/// @return The minimum value of the attribute.
 		GDVIRTUAL1RC(float, _get_initial_value, PackedFloat32Array);
@@ -500,6 +507,12 @@ namespace gga
 		/// @brief Get the buffed value of the attribute.
 		/// @return The buffed value.
 		float get_buffed_value() const;
+		/// @brief Gets an array of attributes constraining this attribute.
+		/// @return The array of attributes constraining this attribute.
+		TypedArray<AttributeBase> get_constrained_by() const;
+		/// @brief Gets the buffed value of the attribute constrained by the constraints.
+		/// @return The constrained value of the attribute.
+		float get_constrained_value() const;
 		/// @brief Get the attributes the attribute derives from.
 		/// @return The attributes the attribute derives from.
 		TypedArray<AttributeBase> get_derived_from() const;

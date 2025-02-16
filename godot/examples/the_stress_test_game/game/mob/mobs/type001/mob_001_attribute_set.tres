@@ -1,19 +1,15 @@
 [gd_resource type="AttributeSet" load_steps=5 format=3 uid="uid://ckimkjo1mlq6b"]
 
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/health.gd" id="1_8il63"]
-[ext_resource type="Script" path="res://examples/the_stress_test_game/game/attributes/movement_speed.gd" id="2_ht5l0"]
+[ext_resource type="Script" uid="uid://c5muy00fqhllu" path="res://examples/the_stress_test_game/game/attributes/health.gd" id="1_8il63"]
+[ext_resource type="Script" uid="uid://dxxgjnap8mu3b" path="res://examples/the_stress_test_game/game/attributes/movement_speed.gd" id="2_ht5l0"]
 
 [sub_resource type="Attribute" id="Attribute_tqdpy"]
 initial_value = 5.0
-max_value = 20.0
-min_value = 1.35612e-34
 attribute_name = "health"
 script = ExtResource("1_8il63")
 
 [sub_resource type="Attribute" id="Attribute_c5xch"]
 initial_value = 40.0
-max_value = 60.0
-min_value = 0.000173749
 attribute_name = "movement_speed"
 script = ExtResource("2_ht5l0")
 

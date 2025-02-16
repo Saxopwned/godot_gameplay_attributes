@@ -14,18 +14,6 @@ func _derived_from(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 
 
-func _get_max_value(attribute_set: AttributeSet) -> float:
-	var base = attribute_set.find_by_name(LevelAttribute.ATTRIBUTE_NAME)
-	assert(base is Attribute, "uh-oh")
-	return base.max_value
- 
-
-func _get_min_value(attribute_set: AttributeSet) -> float:
-	var base = attribute_set.find_by_name(LevelAttribute.ATTRIBUTE_NAME)
-	assert(base is Attribute, "uh-oh")
-	return base.min_value
-
-
 func _get_initial_value(subscribed_attributes: PackedFloat32Array) -> float:
 	return subscribed_attributes[0] + 1
 	
