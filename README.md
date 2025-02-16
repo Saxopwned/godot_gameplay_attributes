@@ -116,8 +116,8 @@ func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 	
 	
-func _get_constrained_value(buffed_value: float, values_constraints: PackedFloat32Array) -> float:
-	return minf(buffed_value, values_constraints[0]) # we don't want to exceed the value of the MaxHealthAttribute
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return minf(buffed_value, buffed_values[0]) # we don't want to exceed the value of the MaxHealthAttribute
 ```
 
 While the maximum health attribute should look like this:
@@ -138,8 +138,8 @@ func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 	
 	
-func _get_constrained_value(buffed_value: float, values_constraints: PackedFloat32Array) -> float:
-	return maxf(buffed_value, values_constraints[0])
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return maxf(buffed_value, buffed_values[0])
 ```
 
 #### Applying the constraints to the main attribute
@@ -161,8 +161,8 @@ func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 	
 	
-func _get_constrained_value(buffed_value: float, values_constraints: PackedFloat32Array) -> float:
-	return clampf(buffed_value, values_constraints[0], values_constraints[1]) # tada!
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return clampf(buffed_value, buffed_values[0], buffed_values[1]) # tada!
 ```
 
 ## Custom attribute buff/debuff
