@@ -13,5 +13,5 @@ func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 	
 	
-func _get_constrained_value(buffed_value: float, values_constraints: PackedFloat32Array) -> float:
-	return minf(buffed_value, values_constraints[0])
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return minf(buffed_value, buffed_values[0])

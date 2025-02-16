@@ -370,6 +370,12 @@ float AttributeContainer::get_attribute_initial_value_by_name(const String &p_na
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_initial_value() : 0.0f;
 }
 
+float AttributeContainer::get_attribute_previous_value_by_name(const String &p_name) const
+{
+	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	return attribute.is_valid() && !attribute.is_null() ? attribute->get_previous_value() : 0.0f;
+}
+
 float AttributeContainer::get_attribute_value_by_name(const String &p_name) const
 {
 	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);

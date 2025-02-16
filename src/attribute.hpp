@@ -331,7 +331,7 @@ namespace gga
 		///			The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed
 		///			by the attribute _constrained_by virtual method.
 		///			NOTE: this is called AFTER that all the buffs are applied to an attribute.
-		GDVIRTUAL2RC(float, _get_constrained_value, float, PackedFloat32Array);
+		GDVIRTUAL3RC(float, _get_constrained_value, float, PackedFloat32Array, PackedFloat32Array);
 		/// @brief Get the initial value of the attribute.
 		/// @return The minimum value of the attribute.
 		GDVIRTUAL1RC(float, _get_initial_value, PackedFloat32Array);
@@ -466,6 +466,8 @@ namespace gga
 		Ref<AttributeSet> attribute_set;
 		/// @brief The attribute container reference.
 		AttributeContainer *attribute_container;
+		/// @brief The previous value of the attribute.
+		float previous_value = 0.0f;
 		/// @brief The attribute value.
 		float value = 0.0f;
 		/// @brief The attribute buffs.
@@ -519,6 +521,9 @@ namespace gga
 		/// @brief Get the initial value of the attribute.
 		/// @return The initial value of the attribute.
 		float get_initial_value() const;
+		/// @brief Get the previous value of the attribute.
+		/// @return The previous value of the attribute.
+		float get_previous_value() const;
 		/// @brief Gets the value of the attribute.
 		/// @return The value of the attribute.
 		float get_value();

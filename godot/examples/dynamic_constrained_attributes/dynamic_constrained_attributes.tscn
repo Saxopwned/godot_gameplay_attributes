@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://xbp3yb6dbf00"]
 
-[ext_resource type="Script" uid="uid://bqvfeyci3uj0n" path="res://examples/dynamic_contrained_attributes/dynamic_contrained_attributes.gd" id="1_5ivuc"]
-[ext_resource type="AttributeSet" uid="uid://dhy342uf3pxb3" path="res://examples/dynamic_contrained_attributes/attribute_sets/constrained_attributes_example_attribute_set.tres" id="2_yvdgj"]
+[ext_resource type="Script" uid="uid://bqvfeyci3uj0n" path="res://examples/dynamic_constrained_attributes/dynamic_constrained_attributes.gd" id="1_y17xq"]
+[ext_resource type="AttributeSet" uid="uid://dhy342uf3pxb3" path="res://examples/dynamic_constrained_attributes/attribute_sets/constrained_attributes_example_attribute_set.tres" id="2_e81sv"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5ivuc"]
 font_size = 11
@@ -18,10 +18,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_5ivuc")
+script = ExtResource("1_y17xq")
 
 [node name="AttributeContainer" type="AttributeContainer" parent="."]
-attribute_set = ExtResource("2_yvdgj")
+attribute_set = ExtResource("2_e81sv")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

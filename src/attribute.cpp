@@ -324,7 +324,7 @@ void AttributeBase::_bind_methods()
 	GDVIRTUAL_BIND(_constrained_by, "attribute_set");
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
 	GDVIRTUAL_BIND(_get_buffed_value, "values");
-	GDVIRTUAL_BIND(_get_constrained_value, "buffed_value", "values_constraints");
+	GDVIRTUAL_BIND(_get_constrained_value, "buffed_value", "buffed_values", "previous_values");
 	GDVIRTUAL_BIND(_get_initial_value, "values");
 
 	/// binds properties to godot
@@ -795,7 +795,7 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 		buffs.push_back(runtime_buff);
 		emit_signal("buff_added", runtime_buff);
 	} else {
-		float prev_value = value;
+		previous_value = value;
 
 		if (runtime_buff->can_apply_to_attribute(this)) {
 			value = runtime_buff->operate(this);
@@ -803,8 +803,8 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 
 		value = get_constrained_value();
 
-		if (!Math::is_equal_approx(prev_value, value)) {
-			emit_signal("attribute_changed", this, prev_value, value);
+		if (!Math::is_equal_approx(previous_value, value)) {
+			emit_signal("attribute_changed", this, previous_value, value);
 		}
 	}
 
@@ -961,16 +961,18 @@ float RuntimeAttribute::get_constrained_value() const
 
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_constrained_value)) {
 		TypedArray<AttributeBase> constraining_attributes = get_constrained_by();
-		TypedArray<float> constrained_values = TypedArray<float>();
+		TypedArray<float> buffed_values = TypedArray<float>();
+		TypedArray<float> previous_values = TypedArray<float>();
 
 		ERR_FAIL_COND_V_MSG(constraining_attributes.size() == 0, buffed_value, "_constrained_by method did not return any attributes.");
 
 		for (int i = 0; i < constraining_attributes.size(); i++) {
 			Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
-			constrained_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
+			buffed_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
+			previous_values.push_back(attribute_container->get_attribute_previous_value_by_name(constraining_attribute->get_attribute_name()));
 		}
 
-		GDVIRTUAL_CALL_PTR(attribute, _get_constrained_value, buffed_value, constrained_values, returning_value);
+		GDVIRTUAL_CALL_PTR(attribute, _get_constrained_value, buffed_value, buffed_values, previous_values, returning_value);
 	}
 
 	return returning_value;
@@ -1012,6 +1014,11 @@ float RuntimeAttribute::get_initial_value() const
 	return attribute->get_initial_value();
 }
 
+float RuntimeAttribute::get_previous_value() const
+{
+	return previous_value;
+}
+
 float RuntimeAttribute::get_value()
 {
 	return value;
@@ -1030,6 +1037,7 @@ void RuntimeAttribute::set_attribute(const Ref<AttributeBase> &p_value)
 void RuntimeAttribute::set_value(const float p_value)
 {
 	value = p_value;
+	previous_value = value;
 }
 
 void RuntimeAttribute::set_buffs(const TypedArray<AttributeBuff> &p_value)

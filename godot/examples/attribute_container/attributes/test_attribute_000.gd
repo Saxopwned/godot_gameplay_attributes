@@ -14,5 +14,5 @@ func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	]
 	
 	
-func _get_constrained_value(buffed_value: float, values: PackedFloat32Array) -> float:
-	return clampf(buffed_value, values[0], values[1])
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return clampf(buffed_value, buffed_values[0], buffed_values[1])

@@ -148,6 +148,10 @@ namespace gga
 		/// @param p_name The name of the attribute to get.
 		/// @return The initial value of the attribute with the given name.
 		float get_attribute_initial_value_by_name(const String &p_name) const;
+		/// @brief Gets the value of an attribute by name.
+		/// @param p_name The name of the attribute to get.
+		/// @return The value of the attribute with the given name.
+		float get_attribute_previous_value_by_name(const String &p_name) const;
 		/// @brief Gets the base value of an attribute by name.
 		/// @param p_name The name of the attribute to get.
 		/// @return The base value of the attribute with the given name.

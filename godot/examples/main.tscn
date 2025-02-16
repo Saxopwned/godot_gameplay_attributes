@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://d2kctykbvpmr1" path="res://examples/attribute_buffs_programmatic_operations/attribute_buffs_programmatic_operations.tscn" id="5_dhme3"]
 [ext_resource type="PackedScene" uid="uid://b2yfl5ptmb1he" path="res://examples/the_stress_test_game/the_stress_test_game.tscn" id="5_yt216"]
 [ext_resource type="PackedScene" uid="uid://ceq8dy34akh8j" path="res://examples/character_levelling_and_experience/character_levelling_and_experience.tscn" id="6_xyviw"]
-[ext_resource type="PackedScene" uid="uid://xbp3yb6dbf00" path="res://examples/dynamic_contrained_attributes/dynamic_contrained_attributes.tscn" id="7_plcr4"]
+[ext_resource type="PackedScene" uid="uid://xbp3yb6dbf00" path="res://examples/dynamic_constrained_attributes/dynamic_constrained_attributes.tscn" id="7_plcr4"]
 
 [node name="Main" type="VBoxContainer"]
 anchors_preset = 15
