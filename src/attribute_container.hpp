@@ -113,6 +113,10 @@ namespace gga
 		/// @param p_predicate The predicate to use to find the attribute buffed value.
 		/// @return The attribute buffed value found.
 		float find_buffed_value(Callable p_predicate) const;
+		/// @brief Finds an initial attribute value in the container.
+		/// @param p_predicate The predicate to use to find the initial attribute value.
+		/// @return The initial attribute value found.
+		float find_initial_value(Callable p_predicate) const;
 		/// @brief Finds an attribute value in the container.
 		/// @param p_predicate The predicate to use to find the attribute value.
 		/// @return The attribute value found.

@@ -47,6 +47,7 @@ void AttributeContainer::_bind_methods()
 	ClassDB::bind_method(D_METHOD("apply_buff", "p_buff"), &AttributeContainer::apply_buff);
 	ClassDB::bind_method(D_METHOD("find", "p_predicate"), &AttributeContainer::find);
 	ClassDB::bind_method(D_METHOD("find_buffed_value", "p_predicate"), &AttributeContainer::find_buffed_value);
+	ClassDB::bind_method(D_METHOD("find_initial_value", "p_predicate"), &AttributeContainer::find_initial_value);
 	ClassDB::bind_method(D_METHOD("find_value", "p_predicate"), &AttributeContainer::find_value);
 	ClassDB::bind_method(D_METHOD("get_attribute_set"), &AttributeContainer::get_attribute_set);
 	ClassDB::bind_method(D_METHOD("get_attributes"), &AttributeContainer::get_attributes);
@@ -309,6 +310,12 @@ float AttributeContainer::find_buffed_value(Callable p_predicate) const
 {
 	Ref<RuntimeAttribute> attribute = find(p_predicate);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_buffed_value() : 0.0f;
+}
+
+float AttributeContainer::find_initial_value(Callable p_predicate) const
+{
+	Ref<RuntimeAttribute> attribute = find(p_predicate);
+	return attribute.is_valid() && !attribute.is_null() ? attribute->get_initial_value() : 0.0f;
 }
 
 float AttributeContainer::find_value(Callable p_predicate) const
