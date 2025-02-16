@@ -53,6 +53,7 @@ void AttributeContainer::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_attributes"), &AttributeContainer::get_attributes);
 	ClassDB::bind_method(D_METHOD("get_attribute_by_name", "p_name"), &AttributeContainer::get_attribute_by_name);
 	ClassDB::bind_method(D_METHOD("get_attribute_buffed_value_by_name", "p_name"), &AttributeContainer::get_attribute_buffed_value_by_name);
+	ClassDB::bind_method(D_METHOD("get_attribute_initial_value_by_name", "p_name"), &AttributeContainer::get_attribute_initial_value_by_name);
 	ClassDB::bind_method(D_METHOD("get_attribute_value_by_name", "p_name"), &AttributeContainer::get_attribute_value_by_name);
 	ClassDB::bind_method(D_METHOD("get_server_authoritative"), &AttributeContainer::get_server_authoritative);
 	ClassDB::bind_method(D_METHOD("remove_attribute", "p_attribute"), &AttributeContainer::remove_attribute);
@@ -347,6 +348,12 @@ float AttributeContainer::get_attribute_buffed_value_by_name(const String &p_nam
 {
 	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_buffed_value() : 0.0f;
+}
+
+float AttributeContainer::get_attribute_initial_value_by_name(const String &p_name) const
+{
+	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	return attribute.is_valid() && !attribute.is_null() ? attribute->get_initial_value() : 0.0f;
 }
 
 float AttributeContainer::get_attribute_value_by_name(const String &p_name) const
