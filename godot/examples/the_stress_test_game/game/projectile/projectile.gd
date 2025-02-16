@@ -2,8 +2,6 @@
 
 extends Area2D
 
-const PROJECTILE_DAMAGE = preload("res://examples/the_stress_test_game/game/projectile/projectile_damage.tres")
-
 var direction: Vector2
 var damage: float
 
@@ -18,7 +16,9 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("mobs"):
-		var debuff = PROJECTILE_DAMAGE.duplicate()
-		debuff.operation = AttributeOperation.subtract(damage)
+		var debuff = AttributeBuff.new()
+		debuff.attribute_name = HealthAttribute.ATTRIBUTE_NAME
+		debuff.operation = AttributeOperation.subtract(absf(damage))
+		debuff.transient = false
 		body.attribute_container.apply_buff(debuff)
 		queue_free()
