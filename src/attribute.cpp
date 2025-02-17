@@ -801,8 +801,6 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 			value = runtime_buff->operate(this);
 		}
 
-		value = get_constrained_value();
-
 		if (!Math::is_equal_approx(previous_value, value)) {
 			emit_signal("attribute_changed", this, previous_value, value);
 		}
