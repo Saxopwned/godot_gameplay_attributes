@@ -13,8 +13,6 @@ func _ready():
 	var health_attribute = Attribute.new()
 	health_attribute.attribute_name = ATTRIBUTE_NAME
 	health_attribute.initial_value = 100
-	health_attribute.min_value = 0
-	health_attribute.max_value = 100
 
 	attribute_container.attribute_set = AttributeSet.new()
 	attribute_container.attribute_set.add_attribute(health_attribute)

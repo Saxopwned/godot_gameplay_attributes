@@ -321,11 +321,11 @@ void AttributeBase::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_buffs", "p_buffs"), &AttributeBase::set_buffs);
 
 	/// binds virtuals to godot
+	GDVIRTUAL_BIND(_constrained_by, "attribute_set");
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
 	GDVIRTUAL_BIND(_get_buffed_value, "values");
-	GDVIRTUAL_BIND(_get_initial_value, "attribute_set");
-	GDVIRTUAL_BIND(_get_max_value, "attribute_set");
-	GDVIRTUAL_BIND(_get_min_value, "attribute_set");
+	GDVIRTUAL_BIND(_get_constrained_value, "buffed_value", "buffed_values", "previous_values");
+	GDVIRTUAL_BIND(_get_initial_value, "values");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
@@ -363,29 +363,21 @@ void AttributeBase::set_buffs(const TypedArray<AttributeBuff> &p_buffs)
 void Attribute::_bind_methods()
 {
 	/// static methods to bind to godot
-	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "initial_value", "min_value", "max_value"), &Attribute::create);
+	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "initial_value"), &Attribute::create);
 
 	/// binds methods to godot
 	ClassDB::bind_method(D_METHOD("get_initial_value"), &Attribute::get_initial_value);
-	ClassDB::bind_method(D_METHOD("get_max_value"), &Attribute::get_max_value);
-	ClassDB::bind_method(D_METHOD("get_min_value"), &Attribute::get_min_value);
 	ClassDB::bind_method(D_METHOD("set_initial_value", "p_value"), &Attribute::set_initial_value);
-	ClassDB::bind_method(D_METHOD("set_max_value", "p_value"), &Attribute::set_max_value);
-	ClassDB::bind_method(D_METHOD("set_min_value", "p_value"), &Attribute::set_min_value);
 
 	/// properties to bind to godot
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "initial_value"), "set_initial_value", "get_initial_value");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_value"), "set_max_value", "get_max_value");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min_value"), "set_min_value", "get_min_value");
 }
 
-Ref<Attribute> Attribute::create(const String &p_attribute_name, const float p_initial_value, const float p_min_value, const float p_max_value)
+Ref<Attribute> Attribute::create(const String &p_attribute_name, const float p_initial_value)
 {
 	Ref<Attribute> attribute = memnew(Attribute);
 	attribute->set_attribute_name(p_attribute_name);
 	attribute->set_initial_value(p_initial_value);
-	attribute->set_min_value(p_min_value);
-	attribute->set_max_value(p_max_value);
 	return attribute;
 }
 
@@ -394,29 +386,9 @@ float Attribute::get_initial_value() const
 	return initial_value;
 }
 
-float Attribute::get_max_value() const
-{
-	return max_value;
-}
-
-float Attribute::get_min_value() const
-{
-	return min_value;
-}
-
 void Attribute::set_initial_value(const float p_value)
 {
 	initial_value = p_value;
-}
-
-void Attribute::set_max_value(const float p_value)
-{
-	max_value = p_value;
-}
-
-void Attribute::set_min_value(const float p_value)
-{
-	min_value = p_value;
 }
 
 #pragma endregion
@@ -785,10 +757,10 @@ void RuntimeAttribute::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_attribute_set"), &RuntimeAttribute::get_attribute_set);
 	ClassDB::bind_method(D_METHOD("get_buffed_value"), &RuntimeAttribute::get_buffed_value);
 	ClassDB::bind_method(D_METHOD("get_buffs"), &RuntimeAttribute::get_buffs);
+	ClassDB::bind_method(D_METHOD("get_constrained_by"), &RuntimeAttribute::get_constrained_by);
+	ClassDB::bind_method(D_METHOD("get_constrained_value"), &RuntimeAttribute::get_constrained_value);
 	ClassDB::bind_method(D_METHOD("get_derived_from"), &RuntimeAttribute::get_derived_from);
-	ClassDB::bind_method(D_METHOD("get_min_value"), &RuntimeAttribute::get_min_value);
 	ClassDB::bind_method(D_METHOD("get_initial_value"), &RuntimeAttribute::get_initial_value);
-	ClassDB::bind_method(D_METHOD("get_max_value"), &RuntimeAttribute::get_max_value);
 	ClassDB::bind_method(D_METHOD("get_value"), &RuntimeAttribute::get_value);
 	ClassDB::bind_method(D_METHOD("remove_buff", "p_buff"), &RuntimeAttribute::remove_buff);
 	ClassDB::bind_method(D_METHOD("remove_buffs", "p_buffs"), &RuntimeAttribute::remove_buffs);
@@ -823,26 +795,14 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 		buffs.push_back(runtime_buff);
 		emit_signal("buff_added", runtime_buff);
 	} else {
-		float max = attribute->get_max_value();
-		float min = attribute->get_min_value();
-		float prev_value = value;
+		previous_value = value;
 
 		if (runtime_buff->can_apply_to_attribute(this)) {
-			float new_value = runtime_buff->operate(this);
-
-			if (Math::is_equal_approx(max, min)) {
-				value = new_value;
-			} else if (min < max) {
-				value = Math::clamp(new_value, min, max);
-			} else if (max == 0) {
-				value = new_value > min ? new_value : min;
-			} else {
-				return false;
-			}
+			value = runtime_buff->operate(this);
 		}
 
-		if (!Math::is_equal_approx(prev_value, value)) {
-			emit_signal("attribute_changed", this, prev_value, value);
+		if (!Math::is_equal_approx(previous_value, value)) {
+			emit_signal("attribute_changed", this, previous_value, value);
 		}
 	}
 
@@ -957,8 +917,6 @@ float RuntimeAttribute::get_buffed_value() const
 		TypedArray<AttributeBase> derived_from = get_derived_from();
 		TypedArray<float> values = TypedArray<float>();
 
-		// todo: rework this. It makes impossible to apply an overridden AttributeBuff to a derived attribute.
-
 		if (derived_from.size() > 0) {
 			for (int i = 0; i < derived_from.size(); i++) {
 				Ref<AttributeBase> derived_attribute = derived_from[i];
@@ -981,6 +939,43 @@ float RuntimeAttribute::get_buffed_value() const
 	return current_value;
 }
 
+TypedArray<AttributeBase> RuntimeAttribute::get_constrained_by() const
+{
+	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _constrained_by)) {
+		TypedArray<AttributeBase> constraining_attributes = TypedArray<AttributeBase>();
+
+		ERR_FAIL_COND_V_MSG(!GDVIRTUAL_CALL_PTR(attribute, _constrained_by, attribute_set, constraining_attributes), constraining_attributes, "_constrained_by errored.");
+
+		return constraining_attributes;
+	}
+
+	return TypedArray<AttributeBase>();
+}
+
+float RuntimeAttribute::get_constrained_value() const
+{
+	float buffed_value = get_buffed_value();
+	float returning_value = buffed_value;
+
+	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_constrained_value)) {
+		TypedArray<AttributeBase> constraining_attributes = get_constrained_by();
+		TypedArray<float> buffed_values = TypedArray<float>();
+		TypedArray<float> previous_values = TypedArray<float>();
+
+		ERR_FAIL_COND_V_MSG(constraining_attributes.size() == 0, buffed_value, "_constrained_by method did not return any attributes.");
+
+		for (int i = 0; i < constraining_attributes.size(); i++) {
+			Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
+			buffed_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
+			previous_values.push_back(attribute_container->get_attribute_previous_value_by_name(constraining_attribute->get_attribute_name()));
+		}
+
+		GDVIRTUAL_CALL_PTR(attribute, _get_constrained_value, buffed_value, buffed_values, previous_values, returning_value);
+	}
+
+	return returning_value;
+}
+
 TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const
 {
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _derived_from)) {
@@ -992,19 +987,6 @@ TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const
 	}
 
 	return TypedArray<AttributeBase>();
-}
-
-float RuntimeAttribute::get_min_value() const
-{
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_min_value)) {
-		float ret;
-
-		if (GDVIRTUAL_CALL_PTR(attribute, _get_min_value, attribute_set, ret)) {
-			return ret;
-		}
-	}
-
-	return attribute->get_min_value();
 }
 
 float RuntimeAttribute::get_initial_value() const
@@ -1030,17 +1012,9 @@ float RuntimeAttribute::get_initial_value() const
 	return attribute->get_initial_value();
 }
 
-float RuntimeAttribute::get_max_value() const
+float RuntimeAttribute::get_previous_value() const
 {
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_max_value)) {
-		float ret;
-
-		if (GDVIRTUAL_CALL_PTR(attribute, _get_max_value, attribute_set, ret)) {
-			return ret;
-		}
-	}
-
-	return attribute->get_max_value();
+	return previous_value;
 }
 
 float RuntimeAttribute::get_value()
@@ -1060,13 +1034,8 @@ void RuntimeAttribute::set_attribute(const Ref<AttributeBase> &p_value)
 
 void RuntimeAttribute::set_value(const float p_value)
 {
-	float max_value = get_max_value();
-
-	if (Math::is_zero_approx(max_value)) {
-		value = p_value > get_min_value() ? p_value : get_min_value();
-	} else {
-		value = Math::clamp(p_value, get_min_value(), get_max_value());
-	}
+	value = p_value;
+	previous_value = value;
 }
 
 void RuntimeAttribute::set_buffs(const TypedArray<AttributeBuff> &p_value)

@@ -113,6 +113,14 @@ namespace gga
 		/// @param p_predicate The predicate to use to find the attribute buffed value.
 		/// @return The attribute buffed value found.
 		float find_buffed_value(Callable p_predicate) const;
+		/// @brief Finds an attribute constrained value in the container.
+		/// @param p_predicate The predicate to use to find the attribute constrained value.
+		/// @return The attribute constrained value found.
+		float find_constrained_value(Callable p_predicate) const;
+		/// @brief Finds an initial attribute value in the container.
+		/// @param p_predicate The predicate to use to find the initial attribute value.
+		/// @return The initial attribute value found.
+		float find_initial_value(Callable p_predicate) const;
 		/// @brief Finds an attribute value in the container.
 		/// @param p_predicate The predicate to use to find the attribute value.
 		/// @return The attribute value found.
@@ -132,6 +140,18 @@ namespace gga
 		/// @param p_name The name of the attribute to get.
 		/// @return The buffed value of the attribute with the given name.
 		float get_attribute_buffed_value_by_name(const String &p_name) const;
+		/// @brief Gets the constrained value of an attribute by name.
+		/// @param p_name The name of the attribute to get.
+		/// @return The constrained value of the attribute with the given name.
+		float get_attribute_constrained_value_by_name(const String &p_name) const;
+		/// @brief Gets the initial value of an attribute by name.
+		/// @param p_name The name of the attribute to get.
+		/// @return The initial value of the attribute with the given name.
+		float get_attribute_initial_value_by_name(const String &p_name) const;
+		/// @brief Gets the value of an attribute by name.
+		/// @param p_name The name of the attribute to get.
+		/// @return The value of the attribute with the given name.
+		float get_attribute_previous_value_by_name(const String &p_name) const;
 		/// @brief Gets the base value of an attribute by name.
 		/// @param p_name The name of the attribute to get.
 		/// @return The base value of the attribute with the given name.

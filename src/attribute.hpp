@@ -321,22 +321,21 @@ namespace gga
 		/// @return The attribute name.
 		String get_attribute_name() const;
 
+		/// @brief Subscribes to some attributes which will constrain the attribute. Like min/max health on a health attribute.
+		GDVIRTUAL1RC(TypedArray<AttributeBase>, _constrained_by, Ref<AttributeSet>);
 		/// @brief Subscribes to some attributes
 		GDVIRTUAL1RC(TypedArray<AttributeBase>, _derived_from, Ref<AttributeSet>);
 		/// @brief Gets the buffed attribute value. The array passed as argument is the array of RuntimeAttribute instances buffed value.
 		GDVIRTUAL1RC(float, _get_buffed_value, PackedFloat32Array);
+		/// @brief 	Gets the constrained value of the attribute.
+		///			The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed
+		///			by the attribute _constrained_by virtual method.
+		///			NOTE: this is called AFTER that all the buffs are applied to an attribute.
+		GDVIRTUAL3RC(float, _get_constrained_value, float, PackedFloat32Array, PackedFloat32Array);
 		/// @brief Get the initial value of the attribute.
 		/// @return The minimum value of the attribute.
 		GDVIRTUAL1RC(float, _get_initial_value, PackedFloat32Array);
 		virtual float get_initial_value() const = 0;
-		/// @brief Get the maximum value of the attribute.
-		/// @return The maximum value of the attribute.
-		GDVIRTUAL1RC(float, _get_max_value, Ref<AttributeSet>);
-		virtual float get_max_value() const = 0;
-		/// @brief Get the minimum value of the attribute.
-		/// @return The minimum value of the attribute.
-		GDVIRTUAL1RC(float, _get_min_value, Ref<AttributeSet>);
-		virtual float get_min_value() const = 0;
 
 		/// @brief Get the buffs affecting the attribute.
 		/// @return The buffs affecting the attribute.
@@ -361,39 +360,21 @@ namespace gga
 		static void _bind_methods();
 		/// @brief The initial value of the attribute.
 		float initial_value = 0.000000f;
-		/// @brief The maximum value of the attribute.
-		float max_value = 0.000000f;
-		/// @brief The minimum value of the attribute.
-		float min_value = 0.000000f;
 
 	public:
 		/// @brief Create an attribute from some parameters.
 		/// @param p_attribute_name The attribute name.
 		/// @param p_initial_value The initial value.
-		/// @param p_min_value The minimum value.
-		/// @param p_max_value The maximum value.
 		/// @return The new instance of Attribute.
-		static Ref<Attribute> create(const String &p_attribute_name, const float p_initial_value, const float p_min_value, const float p_max_value);
+		static Ref<Attribute> create(const String &p_attribute_name, const float p_initial_value);
 
 		// getters/setters
 		/// @brief Get the initial value of the attribute.
 		/// @return The initial value of the attribute.
 		float get_initial_value() const override;
-		/// @brief Get the maximum value of the attribute.
-		/// @return The maximum value of the attribute.
-		float get_max_value() const override;
-		/// @brief Get the minimum value of the attribute.
-		/// @return The minimum value of the attribute.
-		float get_min_value() const override;
 		/// @brief Set the initial value of the attribute.
 		/// @param p_value The initial value of the attribute.
 		void set_initial_value(const float p_value);
-		/// @brief Set the maximum value of the attribute.
-		/// @param p_value The maximum value of the attribute.
-		void set_max_value(const float p_value);
-		/// @brief Set the minimum value of the attribute.
-		/// @param p_value The minimum value of the attribute.
-		void set_min_value(const float p_value);
 	};
 
 	/// @brief Runtime buff. Using class because structs seems to not be allowed in Godot yet.
@@ -485,6 +466,8 @@ namespace gga
 		Ref<AttributeSet> attribute_set;
 		/// @brief The attribute container reference.
 		AttributeContainer *attribute_container;
+		/// @brief The previous value of the attribute.
+		float previous_value = 0.0f;
 		/// @brief The attribute value.
 		float value = 0.0f;
 		/// @brief The attribute buffs.
@@ -526,18 +509,21 @@ namespace gga
 		/// @brief Get the buffed value of the attribute.
 		/// @return The buffed value.
 		float get_buffed_value() const;
+		/// @brief Gets an array of attributes constraining this attribute.
+		/// @return The array of attributes constraining this attribute.
+		TypedArray<AttributeBase> get_constrained_by() const;
+		/// @brief Gets the buffed value of the attribute constrained by the constraints.
+		/// @return The constrained value of the attribute.
+		float get_constrained_value() const;
 		/// @brief Get the attributes the attribute derives from.
 		/// @return The attributes the attribute derives from.
 		TypedArray<AttributeBase> get_derived_from() const;
 		/// @brief Get the initial value of the attribute.
 		/// @return The initial value of the attribute.
 		float get_initial_value() const;
-		/// @brief Get the minimum value of the attribute.
-		/// @return The minimum value of the attribute.
-		float get_min_value() const;
-		/// @brief Get the maximum value of the attribute.
-		/// @return The maximum value of the attribute.
-		float get_max_value() const;
+		/// @brief Get the previous value of the attribute.
+		/// @return The previous value of the attribute.
+		float get_previous_value() const;
 		/// @brief Gets the value of the attribute.
 		/// @return The value of the attribute.
 		float get_value();

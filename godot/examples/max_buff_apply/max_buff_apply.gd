@@ -8,8 +8,6 @@ const ATTRIBUTE_NAME = "awawawaawawawawaw"
 func _ready() -> void:
 	var attribute = Attribute.new()
 	attribute.attribute_name = ATTRIBUTE_NAME
-	attribute.max_value = 100
-	attribute.min_value = 0
 	attribute.initial_value = 50
 	
 	attribute_container.add_attribute(attribute)

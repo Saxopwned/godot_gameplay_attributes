@@ -1,18 +1,16 @@
-@tool
-class_name HealthAttribute 
+class_name TestAttribute000
 extends Attribute
 
-const ATTRIBUTE_NAME := "HealthAttribute"
+const ATTRIBUTE_NAME := "TestAttribute000"
 
-
-func _init(_attribute_name = ATTRIBUTE_NAME) -> void:
-	self.attribute_name = _attribute_name
-
+func _init(_attribute_name := ATTRIBUTE_NAME):
+	attribute_name = _attribute_name
+	
 
 func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
 	return [
-		attribute_set.find_by_name(MinHealthAttribute.ATTRIBUTE_NAME),
-		attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(TestAttribute000ConstraintMin.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(TestAttribute000ConstraintMax.ATTRIBUTE_NAME),
 	]
 	
 	

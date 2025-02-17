@@ -37,8 +37,8 @@ func _ready() -> void:
 
 	sprite_2d.texture = mob_type.texture_2d
 	
-	health = attribute_container.get_attribute_by_name("health")
-	movement_speed = attribute_container.get_attribute_by_name("movement_speed")
+	health = attribute_container.get_attribute_by_name(HealthAttribute.ATTRIBUTE_NAME)
+	movement_speed = attribute_container.get_attribute_by_name(MovementSpeedAttribute.ATTRIBUTE_NAME)
 	
 	label.text = str(health.get_buffed_value())
 	
@@ -60,7 +60,7 @@ func _process(delta: float) -> void:
 			
 			if damage_tick > 1.0:
 				var damage = AttributeBuff.new()
-				damage.attribute_name = "health"
+				damage.attribute_name = HealthAttribute.ATTRIBUTE_NAME
 				damage.operation = AttributeOperation.subtract(1.0)
 				damage_tick = damage_tick - 1.0
 				chase_target.attribute_container.apply_buff(damage)

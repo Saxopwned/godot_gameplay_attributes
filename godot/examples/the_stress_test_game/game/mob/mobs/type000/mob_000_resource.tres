@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="MobType" load_steps=4 format=3 uid="uid://bqk0er6gflwv2"]
 
 [ext_resource type="AttributeSet" uid="uid://ca7i5wsi151yy" path="res://examples/the_stress_test_game/game/mob/mobs/type000/mob_000_attribute_set.tres" id="1_hf0nm"]
-[ext_resource type="Script" uid="uid://bxn2yen4ceew8" path="res://examples/the_stress_test_game/game/mob/mob_type.gd" id="1_qy8kb"]
+[ext_resource type="Script" uid="uid://n6jx84arb5w1" path="res://examples/the_stress_test_game/game/mob/mob_type.gd" id="1_qy8kb"]
 [ext_resource type="Texture2D" uid="uid://cxu0db5xf45bc" path="res://examples/the_stress_test_game/kenney_tiny-dungeon/Tiles/tile_0121.png" id="2_v2nun"]
 
 [resource]

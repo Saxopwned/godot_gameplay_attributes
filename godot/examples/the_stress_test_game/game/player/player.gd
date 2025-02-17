@@ -11,6 +11,8 @@ signal projectile_fired(starting_position: Vector2, target_position: Vector2)
 
 
 var health: RuntimeAttribute
+var min_health: RuntimeAttribute
+var max_health: RuntimeAttribute
 var fire_rate: RuntimeAttribute
 var is_dead: bool = false
 var movement_speed: RuntimeAttribute
@@ -20,15 +22,17 @@ var tick: float
 
 
 func _ready() -> void:
-	health = attribute_container.get_attribute_by_name("health")
-	movement_speed = attribute_container.get_attribute_by_name("movement_speed")
-	fire_rate = attribute_container.get_attribute_by_name("fire_rate")
-	pickup_radius = attribute_container.get_attribute_by_name("pickup_radius")
+	health = attribute_container.get_attribute_by_name(HealthAttribute.ATTRIBUTE_NAME)
+	min_health = attribute_container.get_attribute_by_name(MinHealthAttribute.ATTRIBUTE_NAME)
+	max_health = attribute_container.get_attribute_by_name(MaxHealthAttribute.ATTRIBUTE_NAME)
+	movement_speed = attribute_container.get_attribute_by_name(MovementSpeedAttribute.ATTRIBUTE_NAME)
+	fire_rate = attribute_container.get_attribute_by_name(FireRateAttribute.ATTRIBUTE_NAME)
+	pickup_radius = attribute_container.get_attribute_by_name(PickupRadiusAttribute.ATTRIBUTE_NAME)
 
 	if health:
-		progress_bar.max_value = health.attribute.max_value
-		progress_bar.min_value = health.attribute.min_value
-		progress_bar.value = health.get_buffed_value()
+		progress_bar.min_value = min_health.get_constrained_value()
+		progress_bar.max_value = max_health.get_constrained_value()
+		progress_bar.value = health.get_constrained_value()
 	
 	attribute_container.attribute_changed.connect(func (attribute, _old, new_value):
 		if attribute is HealthAttribute:
@@ -43,8 +47,8 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("die_immediately"):
 		print("uh oh")
 		var instantdeath = AttributeBuff.new()
-		instantdeath.attribute_name = "health"
-		instantdeath.buff_type = instantdeath.BT_ONESHOT
+		instantdeath.attribute_name = HealthAttribute.ATTRIBUTE_NAME
+		instantdeath.transient = false
 		instantdeath.operation = AttributeOperation.subtract(99999999)
 		attribute_container.apply_buff(instantdeath)
 
@@ -83,4 +87,4 @@ func fire_projectile() -> void:
 			next = child
 	
 	if next:
-		projectile_fired.emit(global_position, next.global_position, attribute_container.get_attribute_by_name("damage").get_buffed_value())
+		projectile_fired.emit(global_position, next.global_position, attribute_container.get_attribute_by_name(DamageAttribute.ATTRIBUTE_NAME).get_buffed_value())

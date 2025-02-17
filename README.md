@@ -43,9 +43,9 @@ The addon provides a set of nodes and resources that can be used to define gamep
 
 This addon works using Godot's custom resources as attributes. Each `Attribute` is a custom resource that defines a single attribute that can contained using an `AttributeSet` resource. The choice of custom resources is due to Godot's performance on handling many of them, by giving in the same time the possibility to inherit their base class to create custom attributes.
 
-An `Attribute` has a name, an initial value, a minimum value, and a maximum value.
+An `Attribute` has a name, an initial value, and optionally it can defined how it derives from other attributes and how other attributes can apply constraints to it.
 
-The proper way to define your attributes, is to create your own custom resources as scripts that inherit from `Attribute` base class. This way you can define your attribute, and use latter in your attribute sets.
+The best way to define your attributes, is to create your own custom resources as scripts that inherit from `Attribute` base class. This way you can define your attribute, and use latter in your attribute sets. Otherwise a normal `Attribute` resource can be used if you do not need anything fancy.
 
 An `AttributeSet` is a set of predefined attributes that can be used to define the attributes of an object in the game, like a character, an enemy, or any other object that has attributes.
 
@@ -88,7 +88,82 @@ func _get_initial_value(values: PackedFloat32Array) -> float:
 
 You must override the `_get_buffed_value` method to define how the attribute value is calculated based on the values of the attributes that it depends on. You must override the `_derived_from` method to define which attributes the derived attribute depends on and the `_get_initial_value` method to define the initial value of the attribute.
 
-You can optionally override the `_get_min_value` and `_get_max_value` methods to define the minimum and maximum values of the attribute. 
+## Attributes constraints
+
+Some attributes (like health, mana, stamina etc) could potentially have constraints, like a maximum value, a minimum value, or a value that can be calculated based on other attributes.
+
+To achieve this is quite straightforward. You have to create a script that inherits from `Attribute` base class as your main attribute, one for the minimum value, one for the maximum value, and one for the derived value.
+
+Example:
+
+#### Definining the minimum and maximum constraints
+
+The minimum health attribute should look similar to this:
+
+```gdscript
+class_name MinHealthAttribute
+extends Attribute
+
+const ATTRIBUTE_NAME := "MinHealthAttribute"
+
+func _init(_attribute_name := ATTRIBUTE_NAME):
+	attribute_name = _attribute_name
+
+
+func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
+	return [
+		attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME)
+	]
+	
+	
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return minf(buffed_value, buffed_values[0]) # we don't want to exceed the value of the MaxHealthAttribute
+```
+
+While the maximum health attribute should look like this:
+
+```gdscript
+class_name MaxHealthAttribute
+extends Attribute
+
+const ATTRIBUTE_NAME := "MaxHealthAttribute"
+
+func _init(_attribute_name := ATTRIBUTE_NAME):
+	attribute_name = _attribute_name
+
+
+func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
+	return [
+		attribute_set.find_by_name(MinHealthConstraintAttribute.ATTRIBUTE_NAME)
+	]
+	
+	
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return maxf(buffed_value, buffed_values[0])
+```
+
+#### Applying the constraints to the main attribute
+
+```gdscript
+class_name Health
+extends Attribute
+
+const ATTRIBUTE_NAME := "Health"
+
+func _init(_attribute_name := ATTRIBUTE_NAME):
+	attribute_name = _attribute_name
+	
+	
+func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
+	return [
+		attribute_set.find_by_name(MinHealthAttribute.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME),
+	]
+	
+	
+func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
+	return clampf(buffed_value, buffed_values[0], buffed_values[1]) # tada!
+```
 
 ## Custom attribute buff/debuff
 
@@ -124,8 +199,6 @@ func _ready():
 	var health_attribute = Attribute.new()
 	health_attribute.attribute_name = ATTRIBUTE_NAME
 	health_attribute.initial_value = 100
-	health_attribute.min_value = 0
-	health_attribute.max_value = 100
 
 	attribute_container.attribute_set = AttributeSet.new()
 	attribute_container.attribute_set.add_attribute(health_attribute)
@@ -152,10 +225,6 @@ func _ready():
 	attribute_container.apply_buff(buff)
 
 	print(attribute_container.get_attribute_by_name(ATTRIBUTE_NAME).get_buffed_value()) # 90
-
-	attribute_container.apply_buff(buff)
-
-	print(attribute_container.get_attribute_by_name(ATTRIBUTE_NAME).get_buffed_value()) # 100
 
 	attribute_container.apply_buff(buff)
 

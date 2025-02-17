@@ -3,8 +3,7 @@
 [ext_resource type="AttributeOperation" uid="uid://5id06q5x83r" path="res://examples/attribute_container/buffs/operations/+1_p.tres" id="1_pnpiq"]
 
 [resource]
-attribute_name = "attribute_000"
+attribute_name = "TestAttribute000"
 buff_name = "add_1_percent"
 operation = ExtResource("1_pnpiq")
-max_applies = 351
 unique = true

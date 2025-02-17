@@ -3,7 +3,7 @@
 [ext_resource type="AttributeOperation" uid="uid://d1240pmejx0be" path="res://examples/attribute_container/buffs/operations/-1_p.tres" id="1_b8e3e"]
 
 [resource]
-attribute_name = "attribute_000"
+attribute_name = "TestAttribute000"
 buff_name = "remove_1_percent_for_5_seconds"
 duration = 5.0
 operation = ExtResource("1_b8e3e")

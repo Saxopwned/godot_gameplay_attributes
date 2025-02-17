@@ -1,7 +1,5 @@
 extends VBoxContainer
 
-const ATTRIBUTE_NAME = "attribute_000"
-
 const ADD_1_PERCENT = preload("res://examples/attribute_container/buffs/add_1_percent.tres")
 const ADD_1_PERCENT_FOR_5_SECONDS = preload("res://examples/attribute_container/buffs/add_1_percent_for_5_seconds.tres")
 const ADD_5_FOR_5_SECONDS = preload("res://examples/attribute_container/buffs/add_5_for_5_seconds.tres")
@@ -54,9 +52,7 @@ func _on_attribute_buff_removed(buff: RuntimeBuff) -> void:
 
 func _on_attribute_changed(attribute: RuntimeAttribute, previous_value: float, new_value: float) -> void:
 	print("_on_attribute_changed", attribute, previous_value, new_value)
-	attribute_value_display.max_value = attribute.attribute.max_value
-	attribute_value_display.min_value = attribute.attribute.min_value
-	attribute_value_display.value = attribute.get_buffed_value()
+	attribute_value_display.value = attribute.get_constrained_value()
 
 
 func _ready():
@@ -66,7 +62,7 @@ func _ready():
 	add_child(timer)
 	
 	timer.timeout.connect(func ():
-		print(attribute_container.get_attribute_by_name(ATTRIBUTE_NAME).get_buffed_value())
+		print(attribute_container.get_attribute_by_name(TestAttribute000.ATTRIBUTE_NAME).get_buffed_value())
 	)
 	timer.wait_time = 2.0
 	timer.start()
@@ -101,8 +97,9 @@ func _ready():
 func make_debuff(value: float) -> AttributeBuff:
 	var buff = AttributeBuff.new()
 
-	buff.attribute_name = ATTRIBUTE_NAME
+	buff.attribute_name = TestAttribute000.ATTRIBUTE_NAME
 	buff.operation = AttributeOperation.subtract(value)
+	buff.transient = false
 
 	return buff
 
@@ -110,17 +107,16 @@ func make_debuff(value: float) -> AttributeBuff:
 func make_buff(value: float) -> AttributeBuff:
 	var buff = AttributeBuff.new()
 
-	buff.attribute_name = ATTRIBUTE_NAME
+	buff.attribute_name = TestAttribute000.ATTRIBUTE_NAME
 	buff.operation = AttributeOperation.add(value)
+	buff.transient = false
 
 	return buff
 
 
 func draw_attribute() -> void:
-	var attribute = attribute_container.get_attribute_by_name(ATTRIBUTE_NAME)
+	var attribute = attribute_container.get_attribute_by_name(TestAttribute000.ATTRIBUTE_NAME)
 
 	if attribute:
-		attribute_value_display.max_value = attribute.attribute.max_value
-		attribute_value_display.min_value = attribute.attribute.min_value
 		attribute_value_display.value = attribute.get_buffed_value()
 		print("buffed value is " + str(attribute.get_buffed_value()))

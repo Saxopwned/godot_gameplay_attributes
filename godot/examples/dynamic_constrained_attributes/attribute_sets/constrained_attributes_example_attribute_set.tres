@@ -1,0 +1,22 @@
+[gd_resource type="AttributeSet" load_steps=7 format=3 uid="uid://dhy342uf3pxb3"]
+
+[ext_resource type="Script" uid="uid://dqorlr6s1jgee" path="res://examples/dynamic_constrained_attributes/attributes/min_health_constraint_attribute.gd" id="1_qm3hw"]
+[ext_resource type="Script" uid="uid://b2rf6v1x00d0h" path="res://examples/dynamic_constrained_attributes/attributes/max_health_constraint_attribute.gd" id="2_bpmg6"]
+[ext_resource type="Script" uid="uid://d200w26sfs3o3" path="res://examples/dynamic_constrained_attributes/attributes/constrained_health.gd" id="3_eyh8l"]
+
+[sub_resource type="Attribute" id="Attribute_smg1j"]
+script = ExtResource("1_qm3hw")
+metadata/_custom_type_script = ExtResource("1_qm3hw")
+
+[sub_resource type="Attribute" id="Attribute_3nk5d"]
+initial_value = 10.0
+script = ExtResource("2_bpmg6")
+metadata/_custom_type_script = ExtResource("2_bpmg6")
+
+[sub_resource type="Attribute" id="Attribute_u61fq"]
+initial_value = 10.0
+script = ExtResource("3_eyh8l")
+metadata/_custom_type_script = ExtResource("3_eyh8l")
+
+[resource]
+attributes = Array[AttributeBase]([SubResource("Attribute_smg1j"), SubResource("Attribute_3nk5d"), SubResource("Attribute_u61fq")])
