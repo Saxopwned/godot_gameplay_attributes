@@ -52,7 +52,7 @@ void AttributeOperation::_bind_methods()
 	ClassDB::bind_static_method("AttributeOperation", D_METHOD("forcefully_set_value", "p_value"), &AttributeOperation::forcefully_set_value);
 
 	/// binds properties
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "operand", PROPERTY_HINT_ENUM, "Add:0,Divide:1,Multiply:2,Percentage:3,Subtract:4"), "set_operand", "get_operand");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "operand", PROPERTY_HINT_ENUM, "Add:0,Divide:1,Multiply:2,Percentage:3,Subtract:4,Set:5"), "set_operand", "get_operand");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "set_value", "get_value");
 
 	/// binds enum as consts
