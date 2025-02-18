@@ -14,19 +14,23 @@ var health: RuntimeAttribute
 var min_health: RuntimeAttribute
 var max_health: RuntimeAttribute
 var fire_rate: RuntimeAttribute
+var fire_timer_time: RuntimeAttribute
+var fire_timer: Timer
 var is_dead: bool = false
 var movement_speed: RuntimeAttribute
 var pickup_radius: RuntimeAttribute
 var target: Node2D
-var tick: float
 
 
 func _ready() -> void:
+	fire_timer = Timer.new()
+	add_child(fire_timer)
 	health = attribute_container.get_attribute_by_name(HealthAttribute.ATTRIBUTE_NAME)
 	min_health = attribute_container.get_attribute_by_name(MinHealthAttribute.ATTRIBUTE_NAME)
 	max_health = attribute_container.get_attribute_by_name(MaxHealthAttribute.ATTRIBUTE_NAME)
 	movement_speed = attribute_container.get_attribute_by_name(MovementSpeedAttribute.ATTRIBUTE_NAME)
 	fire_rate = attribute_container.get_attribute_by_name(FireRateAttribute.ATTRIBUTE_NAME)
+	fire_timer_time = attribute_container.get_attribute_by_name(ShotsPerSecondAttribute.ATTRIBUTE_NAME)
 	pickup_radius = attribute_container.get_attribute_by_name(PickupRadiusAttribute.ATTRIBUTE_NAME)
 
 	if health:
@@ -40,7 +44,15 @@ func _ready() -> void:
 			if new_value <= 0.01:
 				is_dead = true
 				died.emit()	
+		elif attribute is ShotsPerSecondAttribute:
+			fire_timer.stop()
+			fire_timer.wait_time = fire_timer_time.get_buffed_value()
+			fire_timer.start()
 	)
+	
+	fire_timer.timeout.connect(fire_projectile)
+	fire_timer.wait_time = fire_timer_time.get_buffed_value()
+	fire_timer.start()
 
 
 func _input(event: InputEvent) -> void:
@@ -51,14 +63,6 @@ func _input(event: InputEvent) -> void:
 		instantdeath.transient = false
 		instantdeath.operation = AttributeOperation.subtract(99999999)
 		attribute_container.apply_buff(instantdeath)
-
-
-func _process(delta: float) -> void:
-	tick += delta
-
-	if tick > fire_rate.get_buffed_value():
-		tick = tick - fire_rate.get_buffed_value()
-		fire_projectile()
 
 
 func _physics_process(delta: float) -> void:

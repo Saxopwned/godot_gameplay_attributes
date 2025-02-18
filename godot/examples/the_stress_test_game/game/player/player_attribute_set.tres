@@ -1,4 +1,4 @@
-[gd_resource type="AttributeSet" load_steps=18 format=3 uid="uid://nswjdhjxocg1"]
+[gd_resource type="AttributeSet" load_steps=20 format=3 uid="uid://nswjdhjxocg1"]
 
 [ext_resource type="Script" uid="uid://q0lg6hqwbtin" path="res://examples/the_stress_test_game/game/attributes/damage.gd" id="1_env54"]
 [ext_resource type="Script" uid="uid://cqkflkgmhbhni" path="res://examples/the_stress_test_game/game/attributes/health.gd" id="2_bsj7q"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://dx21tuvfys5n7" path="res://examples/the_stress_test_game/game/attributes/pickup_radius.gd" id="7_ivnag"]
 [ext_resource type="Script" uid="uid://bjaescr5csbbo" path="res://examples/the_stress_test_game/game/attributes/min_health.gd" id="7_x24xn"]
 [ext_resource type="Script" uid="uid://jqrbyt1kckym" path="res://examples/the_stress_test_game/game/attributes/max_health.gd" id="8_tc01m"]
+[ext_resource type="Script" uid="uid://cvjad10ytv27p" path="res://examples/the_stress_test_game/game/attributes/shots_per_second.gd" id="9_tc01m"]
 
 [sub_resource type="Attribute" id="Attribute_o56mt"]
 initial_value = 4.0
@@ -54,5 +55,10 @@ attribute_name = "MaxHealthAttribute"
 script = ExtResource("8_tc01m")
 metadata/_custom_type_script = ExtResource("8_tc01m")
 
+[sub_resource type="Attribute" id="Attribute_2wsxc"]
+attribute_name = "ShotsPerSecondAttribute"
+script = ExtResource("9_tc01m")
+metadata/_custom_type_script = "uid://cvjad10ytv27p"
+
 [resource]
-attributes = Array[AttributeBase]([SubResource("Attribute_o56mt"), SubResource("Attribute_yu740"), SubResource("Attribute_n8rb4"), SubResource("Attribute_cye61"), SubResource("Attribute_i2pdw"), SubResource("Attribute_x86gy"), SubResource("Attribute_ad25v"), SubResource("Attribute_erl1b"), SubResource("Attribute_i2lij")])
+attributes = Array[AttributeBase]([SubResource("Attribute_o56mt"), SubResource("Attribute_yu740"), SubResource("Attribute_n8rb4"), SubResource("Attribute_cye61"), SubResource("Attribute_i2pdw"), SubResource("Attribute_x86gy"), SubResource("Attribute_ad25v"), SubResource("Attribute_erl1b"), SubResource("Attribute_i2lij"), SubResource("Attribute_2wsxc")])
