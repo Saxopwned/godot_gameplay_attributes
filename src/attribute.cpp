@@ -962,8 +962,6 @@ float RuntimeAttribute::get_constrained_value() const
 		TypedArray<float> buffed_values = TypedArray<float>();
 		TypedArray<float> previous_values = TypedArray<float>();
 
-		ERR_FAIL_COND_V_MSG(constraining_attributes.size() == 0, buffed_value, "_constrained_by method did not return any attributes.");
-
 		for (int i = 0; i < constraining_attributes.size(); i++) {
 			Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
 			buffed_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
