@@ -5,12 +5,12 @@
 /*                        Godot Gameplay Systems                          */
 /*              https://github.com/OctoD/godot-gameplay-systems           */
 /**************************************************************************/
-/* Copyright (c) 2020-present Paolo "OctoD"      Roth (see AUTHORS.md).   */
+/* Copyright (c) 2020-present Paolo "OctoD" Roth (see AUTHORS.md).   */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
 /* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* without limitation, the rights to use, copy, modify, merge, publish,    */
 /* distribute, sublicense, and/or sell copies of the Software, and to     */
 /* permit persons to whom the Software is furnished to do so, subject to  */
 /* the following conditions:                                              */
@@ -123,7 +123,7 @@ float AttributeOperation::operate(float p_base_value) const
 		case OP_ADD:
 			return p_base_value + value;
 		case OP_DIVIDE:
-			return abs(value) < 0.0001f ? 0 : p_base_value / value;
+			return Math::absf(value) < 0.0001f ? 0 : p_base_value / value;
 		case OP_MULTIPLY:
 			return p_base_value * value;
 		case OP_PERCENTAGE:
@@ -270,7 +270,7 @@ int AttributeBuff::get_max_applies() const
 
 bool AttributeBuff::is_time_limited() const
 {
-	return abs(1.0f - duration) > 0.0001f;
+	return Math::absf(1.0f - duration) > 0.0001f;
 }
 
 void AttributeBuff::set_attribute_name(const String &p_value)
@@ -341,6 +341,10 @@ String AttributeBase::get_attribute_name() const
 	return attribute_name;
 }
 
+float AttributeBase::get_initial_value() const{
+	return 0.0f;
+}
+
 TypedArray<AttributeBuff> AttributeBase::get_buffs() const
 {
 	return buffs;
@@ -375,7 +379,7 @@ void Attribute::_bind_methods()
 
 Ref<Attribute> Attribute::create(const String &p_attribute_name, const float p_initial_value)
 {
-	Ref<Attribute> attribute = memnew(Attribute);
+	Ref attribute = memnew(Attribute);
 	attribute->set_attribute_name(p_attribute_name);
 	attribute->set_initial_value(p_initial_value);
 	return attribute;
@@ -436,7 +440,7 @@ bool AttributeSet::operator==(const Ref<AttributeSet> &set) const
 		}
 	}
 
-	return false;
+	return true;
 }
 
 AttributeSet::AttributeSet()
@@ -444,7 +448,7 @@ AttributeSet::AttributeSet()
 	attributes = TypedArray<AttributeBase>();
 }
 
-AttributeSet::AttributeSet(TypedArray<AttributeBase> p_attributes, String p_set_name)
+AttributeSet::AttributeSet(const TypedArray<AttributeBase> &p_attributes, const String &p_set_name)
 {
 	attributes = p_attributes.duplicate(true);
 	set_name = p_set_name;
@@ -453,7 +457,7 @@ AttributeSet::AttributeSet(TypedArray<AttributeBase> p_attributes, String p_set_
 bool AttributeSet::add_attribute(const Ref<AttributeBase> &p_attribute)
 {
 	if (!has_attribute(p_attribute)) {
-		Ref<Attribute> d_attribute = p_attribute->duplicate(true);
+		const Ref<Attribute> d_attribute = p_attribute->duplicate(true);
 
 		attributes.push_back(d_attribute);
 		emit_signal("attribute_added", d_attribute);
@@ -489,15 +493,14 @@ uint16_t AttributeSet::add_attributes(const TypedArray<AttributeBase> &p_attribu
 
 int AttributeSet::find(const Ref<AttributeBase> &p_attribute) const
 {
-	return attributes.find(p_attribute);
+	return static_cast<int>(attributes.find(p_attribute));
 }
 
 Ref<AttributeBase> AttributeSet::find_by_classname(const String &p_classname) const
 {
 	for (int i = 0; i < attributes.size(); i++) {
-		Ref<AttributeBase> attribute = attributes[i];
 
-		if (attribute->get_class() == p_classname) {
+		if (const Ref<AttributeBase> attribute = attributes[i]; attribute->get_class() == p_classname) {
 			return attributes[i];
 		}
 	}
@@ -508,22 +511,21 @@ Ref<AttributeBase> AttributeSet::find_by_classname(const String &p_classname) co
 Ref<AttributeBase> AttributeSet::find_by_name(const String &p_name) const
 {
 	for (int i = 0; i < attributes.size(); i++) {
-		Ref<AttributeBase> attribute = attributes[i];
 
-		if (attribute->get_attribute_name() == p_name) {
+		if (const Ref<AttributeBase> attribute = attributes[i]; attribute->get_attribute_name() == p_name) {
 			return attributes[i];
 		}
 	}
 
-	return Ref<AttributeBase>();
+	return {};
 }
 
 PackedStringArray AttributeSet::get_attributes_names() const
 {
-	PackedStringArray names = PackedStringArray();
+	PackedStringArray names;
 
 	for (int i = 0; i < attributes.size(); i++) {
-		Ref<AttributeBase> attribute = attributes[i];
+		const Ref<AttributeBase> attribute = attributes[i];
 		names.push_back(attribute->get_attribute_name());
 	}
 
@@ -562,10 +564,8 @@ bool AttributeSet::has_attribute(const Ref<AttributeBase> &p_attribute) const
 
 bool AttributeSet::remove_attribute(const Ref<AttributeBase> &p_attribute)
 {
-	int index = attributes.find(p_attribute);
-	bool result = false;
 
-	if (index != -1) {
+	if (const int64_t index = attributes.find(p_attribute); index != -1) {
 		attributes.remove_at(index);
 		emit_signal("attribute_removed", p_attribute);
 		emit_changed();
@@ -580,9 +580,7 @@ int AttributeSet::remove_attributes(const TypedArray<AttributeBase> &p_attribute
 	int count = 0;
 
 	for (int i = 0; i < p_attributes.size(); i++) {
-		int index = attributes.find(p_attributes[i]);
-
-		if (index != -1) {
+		if (const int64_t index = attributes.find(p_attributes[i]);index != -1) {
 			attributes.remove_at(index);
 			count++;
 			emit_signal("attribute_removed", p_attributes[i]);
@@ -617,7 +615,7 @@ void AttributeSet::set_set_name(const String &p_value)
 
 int AttributeSet::count() const
 {
-	return attributes.size();
+	return static_cast<int>(attributes.size());
 }
 
 #pragma endregion
@@ -881,11 +879,9 @@ int RuntimeAttribute::remove_buffs(const TypedArray<AttributeBuff> &p_buffs)
 {
 	int count = 0;
 
-	for (int i = p_buffs.size() - 1; i >= 0; i--) {
-		for (int j = buffs.size() - 1; j >= 0; j--) {
-			Ref<RuntimeBuff> buff = buffs[j];
-
-			if (buff->equals_to(p_buffs[i])) {
+	for (int64_t i = p_buffs.size() - 1; i >= 0; i--) {
+		for (int64_t j = buffs.size() - 1; j >= 0; j--) {
+			if (const Ref<RuntimeBuff> buff = buffs[j]; buff->equals_to(p_buffs[i])) {
 				buffs.remove_at(j);
 				count++;
 			}
@@ -915,7 +911,7 @@ float RuntimeAttribute::get_buffed_value() const
 
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_buffed_value)) {
 		TypedArray<AttributeBase> derived_from = get_derived_from();
-		TypedArray<float> values = TypedArray<float>();
+		TypedArray<float> values;
 
 		if (derived_from.size() > 0) {
 			for (int i = 0; i < derived_from.size(); i++) {
@@ -928,10 +924,9 @@ float RuntimeAttribute::get_buffed_value() const
 	}
 
 	for (int i = 0; i < buffs.size(); i++) {
-		Ref<RuntimeBuff> buff = buffs[i];
-		Ref<AttributeBuff> attribute_buff = buff->get_buff();
+		const Ref<RuntimeBuff> buff = buffs[i];
 
-		if (attribute_buff.is_valid() && !attribute_buff.is_null()) {
+		if (Ref<AttributeBuff> attribute_buff = buff->get_buff();attribute_buff.is_valid() && !attribute_buff.is_null()) {
 			current_value = attribute_buff->operate(current_value);
 		}
 	}
@@ -942,25 +937,25 @@ float RuntimeAttribute::get_buffed_value() const
 TypedArray<AttributeBase> RuntimeAttribute::get_constrained_by() const
 {
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _constrained_by)) {
-		TypedArray<AttributeBase> constraining_attributes = TypedArray<AttributeBase>();
+		TypedArray<AttributeBase> constraining_attributes;
 
 		ERR_FAIL_COND_V_MSG(!GDVIRTUAL_CALL_PTR(attribute, _constrained_by, attribute_set, constraining_attributes), constraining_attributes, "_constrained_by errored.");
 
 		return constraining_attributes;
 	}
 
-	return TypedArray<AttributeBase>();
+	return {};
 }
 
 float RuntimeAttribute::get_constrained_value() const
 {
-	float buffed_value = get_buffed_value();
+	const float buffed_value = get_buffed_value();
 	float returning_value = buffed_value;
 
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_constrained_value)) {
 		TypedArray<AttributeBase> constraining_attributes = get_constrained_by();
-		TypedArray<float> buffed_values = TypedArray<float>();
-		TypedArray<float> previous_values = TypedArray<float>();
+		TypedArray<float> buffed_values;
+		TypedArray<float> previous_values;
 
 		for (int i = 0; i < constraining_attributes.size(); i++) {
 			Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
@@ -977,32 +972,31 @@ float RuntimeAttribute::get_constrained_value() const
 TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const
 {
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _derived_from)) {
-		TypedArray<AttributeBase> derived_attributes = TypedArray<AttributeBase>();
+		TypedArray<AttributeBase> derived_attributes;
 
 		if (GDVIRTUAL_CALL_PTR(attribute, _derived_from, attribute_set, derived_attributes)) {
 			return derived_attributes;
 		}
 	}
 
-	return TypedArray<AttributeBase>();
+	return {};
 }
 
 float RuntimeAttribute::get_initial_value() const
 {
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_initial_value)) {
-		float ret;
 		TypedArray<AttributeBase> base_attributes = get_derived_from();
 
 		ERR_FAIL_COND_V_MSG(base_attributes.size() == 0, 0, "Attribute set must be set to get initial value. Please override _derived_from method.");
 
-		PackedFloat32Array values = PackedFloat32Array();
+		PackedFloat32Array values;
 
 		for (int i = 0; i < base_attributes.size(); i++) {
-			Ref<AttributeBase> base_attribute = base_attributes[i];
+			const Ref<AttributeBase> base_attribute = base_attributes[i];
 			values.push_back(base_attribute->get_initial_value());
 		}
 
-		if (GDVIRTUAL_CALL_PTR(attribute, _get_initial_value, values, ret)) {
+		if (float ret; GDVIRTUAL_CALL_PTR(attribute, _get_initial_value, values, ret)) {
 			return ret;
 		}
 	}
@@ -1015,7 +1009,7 @@ float RuntimeAttribute::get_previous_value() const
 	return previous_value;
 }
 
-float RuntimeAttribute::get_value()
+float RuntimeAttribute::get_value() const
 {
 	return value;
 }

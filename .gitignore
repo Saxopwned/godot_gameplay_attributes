@@ -6,6 +6,10 @@ bin
 *.so
 *.pdb
 
+# CMake
+cmake-build-debug
+cmake-build-release
+
 # SConstruct
 .sconf_temp
 .sconsign.dblite

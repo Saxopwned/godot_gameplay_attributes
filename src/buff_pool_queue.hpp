@@ -59,7 +59,7 @@ namespace gga
 		/// @brief Overridden _physics_process method.
 		void handle_physics_process(double p_delta);
 		/// @brief Adds a buff to the queue.
-		void enqueue(Ref<RuntimeBuff> p_buff);
+		void enqueue(const Ref<RuntimeBuff> &p_buff);
 		/// @brief Returns if the queue is server authoritative.
 		/// @return Whether the queue is server authoritative.
 		bool get_server_authoritative() const;

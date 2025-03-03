@@ -44,7 +44,7 @@ void BuffPoolQueue::_exit_tree()
 	clear();
 }
 
-void BuffPoolQueue::handle_physics_process(double p_delta)
+void BuffPoolQueue::handle_physics_process(const double p_delta)
 {
 	tick += p_delta;
 
@@ -55,7 +55,7 @@ void BuffPoolQueue::handle_physics_process(double p_delta)
 	}
 }
 
-void BuffPoolQueue::enqueue(Ref<RuntimeBuff> p_buff)
+void BuffPoolQueue::enqueue(const Ref<RuntimeBuff> &p_buff)
 {
 	if (server_authoritative && !is_multiplayer_authority()) {
 		return;
@@ -75,15 +75,15 @@ void BuffPoolQueue::clear()
 	queue.clear();
 }
 
-void BuffPoolQueue::process_items(const double discarded)
+void BuffPoolQueue::process_items(const double p_discarded)
 {
 	if (server_authoritative && !is_multiplayer_authority()) {
 		return;
 	}
 
-	float discarded_float = discarded + 1.0f;
+	const float discarded_float = static_cast<float>(p_discarded) + 1.0f;
 
-	for (int i = queue.size() - 1; i >= 0; i--) {
+	for (int64_t i = queue.size() - 1; i >= 0; i--) {
 		Ref<RuntimeBuff> buff = queue[i];
 		buff->set_time_left(buff->get_time_left() - discarded_float);
 
