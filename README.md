@@ -5,6 +5,8 @@ Godot Gameplay Attributes
 
 > (Part of [Godot Gameplay Systems](https://github.com/OctoD/godot-gameplay-systems))
 
+[discord server here](https://discord.gg/meA6pDTXpr)
+
 # Installation
 
 ## Using the AssetLib
