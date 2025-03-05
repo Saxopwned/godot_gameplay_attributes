@@ -1,0 +1,9 @@
+[gd_resource type="AttributeBuff" load_steps=2 format=3 uid="uid://bod8ob6lsgvqb"]
+
+[sub_resource type="AttributeOperation" id="AttributeOperation_dckqs"]
+value = 1.0
+
+[resource]
+attribute_name = "ActionSpeedAttribute"
+buff_name = "ActionSpeedAttribute + 1"
+operation = SubResource("AttributeOperation_dckqs")

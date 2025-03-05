@@ -1,0 +1,73 @@
+[gd_scene load_steps=4 format=3 uid="uid://dgyre8r117rv6"]
+
+[ext_resource type="Script" uid="uid://cfyyiu4qw0iqo" path="res://examples/complex_cases/buffing_a_derived_attribute/buffing_a_derived_attribute.gd" id="1_kum18"]
+[ext_resource type="PackedScene" uid="uid://bqudg1vu3a8g" path="res://examples/complex_cases/buffing_a_derived_attribute/attribute_display.tscn" id="2_bab4h"]
+[ext_resource type="AttributeSet" uid="uid://bbjj8l0w71pk5" path="res://examples/complex_cases/buffing_a_derived_attribute/buffing_a_derived_attribute_attribute_set.tres" id="3_7gg5x"]
+
+[node name="BuffingADerivedAttribute" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+alignment = 1
+script = ExtResource("1_kum18")
+
+[node name="BaseAttributeDisplay" parent="." instance=ExtResource("2_bab4h")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DerivedAttributeDisplay" parent="." instance=ExtResource("2_bab4h")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BaseAttributeHBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Label" type="Label" parent="BaseAttributeHBoxContainer"]
+layout_mode = 2
+text = "Buffs/debuffs for base attribute
+"
+
+[node name="ApplyBuffButton" type="Button" parent="BaseAttributeHBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Apply buff
+"
+
+[node name="RemoveBuffButton" type="Button" parent="BaseAttributeHBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Remove buff
+"
+
+[node name="DerivedAttributeHBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Label" type="Label" parent="DerivedAttributeHBoxContainer"]
+layout_mode = 2
+text = "Buffs/debuffs for derived attribute
+"
+
+[node name="ApplyBuffButton" type="Button" parent="DerivedAttributeHBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Apply buff
+"
+
+[node name="RemoveBuffButton" type="Button" parent="DerivedAttributeHBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Remove buff
+"
+
+[node name="AttributeContainer" type="AttributeContainer" parent="."]
+attribute_set = ExtResource("3_7gg5x")
+unique_name_in_owner = true
