@@ -8,48 +8,85 @@
 		A good practice consist in overriding the [Attribute] class to create your own attributes.
 
 		In certain scenarios, you could also create attributes from other [Attribute] classes by overriding three methods:
-		- [method _derived_from] to select the attributes which are derived from this one, [b]required[/b].
-		- [method _get_buffed_value] to calculate the value of the attribute after applying all the buffs, [b]required[/b].
-		- [method _get_initial_value] to calculate the initial value of the attribute, [b]required[/b].
-		- [method _get_max_value] to calculate the maximum value of the attribute, [b]optional[/b].
-		- [method _get_min_value] to calculate the minimum value of the attribute, [b]optional[/b].
+		- [method _constrained_by] Subscribes to some attributes which will constrain this attribute. Like min/max health on a health attribute.
+		- [method _derived_from] Subscribes to some attributes which will define how this attribute is derived. Like strength and dexterity on a damage attribute.
+		- [method _get_buffed_value] Gets the buffed attribute value. The function argument is an array of buffed values of the base attributes defining the derived attribute.
+		- [method _get_constrained_value] Gets the constrained value of the attribute. The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed by the attribute _constrained_by virtual method. NOTE: this is called AFTER that all the buffs are applied to an attribute.
+		- [method _get_initial_value] Get the initial value of the attribute.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="_constrained_by" qualifiers="virtual const">
+			<return type="AttributeBase[]" />
+			<param index="0" name="attribute_set" type="AttributeSet" />
+			<description>
+				Subscribes to some attributes which will constrain this attribute. Like min/max health on a health attribute.
+				[codeblock]
+				[gdscript]
+				func _constrained_by(attribute_set: AttributeSet) -> Array:
+				    return [
+				        attribute_set.find_attribute_by_name("MyAttributeName_1"),
+				        attribute_set.find_attribute_by_name("MyAttributeName_2")
+				    ]
+				[/gdscript]
+				[/codeblock]
+			</description>
+		</method>
 		<method name="_derived_from" qualifiers="virtual const">
 			<return type="AttributeBase[]" />
 			<param index="0" name="attribute_set" type="AttributeSet" />
 			<description>
-				Override this method to select the attributes which are derived from this one.
+				Subscribes to some attributes which will define how this attribute is derived. Like strength and dexterity on a damage attribute.
 				[codeblock]
-					func _derived_from(attribute_set: AttributeSet) -> Array:
-					return [
-						attribute_set.find_attribute_by_name("MyAttributeName_1"),
-						attribute_set.find_attribute_by_name("MyAttributeName_2")
-					]
+				[gdscript]
+				func _derived_from(attribute_set: AttributeSet) -> Array:
+				    return [
+				        attribute_set.find_attribute_by_name("MyAttributeName_1"),
+				        attribute_set.find_attribute_by_name("MyAttributeName_2")
+				    ]
+				[/gdscript]
 				[/codeblock]
-
-				[b]Note:[/b] This method is called automagically only if the attribute is a derived one.
-				[b]Note:[/b] This method is required for derived attributes.
 			</description>
 		</method>
 		<method name="_get_buffed_value" qualifiers="virtual const">
 			<return type="float" />
 			<param index="0" name="values" type="PackedFloat32Array" />
 			<description>
-				Override this method to calculate the value of the attribute after applying all the buffs.
-				Each param is the value of the attribute which is derived from this one.
+				Gets the buffed attribute value. The array passed as argument is the array of RuntimeAttribute instances buffed values.
 				[codeblock]
-					func _get_buffed_value(values: PackedFloat32Array) -> float:
-						var my_attribute_value_1 = values[0]
-						var my_attribute_value_2 = values[1]
-							
-						return my_attribute_value_1 + my_attribute_value_2 + 1
+				[gdscript]
+				func _get_buffed_value(values: PackedFloat32Array) -> float:
+				    var my_buffed_attribute_value_1 = values[0]
+				    var my_buffed_attribute_value_2 = values[1]
+
+				    return my_attribute_value_1 + my_attribute_value_2 + 1
+				[/gdscript]
 				[/codeblock]
 
-				[b]Note:[/b] This method is called automagically only if the attribute is a derived one.
-				[b]Note:[/b] This method is required for derived attributes.
+				[b]Note:[/b] This method is called only if the [AttributeBase._derived_from] is overridden.
+			</description>
+		</method>
+		<method name="_get_constrained_value" qualifiers="virtual const">
+			<return type="float" />
+			<param index="0" name="values" type="PackedFloat32Array" />
+			<description>
+				Gets the constrained value of the attribute.
+
+				The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed by the attribute _constrained_by virtual method.
+
+				[codeblock]
+				[gdscript]
+				func _get_constrained_value(my_attribute_value: float, current_buffed_values: PackedFloat32Array, previous_buffed_values: PackedFloat32Array) -> float:
+				    var min_health = values[0]
+				    var max_health = values[1]
+
+				    return clampf(my_attribute_value, min_health, max_health)
+				[/gdscript]
+				[/codeblock]
+
+				[b]Note:[/b] This method is called only if the [AttributeBase._constrained_by] is overridden.
+				[b]Note:[/b] this is called AFTER that all the buffs are applied to an attribute.
 			</description>
 		</method>
 		<method name="_get_initial_value" qualifiers="virtual const">
@@ -58,48 +95,17 @@
 			<description>
 				Override this method to calculate the initial value of the attribute.
 				[codeblock]
-					func _get_initial_value(attribute_set: AttributeSet) -> float:
-						var my_attribute_value_1 = values[0]
-						var my_attribute_value_2 = values[1]
+				[gdscript]
+				func _get_initial_value(attribute_set: AttributeSet) -> float:
+				    var my_attribute_value_1 = values[0]
+				    var my_attribute_value_2 = values[1]
 						
-						return my_attribute_value_1 + my_attribute_value_2 + 1
+				    return my_attribute_value_1 + my_attribute_value_2 + 1
+				[/gdscript]
 				[/codeblock]
 
-				[b]Note:[/b] This method is called automagically only if the attribute is a derived one.
+				[b]Note:[/b] This method is called only if the attribute is a derived one.
 				[b]Note:[/b] This method is required for derived attributes.
-			</description>
-		</method>
-		<method name="_get_max_value" qualifiers="virtual const">
-			<return type="float" />
-			<param index="0" name="attribute_set" type="AttributeSet" />
-			<description>
-				Override this method to calculate the maximum value of the attribute.
-
-				[codeblock]
-					func _get_max_value(attribute_set: AttributeSet) -> float:
-						var value_0 = attribute_set.find_attribute_by_name("MyAttributeName_1").max_value
-						var value_1 = attribute_set.find_attribute_by_name("MyAttributeName_2").max_value
-						
-						return clamp((value_0 + value_1) / 2.0, 0.0, 100.0)
-				[/codeblock]
-
-				[b]Note:[/b] This method is called automagically only if the attribute is a derived one.
-				[b]Note:[/b] This method is optional.
-			</description>
-		</method>
-		<method name="_get_min_value" qualifiers="virtual const">
-			<return type="float" />
-			<param index="0" name="attribute_set" type="AttributeSet" />
-			<description>
-				Override this method to calculate the minimum value of the attribute.
-
-				[codeblock]
-					func _get_min_value(attribute_set: AttributeSet) -> float:
-						# do your stuff here
-				[/codeblock]
-
-				[b]Note:[/b] This method is called automagically only if the attribute is a derived one.
-				[b]Note:[/b] This method is optional.
 			</description>
 		</method>
 	</methods>

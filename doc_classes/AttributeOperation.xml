@@ -76,5 +76,8 @@
 		<constant name="OP_SUBTRACT" value="4" enum="OperationType">
 			The operation subtracts a value from the attribute.
 		</constant>
+		<constant name="OP_SET" value="5" enum="OperationType">
+			Sets the value directly. USE THIS WITH CAUTION.
+		</constant>
 	</constants>
 </class>
