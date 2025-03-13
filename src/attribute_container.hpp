@@ -102,7 +102,7 @@ namespace gga
 		void remove_attribute(const Ref<AttributeBase> &p_attribute);
 		/// @brief Removes a buff from the container.
 		/// @param p_buff The buff to remove.
-		void remove_buff(const Ref<AttributeBuff> &p_buff);
+		void remove_buff(const Ref<AttributeBuff> &p_buff)const;
 		/// @brief Setups the container.
 		void setup();
 

@@ -72,7 +72,7 @@ void AttributeContainer::_bind_methods()
 	ADD_SIGNAL(MethodInfo("attribute_changed", PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeAttributeBase"), PropertyInfo(Variant::FLOAT, "previous_value"), PropertyInfo(Variant::FLOAT, "new_value")));
 	ADD_SIGNAL(MethodInfo("buff_applied", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_dequed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
-	ADD_SIGNAL(MethodInfo("buff_enqued", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
+	ADD_SIGNAL(MethodInfo("buff_enqueued", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_removed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 }
 
@@ -95,7 +95,7 @@ void AttributeContainer::_on_buff_dequeued(const Ref<RuntimeBuff> &p_buff)
 
 void AttributeContainer::_on_buff_enqueued(const Ref<RuntimeBuff> &p_buff)
 {
-	emit_signal("buff_enqued", p_buff);
+	emit_signal("buff_enqueued", p_buff);
 }
 
 void AttributeContainer::_on_buff_removed(const Ref<RuntimeBuff> &p_buff)
@@ -118,7 +118,7 @@ void AttributeContainer::notify_derived_attributes(const Ref<RuntimeAttribute> &
 			float previous_value = derived_attribute->get_value();
 			float current_value = derived_attribute->get_buffed_value();
 
-			if (previous_value != current_value) {
+			if (!Math::is_equal_approx(previous_value, current_value)) {
 				derived_attribute->emit_signal("attribute_changed", derived_attribute, previous_value, current_value);
 			}
 		}
@@ -157,13 +157,9 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 	runtime_attribute->set_buffs(p_attribute->get_buffs());
 	runtime_attribute->set_value(runtime_attribute->get_initial_value());
 
-	Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
-	Callable buff_applied_callable = Callable::create(this, "_on_buff_applied");
-	Callable buff_removed_callable = Callable::create(this, "_on_buff_removed");
-
-	ERR_FAIL_COND_MSG(runtime_attribute->is_connected("attribute_changed", attribute_changed_callable), "Attribute already connected to attribute_changed signal.");
-	ERR_FAIL_COND_MSG(runtime_attribute->is_connected("buff_added", buff_applied_callable), "Attribute already connected to buff_added signal.");
-	ERR_FAIL_COND_MSG(runtime_attribute->is_connected("buff_removed", buff_removed_callable), "Attribute already connected to buff_removed signal.");
+	const Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
+	const Callable buff_applied_callable = Callable::create(this, "_on_buff_applied");
+	const Callable buff_removed_callable = Callable::create(this, "_on_buff_removed");
 
 	runtime_attribute->connect("attribute_changed", attribute_changed_callable);
 	runtime_attribute->connect("buff_added", buff_applied_callable);
@@ -172,16 +168,16 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 	if (TypedArray<AttributeBase> base_attributes = runtime_attribute->get_derived_from(); base_attributes.size() > 0) {
 		for (int i = 0; i < base_attributes.size(); i++) {
 			const Ref<AttributeBase> base_attribute = base_attributes[i];
-			Array _derived;
 
 			if (derived_attributes.has(base_attribute->get_attribute_name())) {
+				Array _derived = {};
 				_derived = derived_attributes[base_attribute->get_attribute_name()];
+				_derived.push_back(runtime_attribute);
 			} else {
-				_derived = Array();
+				Array _derived = {};
 				derived_attributes[base_attribute->get_attribute_name()] = _derived;
+				_derived.push_back(runtime_attribute);
 			}
-
-			_derived.push_back(runtime_attribute);
 		}
 	}
 
@@ -211,24 +207,25 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 			constrained_values.push_back(attribute->get_buffed_value());
 		}
 
-		TypedArray<AttributeOperation> operations = TypedArray<AttributeOperation>();
-		bool applied = GDVIRTUAL_CALL_PTR(p_buff, _operate, constrained_values, attribute_set, operations);
+		TypedArray<AttributeOperation> operations;
+
+		const bool applied = GDVIRTUAL_CALL_PTR(p_buff, _operate, constrained_values, attribute_set, operations);
 
 		ERR_FAIL_COND_MSG(!applied, "An error occurred calling the overridden _operate method.");
 
 		/// we are going to create a new AttributeBuff for each derived attribute affected by the buff
 		/// we will add this buff to each affected runtime attribute.
 		for (int i = 0; i < operations.size(); i++) {
-			Ref<AttributeBuff> derived_buff = memnew(AttributeBuff);
-			Ref<AttributeOperation> operation = memnew(AttributeOperation);
-			Ref<RuntimeAttribute> runtime_attribute = _affected_runtime_attributes[i];
+			Ref derived_buff = memnew(AttributeBuff);
+			Ref operation = memnew(AttributeOperation);
+			const Ref<RuntimeAttribute> runtime_attribute = _affected_runtime_attributes[i];
 
 			derived_buff->set_attribute_name(runtime_attribute->get_attribute()->get_attribute_name());
 			derived_buff->set_buff_name(p_buff->get_buff_name());
 			derived_buff->set_duration(p_buff->get_duration());
 			/// since it's a derived operation, we must multiply the max_applies by the number of derived attributes
 			/// affected.
-			derived_buff->set_max_applies(operations.size() * p_buff->get_max_applies());
+			derived_buff->set_max_applies(static_cast<int>(operations.size()) * p_buff->get_max_applies());
 			derived_buff->set_transient(p_buff->get_transient());
 
 			derived_buff->set_operation(operations[i]);
@@ -238,7 +235,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 			}
 		}
 	} else {
-		Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_buff->get_attribute_name());
+		const Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_buff->get_attribute_name());
 
 		ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute '" + p_buff->get_attribute_name() + "' not found in the container.");
 		ERR_FAIL_COND_MSG(runtime_attribute.is_null(), "Attribute reference is not valid.");
@@ -254,7 +251,7 @@ void AttributeContainer::remove_attribute(const Ref<AttributeBase> &p_attribute)
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
 	ERR_FAIL_COND_MSG(!has_attribute(p_attribute), "Attribute not found in the container.");
 
-	Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_name());
+	const Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_name());
 
 	ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute not valid.");
 
@@ -269,14 +266,14 @@ void AttributeContainer::remove_attribute(const Ref<AttributeBase> &p_attribute)
 	ERR_FAIL_COND_MSG(!attributes.erase(attribute_name), "Failed to remove attribute from container.");
 }
 
-void AttributeContainer::remove_buff(const Ref<AttributeBuff> &p_buff)
+void AttributeContainer::remove_buff(const Ref<AttributeBuff> &p_buff) const
 {
 	ERR_FAIL_NULL_MSG(p_buff, "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
 
 	Array _attributes = attributes.values();
 
 	for (int i = 0; i < _attributes.size(); i++) {
-		Ref<RuntimeAttribute> attribute = _attributes[i];
+		const Ref<RuntimeAttribute> attribute = _attributes[i];
 		attribute->remove_buff(p_buff);
 	}
 }
@@ -336,7 +333,7 @@ Ref<AttributeSet> AttributeContainer::get_attribute_set() const
 
 TypedArray<RuntimeAttribute> AttributeContainer::get_attributes() const
 {
-	return (TypedArray<RuntimeAttribute>)attributes.values();
+	return attributes.values();
 }
 
 Ref<RuntimeAttribute> AttributeContainer::get_attribute_by_name(const String &p_name) const
@@ -356,25 +353,25 @@ float AttributeContainer::get_attribute_buffed_value_by_name(const String &p_nam
 
 float AttributeContainer::get_attribute_constrained_value_by_name(const String &p_name) const
 {
-	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_constrained_value() : 0.0f;
 }
 
 float AttributeContainer::get_attribute_initial_value_by_name(const String &p_name) const
 {
-	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_initial_value() : 0.0f;
 }
 
 float AttributeContainer::get_attribute_previous_value_by_name(const String &p_name) const
 {
-	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_previous_value() : 0.0f;
 }
 
 float AttributeContainer::get_attribute_value_by_name(const String &p_name) const
 {
-	Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_value() : 0.0f;
 }
 

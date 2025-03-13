@@ -77,7 +77,7 @@ func _ready():
 	attribute_container.attribute_changed.connect(_on_attribute_changed)
 	attribute_container.buff_applied.connect(_on_attribute_buff_added)
 	attribute_container.buff_dequed.connect(_on_attribute_buff_dequeued)
-	attribute_container.buff_enqued.connect(_on_attribute_buff_enqueued)
+	attribute_container.buff_enqueued.connect(_on_attribute_buff_enqueued)
 	attribute_container.buff_removed.connect(_on_attribute_buff_removed)
 
 	for attr in attribute_container.get_attributes():
