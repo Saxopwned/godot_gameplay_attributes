@@ -5,26 +5,7 @@
 /*                        Godot Gameplay Systems                          */
 /*              https://github.com/OctoD/godot-gameplay-systems           */
 /**************************************************************************/
-/* Copyright (c) 2020-present Paolo "OctoD"      Roth (see AUTHORS.md).   */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/* Read the license file in this repo.						              */
 /**************************************************************************/
 
 #include "buff_pool_queue.hpp"
@@ -39,6 +20,12 @@ void BuffPoolQueue::_bind_methods()
 	ADD_SIGNAL(MethodInfo("attribute_buff_enqueued", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 }
 
+BuffPoolQueue::BuffPoolQueue()
+{
+	tick = 0.0f;
+	server_authoritative = false;
+}
+
 void BuffPoolQueue::_exit_tree()
 {
 	clear();
@@ -49,7 +36,7 @@ void BuffPoolQueue::handle_physics_process(const double p_delta)
 	tick += p_delta;
 
 	if (Math::is_equal_approx(tick, 1.0)) {
-		double discarded = tick - 1.0;
+		const double discarded = tick - 1.0;
 		tick = discarded;
 		process_items(discarded);
 	}
@@ -75,7 +62,7 @@ void BuffPoolQueue::clear()
 	queue.clear();
 }
 
-void BuffPoolQueue::process_items(const double p_discarded)
+void BuffPoolQueue::process_items(const double &p_discarded)
 {
 	if (server_authoritative && !is_multiplayer_authority()) {
 		return;
@@ -94,7 +81,7 @@ void BuffPoolQueue::process_items(const double p_discarded)
 	}
 }
 
-void BuffPoolQueue::set_server_authoritative(const bool p_server_authoritative)
+void BuffPoolQueue::set_server_authoritative(const bool &p_server_authoritative)
 {
 	server_authoritative = p_server_authoritative;
 }

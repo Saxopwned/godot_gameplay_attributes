@@ -5,26 +5,7 @@
 /*                        Godot Gameplay Systems                          */
 /*              https://github.com/OctoD/godot-gameplay-systems           */
 /**************************************************************************/
-/* Copyright (c) 2020-present Paolo "OctoD" Roth (see AUTHORS.md).   */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation, the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/* Read the license file in this repo.						              */
 /**************************************************************************/
 
 #include "attribute.hpp"
@@ -66,7 +47,7 @@ void AttributeOperation::_bind_methods()
 
 Ref<AttributeOperation> AttributeOperation::create(const OperationType p_operand, const float p_value)
 {
-	Ref<AttributeOperation> operation = memnew(AttributeOperation);
+	Ref operation = memnew(AttributeOperation);
 	operation->set_operand(p_operand);
 	operation->set_value(p_value);
 	return operation;
@@ -109,7 +90,7 @@ Ref<AttributeOperation> AttributeOperation::forcefully_set_value(const float p_v
 
 int AttributeOperation::get_operand() const
 {
-	return (int)operand;
+	return operand;
 }
 
 float AttributeOperation::get_value() const
@@ -664,7 +645,7 @@ float RuntimeBuff::operate(const Ref<RuntimeAttribute> &p_runtime_attribute) con
 
 Ref<RuntimeBuff> RuntimeBuff::from_buff(const Ref<AttributeBuff> &p_buff)
 {
-	Ref<RuntimeBuff> runtime_buff = memnew(RuntimeBuff);
+	Ref runtime_buff = memnew(RuntimeBuff);
 	runtime_buff->buff = p_buff;
 	runtime_buff->time_left = p_buff->get_duration();
 	return runtime_buff;
@@ -785,7 +766,7 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 		return false;
 	}
 
-	Ref<RuntimeBuff> runtime_buff = RuntimeBuff::from_buff(p_buff);
+	const Ref<RuntimeBuff> runtime_buff = RuntimeBuff::from_buff(p_buff);
 
 	ERR_FAIL_COND_V_MSG(runtime_buff.is_null(), false, "Failed to create runtime buff from attribute buff.");
 
@@ -829,8 +810,7 @@ bool RuntimeAttribute::can_receive_buff(const Ref<AttributeBuff> &p_buff) const
 	int buffs_count = 0;
 
 	for (int i = 0; i < buffs.size(); i++) {
-		Ref<RuntimeBuff> buff = buffs[i];
-		if (buff->equals_to(p_buff)) {
+		if (const Ref<RuntimeBuff> buff = buffs[i]; buff->equals_to(p_buff)) {
 			buffs_count++;
 		}
 	}
@@ -850,9 +830,7 @@ void RuntimeAttribute::clear_buffs()
 bool RuntimeAttribute::has_buff(const Ref<AttributeBuff> &p_buff) const
 {
 	for (int i = 0; i < buffs.size(); i++) {
-		Ref<RuntimeBuff> buff = buffs[i];
-
-		if (buff->equals_to(p_buff)) {
+		if (const Ref<RuntimeBuff> buff = buffs[i]; buff->equals_to(p_buff)) {
 			return true;
 		}
 	}
@@ -863,9 +841,7 @@ bool RuntimeAttribute::has_buff(const Ref<AttributeBuff> &p_buff) const
 bool RuntimeAttribute::remove_buff(const Ref<AttributeBuff> &p_buff)
 {
 	for (int i = 0; i < buffs.size(); i++) {
-		Ref<RuntimeBuff> buff = buffs[i];
-
-		if (buff->equals_to(p_buff)) {
+		if (const Ref<RuntimeBuff> buff = buffs[i]; buff->equals_to(p_buff)) {
 			buffs.remove_at(i);
 			emit_signal("buff_removed", buff);
 			return true;
@@ -915,7 +891,7 @@ float RuntimeAttribute::get_buffed_value() const
 
 		if (derived_from.size() > 0) {
 			for (int i = 0; i < derived_from.size(); i++) {
-				Ref<AttributeBase> derived_attribute = derived_from[i];
+				const Ref<AttributeBase> derived_attribute = derived_from[i];
 				values.push_back(attribute_container->get_attribute_buffed_value_by_name(derived_attribute->get_attribute_name()));
 			}
 		}
@@ -958,7 +934,7 @@ float RuntimeAttribute::get_constrained_value() const
 		TypedArray<float> previous_values;
 
 		for (int i = 0; i < constraining_attributes.size(); i++) {
-			Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
+			const Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
 			buffed_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
 			previous_values.push_back(attribute_container->get_attribute_previous_value_by_name(constraining_attribute->get_attribute_name()));
 		}
@@ -972,9 +948,7 @@ float RuntimeAttribute::get_constrained_value() const
 TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const
 {
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _derived_from)) {
-		TypedArray<AttributeBase> derived_attributes;
-
-		if (GDVIRTUAL_CALL_PTR(attribute, _derived_from, attribute_set, derived_attributes)) {
+		if (TypedArray<AttributeBase> derived_attributes; GDVIRTUAL_CALL_PTR(attribute, _derived_from, attribute_set, derived_attributes)) {
 			return derived_attributes;
 		}
 	}

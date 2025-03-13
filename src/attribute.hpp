@@ -5,26 +5,7 @@
 /*                        Godot Gameplay Systems                          */
 /*              https://github.com/OctoD/godot-gameplay-systems           */
 /**************************************************************************/
-/* Copyright (c) 2020-present Paolo "OctoD"      Roth (see AUTHORS.md).   */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/* Read the license file in this repo.						              */
 /**************************************************************************/
 
 // ReSharper disable CppClassCanBeFinal
@@ -159,16 +140,18 @@ namespace gga
 		/// @param p_attribute The attribute to find.
 		/// @return The index of the attribute.
 		[[nodiscard]] int find(const Ref<AttributeBase> &p_attribute) const;
-		/// @brief Finds an attribute by it's own class_name name in the set.
+		/// @brief Finds an attribute by its own class_name name in the set.
 		/// @param p_classname The class_name name of the attribute.
 		/// @return The attribute.
 		[[nodiscard]] Ref<AttributeBase> find_by_classname(const String &p_classname) const;
-		/// @brief Finds an attribute by it's name in the set.
+		/// @brief Finds an attribute by its name in the set.
 		/// @param p_name The name of the attribute.
 		/// @return The attribute.
 		[[nodiscard]] Ref<AttributeBase> find_by_name(const String &p_name) const;
-		/// @brief Gets all the attributes names in the set.
-		/// @return The attributes names.
+		/// @brief Gets all the attributes'
+		/// names in the set.
+		/// @return The attributes'
+		/// name.
 		[[nodiscard]] PackedStringArray get_attributes_names() const;
 		/// @brief Get the attributes in the set.
 		/// @return The attributes.
@@ -177,7 +160,7 @@ namespace gga
 		/// @param index The index of the attribute.
 		/// @return The attribute.
 		[[nodiscard]] Ref<AttributeBase> get_at(int index) const;
-		/// @brief Get the set name. I dunno if it gets or sets but the pun is intended.
+		/// @brief Get the set name.
 		/// @return The set name.
 		[[nodiscard]] String get_set_name() const;
 		/// @brief Check if the set has an attribute.
@@ -278,8 +261,9 @@ namespace gga
 		/// @brief Returns if the _operate method is overridden.
 		/// @return True if the _operate method is overridden, false otherwise.
 		[[nodiscard]] bool is_operate_overridden() const;
-		/// @brief Returns if the buff is time limited.
-		/// @return True if the buff is time limited, false otherwise.
+		/// @brief Returns if the buff is time-limited.
+		/// @return True if the buff is time-limited,
+		/// false otherwise.
 		[[nodiscard]] bool is_time_limited() const;
 		/// @brief Sets the affected attribute name.
 		/// @param p_value The affected attribute name.
@@ -322,7 +306,9 @@ namespace gga
 		/// @return The attribute name.
 		[[nodiscard]] String get_attribute_name() const;
 
-		/// @brief Subscribes to some attributes which will constrain the attribute. Like min/max health on a health attribute.
+		/// @brief Subscribes to some attributes
+		/// that will constrain the attribute.
+		/// Like min/max health on a health attribute.
 		GDVIRTUAL1RC(TypedArray<AttributeBase>, _constrained_by, Ref<AttributeSet>); // NOLINT(*-unnecessary-value-param)
 		/// @brief Subscribes to some attributes
 		GDVIRTUAL1RC(TypedArray<AttributeBase>, _derived_from, Ref<AttributeSet>); // NOLINT(*-unnecessary-value-param)
@@ -379,7 +365,7 @@ namespace gga
 		void set_initial_value( float p_value);
 	};
 
-	/// @brief Runtime buff. Using class because structs seems to not be allowed in Godot yet.
+	/// @brief Runtime buff.
 	class RuntimeBuff : public RefCounted
 	{
 		GDCLASS(RuntimeBuff, RefCounted);

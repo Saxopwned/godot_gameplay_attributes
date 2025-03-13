@@ -18,24 +18,24 @@ Godot Gameplay Attributes
 
 ## Using the GitHub repository
 
-1. Download the latest version of the addon from the [releases page](https://github.com/OctoD/godot_gameplay_attributes/releases).
+1. Download the latest version of the addon from the [release page](https://github.com/OctoD/godot_gameplay_attributes/releases).
 2. Extract the contents of the zip file into your project's `addons` folder.
 3. Enjoy!
 
 ## Using Git
 
-1. Clone the repository into your project's `addons` folder:
+Clone the repository into your project's `addons` folder:
 
 ```bash
 git clone --recurse-submodules
 ```
 
-2. Build the project:
+Build the project:
 
 ```bash
 scons platform=windows # or linux, macos etc
 ```
-3. Enjoy!
+Enjoy!
 
 # Usage
 
@@ -43,11 +43,35 @@ The addon provides a set of nodes and resources that can be used to define gamep
 
 ## How does it work and why
 
-This addon works using Godot's custom resources as attributes. Each `Attribute` is a custom resource that defines a single attribute that can contained using an `AttributeSet` resource. The choice of custom resources is due to Godot's performance on handling many of them, by giving in the same time the possibility to inherit their base class to create custom attributes.
+This addon works
+using Godot's custom resources as attributes.
 
-An `Attribute` has a name, an initial value, and optionally it can defined how it derives from other attributes and how other attributes can apply constraints to it.
+Each `Attribute` is a custom resource
+that defines a single attribute
+that can be contained
+by an `AttributeSet` resource.
+The choice of custom resources is due to Godot's performance
+on handling many of them,
+by giving at the same time the possibility
+to inherit their base class
+to create custom attributes.
 
-The best way to define your attributes, is to create your own custom resources as scripts that inherit from `Attribute` base class. This way you can define your attribute, and use latter in your attribute sets. Otherwise a normal `Attribute` resource can be used if you do not need anything fancy.
+An `Attribute` has a name,
+an initial value,
+and optionally it can define
+how it derives from other attributes
+and how other attributes can apply constraints to it.
+
+The best way
+to define your attributes is
+to create your own custom resources as scripts
+that inherit from the `Attribute` base class.
+This way,
+you can define your attribute
+and use it later in your attribute sets.
+Otherwise,
+a normal `Attribute` resource can be used
+if you do not need anything fancy.
 
 An `AttributeSet` is a set of predefined attributes that can be used to define the attributes of an object in the game, like a character, an enemy, or any other object that has attributes.
 
@@ -61,7 +85,8 @@ A `RuntimeBuff` is the representation of an `AttributeBuff` resource that will m
 
 Derived attributes are attributes that are calculated based on other attributes. For example, the health of a character can be calculated based on the strength and constitution attributes of the character, or mana can be calculated based on intelligence and wisdom.
 
-To define a derived attribute, you must create a scripts that inherits from `Attribute` base class. 
+To define a derived attribute,
+you must create scripts that inherit from `Attribute` base class. 
 
 Example:
 
@@ -92,13 +117,22 @@ You must override the `_get_buffed_value` method to define how the attribute val
 
 ## Attributes constraints
 
-Some attributes (like health, mana, stamina etc) could potentially have constraints, like a maximum value, a minimum value, or a value that can be calculated based on other attributes.
+Some attributes
+(like health,
+mana,
+stamina,
+etc.)
+could potentially have constraints,
+like a maximum value,
+a minimum value,
+or a value
+that can be calculated based on other attributes.
 
 To achieve this is quite straightforward. You have to create a script that inherits from `Attribute` base class as your main attribute, one for the minimum value, one for the maximum value, and one for the derived value.
 
 Example:
 
-#### Definining the minimum and maximum constraints
+#### Defining the minimum and maximum constraints
 
 The minimum health attribute should look similar to this:
 
@@ -175,15 +209,19 @@ This class provides two virtuals you have to implement:
 
 - `_applies_to(attribute_set: AttributeSet) -> Array[AttributeBase]` that will define to which attribute the buff will be applied.
 - `_operate(values: Array[float], attribute_set: AttributeSet) -> Array[AttributeOperation]` that will define how the buff will modify the attributes.
-  - The `values` parameter is an array of the buffed values of the subscribed attributes (at runtime) that the buff will use.
+  - The `values` parameter is an array subscribed attributes' buffed values (at runtime) that the buff will use.
 
 You can find an example [here](godot/examples/character_levelling_and_experience/experience_buff.gd)
 
-This is good for mechanics where there is some kind of buff/debuff mitigation, like a shield that will absorb some damage before it reaches the health of a character, or movement speed that will be reduced by a debuff.
+This is good for mechanics
+where there is some kind of buff/debuff mitigation,
+like 
+- a shield that will absorb some damage before it reaches the health of a character
+- a movement speed that will be reduced by a debuff.
 
 ## How to use this addon programmatically
 
-Here a short example
+Here is a short example
 
 ```gdscript
 extends Node

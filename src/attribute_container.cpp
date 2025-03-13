@@ -5,26 +5,7 @@
 /*                        Godot Gameplay Systems                          */
 /*              https://github.com/OctoD/godot-gameplay-systems           */
 /**************************************************************************/
-/* Copyright (c) 2020-present Paolo "OctoD"      Roth (see AUTHORS.md).   */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/* Read the license file in this repo.						              */
 /**************************************************************************/
 
 #include "attribute_container.hpp"
@@ -149,7 +130,7 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
 	ERR_FAIL_COND_MSG(has_attribute(p_attribute), "Attribute already exists in the container.");
 
-	const Ref runtime_attribute = memnew(RuntimeAttribute);
+	RuntimeAttribute* runtime_attribute = memnew(RuntimeAttribute);
 
 	runtime_attribute->attribute_container = this;
 	runtime_attribute->set_attribute(p_attribute);
@@ -189,7 +170,6 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 	ERR_FAIL_NULL_MSG(p_buff, "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
 
 	if (p_buff->is_operate_overridden()) {
-		Ref<RuntimeBuff> runtime_buff = RuntimeBuff::from_buff(p_buff);
 		TypedArray<AttributeBase> _attributes;
 		TypedArray<RuntimeAttribute> _affected_runtime_attributes;
 		TypedArray<float> constrained_values;
@@ -198,7 +178,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 		ERR_FAIL_COND_MSG(!GDVIRTUAL_CALL_PTR(p_buff, _applies_to, attribute_set, _attributes), "An error occurred calling the overridden _applies_to method.");
 
 		for (int i = 0; i < _attributes.size(); i++) {
-			Ref<AttributeBase> attribute_base = _attributes[i];
+			const Ref<AttributeBase> attribute_base = _attributes[i];
 			Ref<RuntimeAttribute> attribute = get_attribute_by_name(attribute_base->get_attribute_name());
 
 			ERR_FAIL_NULL_MSG(attribute, "Attribute not found in attribute set.");
@@ -217,7 +197,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 		/// we will add this buff to each affected runtime attribute.
 		for (int i = 0; i < operations.size(); i++) {
 			Ref derived_buff = memnew(AttributeBuff);
-			Ref operation = memnew(AttributeOperation);
+
 			const Ref<RuntimeAttribute> runtime_attribute = _affected_runtime_attributes[i];
 
 			derived_buff->set_attribute_name(runtime_attribute->get_attribute()->get_attribute_name());
@@ -255,7 +235,7 @@ void AttributeContainer::remove_attribute(const Ref<AttributeBase> &p_attribute)
 
 	ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute not valid.");
 
-	String attribute_name = runtime_attribute->get_attribute()->get_attribute_name();
+	const String attribute_name = runtime_attribute->get_attribute()->get_attribute_name();
 
 	ERR_FAIL_COND_MSG(!attributes.has(attribute_name), "Attribute not found. This is a bug, please open an issue.");
 
