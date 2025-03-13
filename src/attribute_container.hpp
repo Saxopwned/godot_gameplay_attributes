@@ -44,6 +44,9 @@ namespace gga
 		/// @brief Server authoritative. If set to true, the container will only process buffs on the server.
 		bool server_authoritative;
 
+		/// @brief Receives a notification.
+		/// @param p_what The notification.
+		void _notification(int p_what);
 		/// @brief Handles the attribute_changed signal.
 		/// @param p_attribute The attribute that changed.
 		/// @param p_previous_value The previous value of the attribute.
@@ -68,11 +71,6 @@ namespace gga
 		void notify_derived_attributes(const Ref<RuntimeAttribute> &p_runtime_attribute);
 
 	public:
-		/// @brief Override of the _physics_process method.
-		/// @param p_delta The delta time.
-		void _physics_process(double p_delta) override;
-		/// @brief Override of the _ready method.
-		void _ready() override;
 		/// @brief Adds an attribute to the container.
 		/// @param p_attribute The attribute to add.
 		void add_attribute(const Ref<AttributeBase> &p_attribute);

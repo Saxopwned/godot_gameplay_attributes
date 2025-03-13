@@ -57,6 +57,19 @@ void AttributeContainer::_bind_methods()
 	ADD_SIGNAL(MethodInfo("buff_removed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 }
 
+void AttributeContainer::_notification(const int p_what)
+{
+	if (p_what == NOTIFICATION_READY) {
+		buff_pool_queue = memnew(BuffPoolQueue);
+		buff_pool_queue->set_server_authoritative(server_authoritative);
+		buff_pool_queue->connect("attribute_buff_dequeued", Callable::create(this, "_on_buff_dequeued"));
+		buff_pool_queue->connect("attribute_buff_enqueued", Callable::create(this, "_on_buff_enqueued"));
+
+		add_child(buff_pool_queue);
+		setup();
+	}
+}
+
 void AttributeContainer::_on_attribute_changed(const Ref<RuntimeAttribute> &p_attribute, const float p_previous_value, const float p_new_value)
 {
 	emit_signal("attribute_changed", p_attribute, p_previous_value, p_new_value);
@@ -84,7 +97,7 @@ void AttributeContainer::_on_buff_removed(const Ref<RuntimeBuff> &p_buff)
 	emit_signal("buff_removed", p_buff);
 }
 
-bool AttributeContainer::has_attribute(const Ref<AttributeBase> &p_attribute)const
+bool AttributeContainer::has_attribute(const Ref<AttributeBase> &p_attribute) const
 {
 	return attributes.has(p_attribute->get_attribute_name());
 }
@@ -106,31 +119,12 @@ void AttributeContainer::notify_derived_attributes(const Ref<RuntimeAttribute> &
 	}
 }
 
-void AttributeContainer::_physics_process(double p_delta)
-{
-	if (buff_pool_queue) {
-		buff_pool_queue->handle_physics_process(p_delta);
-	}
-}
-
-void AttributeContainer::_ready()
-{
-	/// initializes the BuffPoolQueue
-	buff_pool_queue = memnew(BuffPoolQueue);
-	buff_pool_queue->set_server_authoritative(server_authoritative);
-	buff_pool_queue->connect("attribute_buff_dequeued", Callable::create(this, "_on_buff_dequeued"));
-	buff_pool_queue->connect("attribute_buff_enqueued", Callable::create(this, "_on_buff_enqueued"));
-
-	add_child(buff_pool_queue);
-	setup();
-}
-
 void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 {
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
 	ERR_FAIL_COND_MSG(has_attribute(p_attribute), "Attribute already exists in the container.");
 
-	RuntimeAttribute* runtime_attribute = memnew(RuntimeAttribute);
+	RuntimeAttribute *runtime_attribute = memnew(RuntimeAttribute);
 
 	runtime_attribute->attribute_container = this;
 	runtime_attribute->set_attribute(p_attribute);

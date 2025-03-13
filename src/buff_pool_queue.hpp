@@ -40,7 +40,7 @@ namespace gga
 		/// @brief Overridden _exit_tree method.
 		void _exit_tree() override;
 		/// @brief Overridden _physics_process method.
-		void handle_physics_process(double p_delta);
+		void _physics_process(double p_delta) override;
 		/// @brief Adds a buff to the queue.
 		void enqueue(const Ref<RuntimeBuff> &p_buff);
 		/// @brief Returns if the queue is server authoritative.

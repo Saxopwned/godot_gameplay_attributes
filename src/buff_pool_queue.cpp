@@ -31,7 +31,7 @@ void BuffPoolQueue::_exit_tree()
 	clear();
 }
 
-void BuffPoolQueue::handle_physics_process(const double p_delta)
+void BuffPoolQueue::_physics_process(const double p_delta)
 {
 	tick += p_delta;
 
