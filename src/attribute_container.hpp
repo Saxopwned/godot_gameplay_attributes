@@ -46,6 +46,7 @@ namespace gga
 
 		/// @brief Receives a notification.
 		/// @param p_what The notification.
+		// ReSharper disable once CppHidingFunction
 		void _notification(int p_what);
 		/// @brief Handles the attribute_changed signal.
 		/// @param p_attribute The attribute that changed.
@@ -94,14 +95,6 @@ namespace gga
 		/// @param p_predicate The predicate to use to find the attribute buffed value.
 		/// @return The attribute buffed value found.
 		[[nodiscard]] float find_buffed_value(const Callable &p_predicate) const;
-		/// @brief Finds an attribute constrained value in the container.
-		/// @param p_predicate The predicate to use to find the attribute constrained value.
-		/// @return The attribute constrained value found.
-		[[nodiscard]] float find_constrained_value(const Callable &p_predicate) const;
-		/// @brief Finds an initial attribute value in the container.
-		/// @param p_predicate The predicate to use to find the initial attribute value.
-		/// @return The initial attribute value found.
-		[[nodiscard]] float find_initial_value(const Callable &p_predicate) const;
 		/// @brief Finds an attribute value in the container.
 		/// @param p_predicate The predicate to use to find the attribute value.
 		/// @return The attribute value found.
@@ -121,14 +114,6 @@ namespace gga
 		/// @param p_name The name of the attribute to get.
 		/// @return The buffed value of the attribute with the given name.
 		[[nodiscard]] float get_attribute_buffed_value_by_name(const String &p_name) const;
-		/// @brief Gets the constrained value of an attribute by name.
-		/// @param p_name The name of the attribute to get.
-		/// @return The constrained value of the attribute with the given name.
-		[[nodiscard]] float get_attribute_constrained_value_by_name(const String &p_name) const;
-		/// @brief Gets the initial value of an attribute by name.
-		/// @param p_name The name of the attribute to get.
-		/// @return The initial value of the attribute with the given name.
-		[[nodiscard]] float get_attribute_initial_value_by_name(const String &p_name) const;
 		/// @brief Gets the value of an attribute by name.
 		/// @param p_name The name of the attribute to get.
 		/// @return The value of the attribute with the given name.

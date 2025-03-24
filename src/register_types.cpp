@@ -46,11 +46,11 @@ void gdextension_initialize(ModuleInitializationLevel p_level)
 		ClassDB::register_class<gga::AttributeSet>();
 		/// nodes
 		ClassDB::register_runtime_class<gga::AttributeContainer>();
+		ClassDB::register_runtime_class<gga::AttributeComputationArgument>();
 		ClassDB::register_runtime_class<gga::BuffPoolQueue>();
 		/// runtime classes
 		ClassDB::register_runtime_class<gga::RuntimeBuff>();
 		ClassDB::register_runtime_class<gga::RuntimeAttribute>();
-	} else if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
 	}
 }
 

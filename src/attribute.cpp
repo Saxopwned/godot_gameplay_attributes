@@ -120,29 +120,7 @@ float AttributeOperation::operate(float p_base_value) const
 
 void AttributeOperation::set_operand(const int p_value)
 {
-	switch (p_value) {
-		case 0:
-			operand = OP_ADD;
-			break;
-		case 1:
-			operand = OP_DIVIDE;
-			break;
-		case 2:
-			operand = OP_MULTIPLY;
-			break;
-		case 3:
-			operand = OP_PERCENTAGE;
-			break;
-		case 4:
-			operand = OP_SUBTRACT;
-			break;
-		case 5:
-			operand = OP_SET;
-			break;
-		default:
-			operand = OP_ADD;
-			break;
-	}
+	operand = static_cast<OperationType>(p_value);
 }
 
 void AttributeOperation::set_value(const float p_value)
@@ -171,16 +149,22 @@ void AttributeBuff::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_attribute_name"), &AttributeBuff::get_attribute_name);
 	ClassDB::bind_method(D_METHOD("get_buff_name"), &AttributeBuff::get_buff_name);
 	ClassDB::bind_method(D_METHOD("get_duration"), &AttributeBuff::get_duration);
+	ClassDB::bind_method(D_METHOD("get_duration_merging"), &AttributeBuff::get_duration_merging);
+	ClassDB::bind_method(D_METHOD("get_max_applies"), &AttributeBuff::get_stack_size);
 	ClassDB::bind_method(D_METHOD("get_operation"), &AttributeBuff::get_operation);
-	ClassDB::bind_method(D_METHOD("get_max_applies"), &AttributeBuff::get_max_applies);
+	ClassDB::bind_method(D_METHOD("get_queue_execution"), &AttributeBuff::get_queue_execution);
+	ClassDB::bind_method(D_METHOD("get_stack_size"), &AttributeBuff::get_stack_size);
 	ClassDB::bind_method(D_METHOD("get_transient"), &AttributeBuff::get_transient);
 	ClassDB::bind_method(D_METHOD("get_unique"), &AttributeBuff::get_unique);
 	ClassDB::bind_method(D_METHOD("operate", "base_value"), &AttributeBuff::operate);
 	ClassDB::bind_method(D_METHOD("set_attribute_name", "p_value"), &AttributeBuff::set_attribute_name);
 	ClassDB::bind_method(D_METHOD("set_buff_name", "p_value"), &AttributeBuff::set_buff_name);
 	ClassDB::bind_method(D_METHOD("set_duration", "p_value"), &AttributeBuff::set_duration);
+	ClassDB::bind_method(D_METHOD("set_duration_merging", "p_value"), &AttributeBuff::set_duration_merging);
+	ClassDB::bind_method(D_METHOD("set_max_applies", "p_value"), &AttributeBuff::set_stack_size);
 	ClassDB::bind_method(D_METHOD("set_operation", "p_value"), &AttributeBuff::set_operation);
-	ClassDB::bind_method(D_METHOD("set_max_applies", "p_value"), &AttributeBuff::set_max_applies);
+	ClassDB::bind_method(D_METHOD("set_queue_execution", "p_value"), &AttributeBuff::set_queue_execution);
+	ClassDB::bind_method(D_METHOD("set_stack_size", "p_value"), &AttributeBuff::set_stack_size);
 	ClassDB::bind_method(D_METHOD("set_transient", "p_value"), &AttributeBuff::set_transient);
 	ClassDB::bind_method(D_METHOD("set_unique", "p_value"), &AttributeBuff::set_unique);
 
@@ -188,10 +172,20 @@ void AttributeBuff::_bind_methods()
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "buff_name"), "set_buff_name", "get_buff_name");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "duration"), "set_duration", "get_duration");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "duration_merging", PROPERTY_HINT_ENUM, "Add:0,Stack:1,Restart:2"), "set_duration_merging", "get_duration_merging");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "operation", PROPERTY_HINT_RESOURCE_TYPE, "AttributeOperation"), "set_operation", "get_operation");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_applies"), "set_max_applies", "get_max_applies");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_applies"), "set_stack_size", "get_stack_size");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "stack_size"), "set_stack_size", "get_stack_size");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "queue_execution", PROPERTY_HINT_ENUM, "Parallel:0,Waterfall:1"), "set_queue_execution", "get_queue_execution");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "transient"), "set_transient", "get_transient");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "unique"), "set_unique", "get_unique");
+
+	/// binds enum constants
+	BIND_ENUM_CONSTANT(DURATION_MERGE_ADD);
+	BIND_ENUM_CONSTANT(DURATION_MERGE_STACK);
+	BIND_ENUM_CONSTANT(DURATION_MERGE_RESTART);
+	BIND_ENUM_CONSTANT(QUEUE_EXECUTION_PARALLEL)
+	BIND_ENUM_CONSTANT(QUEUE_EXECUTION_WATERFALL)
 }
 
 bool AttributeBuff::operator==(const Ref<AttributeBuff> &buff) const
@@ -199,7 +193,7 @@ bool AttributeBuff::operator==(const Ref<AttributeBuff> &buff) const
 	return buff->attribute_name == attribute_name && buff->buff_name == buff_name && buff->duration == duration && buff->operation == operation;
 }
 
-float AttributeBuff::operate(float base_value) const
+float AttributeBuff::operate(const float base_value) const
 {
 	ERR_FAIL_COND_V_MSG(operation.is_null(), 0.0f, "AttributeBuff operation is null, cannot operate on base value.");
 	return operation->operate(base_value);
@@ -218,6 +212,11 @@ String AttributeBuff::get_buff_name() const
 float AttributeBuff::get_duration() const
 {
 	return duration;
+}
+
+int AttributeBuff::get_duration_merging() const
+{
+	return duration_merging;
 }
 
 bool AttributeBuff::get_transient() const
@@ -244,9 +243,14 @@ Ref<AttributeOperation> AttributeBuff::get_operation() const
 	return operation;
 }
 
-int AttributeBuff::get_max_applies() const
+int AttributeBuff::get_stack_size() const
 {
-	return max_applies;
+	return max_stacking;
+}
+
+int AttributeBuff::get_queue_execution() const
+{
+	return queue_execution;
 }
 
 bool AttributeBuff::is_time_limited() const
@@ -269,14 +273,24 @@ void AttributeBuff::set_duration(const float p_value)
 	duration = p_value;
 }
 
+void AttributeBuff::set_duration_merging(int p_value)
+{
+	duration_merging = static_cast<DurationMerging>(p_value);
+}
+
 void AttributeBuff::set_operation(const Ref<AttributeOperation> &p_value)
 {
 	operation = p_value;
 }
 
-void AttributeBuff::set_max_applies(const int p_value)
+void AttributeBuff::set_stack_size(const int p_value)
 {
-	max_applies = p_value;
+	max_stacking = p_value;
+}
+
+void AttributeBuff::set_queue_execution(int p_value)
+{
+	queue_execution = static_cast<QueueExecution>(p_value);
 }
 
 void AttributeBuff::set_transient(const bool p_value)
@@ -287,6 +301,56 @@ void AttributeBuff::set_transient(const bool p_value)
 void AttributeBuff::set_unique(const bool p_value)
 {
 	unique = p_value;
+}
+
+#pragma endregion
+
+#pragma region AttributeComputationArgument
+
+AttributeBuff *AttributeComputationArgument::get_buff() const
+{
+	return buff;
+}
+
+float AttributeComputationArgument::get_operated_value() const
+{
+	return operated_value;
+}
+
+RuntimeAttribute *AttributeComputationArgument::get_runtime_attribute() const
+{
+	return runtime_attribute;
+}
+
+void AttributeComputationArgument::set_buff(AttributeBuff *p_buff)
+{
+	buff = p_buff;
+}
+
+void AttributeComputationArgument::set_operated_value(const float &p_value)
+{
+	operated_value = p_value;
+}
+
+void AttributeComputationArgument::set_runtime_attribute(RuntimeAttribute *p_runtime_attribute)
+{
+	runtime_attribute = p_runtime_attribute;
+}
+
+void AttributeComputationArgument::_bind_methods()
+{
+	/// binds methods to godot
+	ClassDB::bind_method(D_METHOD("get_buff"), &AttributeComputationArgument::get_buff);
+	ClassDB::bind_method(D_METHOD("get_operated_value"), &AttributeComputationArgument::get_operated_value);
+	ClassDB::bind_method(D_METHOD("get_runtime_attribute"), &AttributeComputationArgument::get_runtime_attribute);
+	ClassDB::bind_method(D_METHOD("set_buff", "p_buff"), &AttributeComputationArgument::set_buff);
+	ClassDB::bind_method(D_METHOD("set_operated_value", "p_value"), &AttributeComputationArgument::set_operated_value);
+	ClassDB::bind_method(D_METHOD("set_runtime_attribute", "p_runtime_attribute"), &AttributeComputationArgument::set_runtime_attribute);
+
+	/// binds properties to godot
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "24:17/AttributeBuff"), "set_buff", "get_buff");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "operated_value"), "set_operated_value", "get_operated_value");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "runtime_attribute", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeAttribute"), "set_runtime_attribute", "get_runtime_attribute");
 }
 
 #pragma endregion
@@ -302,11 +366,7 @@ void AttributeBase::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_buffs", "p_buffs"), &AttributeBase::set_buffs);
 
 	/// binds virtuals to godot
-	GDVIRTUAL_BIND(_constrained_by, "attribute_set");
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
-	GDVIRTUAL_BIND(_get_buffed_value, "values");
-	GDVIRTUAL_BIND(_get_constrained_value, "buffed_value", "buffed_values", "previous_values");
-	GDVIRTUAL_BIND(_get_initial_value, "values");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
@@ -320,10 +380,6 @@ String AttributeBase::get_attribute_name() const
 	}
 
 	return attribute_name;
-}
-
-float AttributeBase::get_initial_value() const{
-	return 0.0f;
 }
 
 TypedArray<AttributeBuff> AttributeBase::get_buffs() const
@@ -348,32 +404,15 @@ void AttributeBase::set_buffs(const TypedArray<AttributeBuff> &p_buffs)
 void Attribute::_bind_methods()
 {
 	/// static methods to bind to godot
-	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "initial_value"), &Attribute::create);
-
-	/// binds methods to godot
-	ClassDB::bind_method(D_METHOD("get_initial_value"), &Attribute::get_initial_value);
-	ClassDB::bind_method(D_METHOD("set_initial_value", "p_value"), &Attribute::set_initial_value);
-
-	/// properties to bind to godot
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "initial_value"), "set_initial_value", "get_initial_value");
+	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "attribute_buffs"), &Attribute::create);
 }
 
-Ref<Attribute> Attribute::create(const String &p_attribute_name, const float p_initial_value)
+Ref<Attribute> Attribute::create(const String &p_attribute_name, const TypedArray<AttributeBuff> &p_buffs)
 {
 	Ref attribute = memnew(Attribute);
+	attribute->buffs = p_buffs;
 	attribute->set_attribute_name(p_attribute_name);
-	attribute->set_initial_value(p_initial_value);
 	return attribute;
-}
-
-float Attribute::get_initial_value() const
-{
-	return initial_value;
-}
-
-void Attribute::set_initial_value(const float p_value)
-{
-	initial_value = p_value;
 }
 
 #pragma endregion
@@ -480,7 +519,6 @@ int AttributeSet::find(const Ref<AttributeBase> &p_attribute) const
 Ref<AttributeBase> AttributeSet::find_by_classname(const String &p_classname) const
 {
 	for (int i = 0; i < attributes.size(); i++) {
-
 		if (const Ref<AttributeBase> attribute = attributes[i]; attribute->get_class() == p_classname) {
 			return attributes[i];
 		}
@@ -492,7 +530,6 @@ Ref<AttributeBase> AttributeSet::find_by_classname(const String &p_classname) co
 Ref<AttributeBase> AttributeSet::find_by_name(const String &p_name) const
 {
 	for (int i = 0; i < attributes.size(); i++) {
-
 		if (const Ref<AttributeBase> attribute = attributes[i]; attribute->get_attribute_name() == p_name) {
 			return attributes[i];
 		}
@@ -518,13 +555,13 @@ TypedArray<AttributeBase> AttributeSet::get_attributes() const
 	return attributes;
 }
 
-Ref<AttributeBase> AttributeSet::get_at(int index) const
+Ref<AttributeBase> AttributeSet::get_at(const int index) const
 {
 	if (index >= 0 && index < attributes.size()) {
 		return attributes[index];
 	}
 
-	return Ref<Attribute>();
+	return {};
 }
 
 String AttributeSet::get_set_name() const
@@ -545,7 +582,6 @@ bool AttributeSet::has_attribute(const Ref<AttributeBase> &p_attribute) const
 
 bool AttributeSet::remove_attribute(const Ref<AttributeBase> &p_attribute)
 {
-
 	if (const int64_t index = attributes.find(p_attribute); index != -1) {
 		attributes.remove_at(index);
 		emit_signal("attribute_removed", p_attribute);
@@ -561,7 +597,7 @@ int AttributeSet::remove_attributes(const TypedArray<AttributeBase> &p_attribute
 	int count = 0;
 
 	for (int i = 0; i < p_attributes.size(); i++) {
-		if (const int64_t index = attributes.find(p_attributes[i]);index != -1) {
+		if (const int64_t index = attributes.find(p_attributes[i]); index != -1) {
 			attributes.remove_at(index);
 			count++;
 			emit_signal("attribute_removed", p_attributes[i]);
@@ -663,12 +699,12 @@ bool RuntimeBuff::operator==(const Ref<AttributeBuff> &p_attribute_buff) const
 
 bool RuntimeBuff::operator==(const Ref<RuntimeBuff> &p_runtime_buff) const
 {
-	return buff == p_runtime_buff->buff && time_left == p_runtime_buff->time_left;
+	return buff == p_runtime_buff->buff && Math::is_equal_approx(time_left, p_runtime_buff->time_left);
 }
 
 bool RuntimeBuff::can_apply_to_attribute(const Ref<RuntimeAttribute> &p_attribute) const
 {
-	Ref<RuntimeAttribute> applied_to = applies_to(p_attribute->attribute_container);
+	const Ref<RuntimeAttribute> applied_to = applies_to(p_attribute->attribute_container);
 
 	ERR_FAIL_NULL_V_MSG(applied_to, false, "Attribute not found in attribute set.");
 	ERR_FAIL_COND_V_MSG(!applied_to.is_valid(), false, "Attribute reference is not valid.");
@@ -736,11 +772,10 @@ void RuntimeAttribute::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_attribute_set"), &RuntimeAttribute::get_attribute_set);
 	ClassDB::bind_method(D_METHOD("get_buffed_value"), &RuntimeAttribute::get_buffed_value);
 	ClassDB::bind_method(D_METHOD("get_buffs"), &RuntimeAttribute::get_buffs);
-	ClassDB::bind_method(D_METHOD("get_constrained_by"), &RuntimeAttribute::get_constrained_by);
-	ClassDB::bind_method(D_METHOD("get_constrained_value"), &RuntimeAttribute::get_constrained_value);
 	ClassDB::bind_method(D_METHOD("get_derived_from"), &RuntimeAttribute::get_derived_from);
-	ClassDB::bind_method(D_METHOD("get_initial_value"), &RuntimeAttribute::get_initial_value);
+	ClassDB::bind_method(D_METHOD("get_parent_runtime_attributes"), &RuntimeAttribute::get_parent_runtime_attributes);
 	ClassDB::bind_method(D_METHOD("get_value"), &RuntimeAttribute::get_value);
+	ClassDB::bind_method(D_METHOD("has_ongoing_buffs"), &RuntimeAttribute::has_ongoing_buffs);
 	ClassDB::bind_method(D_METHOD("remove_buff", "p_buff"), &RuntimeAttribute::remove_buff);
 	ClassDB::bind_method(D_METHOD("remove_buffs", "p_buffs"), &RuntimeAttribute::remove_buffs);
 	ClassDB::bind_method(D_METHOD("set_attribute", "p_value"), &RuntimeAttribute::set_attribute);
@@ -757,6 +792,7 @@ void RuntimeAttribute::_bind_methods()
 	ADD_SIGNAL(MethodInfo("attribute_changed", PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeAttributeBase"), PropertyInfo(Variant::FLOAT, "previous_value"), PropertyInfo(Variant::FLOAT, "new_value")));
 	ADD_SIGNAL(MethodInfo("buff_added", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_removed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
+	ADD_SIGNAL(MethodInfo("buff_time_updated", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buffs_cleared"));
 }
 
@@ -771,12 +807,41 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 	ERR_FAIL_COND_V_MSG(runtime_buff.is_null(), false, "Failed to create runtime buff from attribute buff.");
 
 	if (p_buff->get_transient()) {
-		buffs.push_back(runtime_buff);
-		emit_signal("buff_added", runtime_buff);
+		const auto duration_merging = runtime_buff->buff->get_duration_merging();
+
+		if (duration_merging == AttributeBuff::DURATION_MERGE_ADD || duration_merging == AttributeBuff::DURATION_MERGE_RESTART) {
+			auto buffs = get_buffs();
+
+			for (int i = 0; i < buffs.size(); i++) {
+				if (auto maybe_runtime_buff = cast_to<RuntimeBuff>(buffs[i]); maybe_runtime_buff && maybe_runtime_buff->buff == p_buff) {
+					if (duration_merging == AttributeBuff::DURATION_MERGE_ADD) {
+						maybe_runtime_buff->set_time_left(maybe_runtime_buff->get_time_left() + p_buff->get_duration());
+					} else {
+						maybe_runtime_buff->set_time_left(p_buff->get_duration());
+					}
+
+					emit_signal("buff_time_updated", maybe_runtime_buff);
+					break;
+				}
+			}
+
+			runtime_buff->time_left = p_buff->get_duration();
+		} else {
+			buffs.push_back(runtime_buff);
+			emit_signal("buff_added", runtime_buff);
+		}
 	} else {
 		previous_value = value;
 
-		if (runtime_buff->can_apply_to_attribute(this)) {
+		if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _compute_value)) {
+			AttributeComputationArgument *argument = memnew(AttributeComputationArgument);
+
+			argument->set_buff(p_buff.ptr());
+			argument->set_operated_value(runtime_buff->operate(this));
+			argument->set_runtime_attribute(this);
+
+			GDVIRTUAL_CALL_PTR(attribute, _compute_value, argument, value);
+		} else if (runtime_buff->can_apply_to_attribute(this)) {
 			value = runtime_buff->operate(this);
 		}
 
@@ -815,7 +880,7 @@ bool RuntimeAttribute::can_receive_buff(const Ref<AttributeBuff> &p_buff) const
 		}
 	}
 
-	if (buffs_count >= p_buff->get_max_applies() && p_buff->get_max_applies() > 0) {
+	if (buffs_count >= p_buff->get_stack_size() && p_buff->get_stack_size() > 0) {
 		return false;
 	}
 
@@ -827,6 +892,25 @@ void RuntimeAttribute::clear_buffs()
 	buffs.clear();
 }
 
+TypedArray<RuntimeAttribute> RuntimeAttribute::get_parent_runtime_attributes() const
+{
+	if (const auto derived = get_derived_from(); derived.size() > 0) {
+		TypedArray<RuntimeAttribute> parent_attributes;
+
+		for (int i = 0; i < derived.size(); i++) {
+			if (Ref attribute_base = cast_to<AttributeBase>(derived[i]); attribute_base.is_valid() && !attribute_base.is_null()) {
+				if (const auto parent_attribute = attribute_container->get_attribute_by_name(attribute_base->get_attribute_name()); !parent_attribute.is_null() && parent_attribute.is_valid()) {
+					parent_attributes.push_back(parent_attribute);
+				}
+			}
+		}
+
+		return parent_attributes;
+	}
+
+	return {};
+}
+
 bool RuntimeAttribute::has_buff(const Ref<AttributeBuff> &p_buff) const
 {
 	for (int i = 0; i < buffs.size(); i++) {
@@ -836,6 +920,21 @@ bool RuntimeAttribute::has_buff(const Ref<AttributeBuff> &p_buff) const
 	}
 
 	return false;
+}
+
+bool RuntimeAttribute::has_ongoing_buffs() const
+{
+	for (int i = 0; i < buffs.size(); i++) {
+		if (const Ref<RuntimeBuff> buff = buffs[i]; !buff->can_dequeue() && !Math::is_zero_approx(buff->get_duration())) {
+			return true;
+		}
+	}
+
+	return false;
+}
+bool RuntimeAttribute::is_computable() const
+{
+	return GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _compute_value);
 }
 
 bool RuntimeAttribute::remove_buff(const Ref<AttributeBuff> &p_buff)
@@ -856,11 +955,8 @@ int RuntimeAttribute::remove_buffs(const TypedArray<AttributeBuff> &p_buffs)
 	int count = 0;
 
 	for (int64_t i = p_buffs.size() - 1; i >= 0; i--) {
-		for (int64_t j = buffs.size() - 1; j >= 0; j--) {
-			if (const Ref<RuntimeBuff> buff = buffs[j]; buff->equals_to(p_buffs[i])) {
-				buffs.remove_at(j);
-				count++;
-			}
+		if (remove_buff(buffs[i])) {
+			count++;
 		}
 	}
 
@@ -885,64 +981,15 @@ float RuntimeAttribute::get_buffed_value() const
 {
 	float current_value = value;
 
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_buffed_value)) {
-		TypedArray<AttributeBase> derived_from = get_derived_from();
-		TypedArray<float> values;
-
-		if (derived_from.size() > 0) {
-			for (int i = 0; i < derived_from.size(); i++) {
-				const Ref<AttributeBase> derived_attribute = derived_from[i];
-				values.push_back(attribute_container->get_attribute_buffed_value_by_name(derived_attribute->get_attribute_name()));
-			}
-		}
-
-		GDVIRTUAL_CALL_PTR(attribute, _get_buffed_value, values, current_value);
-	}
-
 	for (int i = 0; i < buffs.size(); i++) {
 		const Ref<RuntimeBuff> buff = buffs[i];
 
-		if (Ref<AttributeBuff> attribute_buff = buff->get_buff();attribute_buff.is_valid() && !attribute_buff.is_null()) {
+		if (Ref<AttributeBuff> attribute_buff = buff->get_buff(); attribute_buff.is_valid() && !attribute_buff.is_null()) {
 			current_value = attribute_buff->operate(current_value);
 		}
 	}
 
 	return current_value;
-}
-
-TypedArray<AttributeBase> RuntimeAttribute::get_constrained_by() const
-{
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _constrained_by)) {
-		TypedArray<AttributeBase> constraining_attributes;
-
-		ERR_FAIL_COND_V_MSG(!GDVIRTUAL_CALL_PTR(attribute, _constrained_by, attribute_set, constraining_attributes), constraining_attributes, "_constrained_by errored.");
-
-		return constraining_attributes;
-	}
-
-	return {};
-}
-
-float RuntimeAttribute::get_constrained_value() const
-{
-	const float buffed_value = get_buffed_value();
-	float returning_value = buffed_value;
-
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_constrained_value)) {
-		TypedArray<AttributeBase> constraining_attributes = get_constrained_by();
-		TypedArray<float> buffed_values;
-		TypedArray<float> previous_values;
-
-		for (int i = 0; i < constraining_attributes.size(); i++) {
-			const Ref<AttributeBase> constraining_attribute = constraining_attributes[i];
-			buffed_values.push_back(attribute_container->get_attribute_buffed_value_by_name(constraining_attribute->get_attribute_name()));
-			previous_values.push_back(attribute_container->get_attribute_previous_value_by_name(constraining_attribute->get_attribute_name()));
-		}
-
-		GDVIRTUAL_CALL_PTR(attribute, _get_constrained_value, buffed_value, buffed_values, previous_values, returning_value);
-	}
-
-	return returning_value;
 }
 
 TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const
@@ -954,28 +1001,6 @@ TypedArray<AttributeBase> RuntimeAttribute::get_derived_from() const
 	}
 
 	return {};
-}
-
-float RuntimeAttribute::get_initial_value() const
-{
-	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _get_initial_value)) {
-		TypedArray<AttributeBase> base_attributes = get_derived_from();
-
-		ERR_FAIL_COND_V_MSG(base_attributes.size() == 0, 0, "Attribute set must be set to get initial value. Please override _derived_from method.");
-
-		PackedFloat32Array values;
-
-		for (int i = 0; i < base_attributes.size(); i++) {
-			const Ref<AttributeBase> base_attribute = base_attributes[i];
-			values.push_back(base_attribute->get_initial_value());
-		}
-
-		if (float ret; GDVIRTUAL_CALL_PTR(attribute, _get_initial_value, values, ret)) {
-			return ret;
-		}
-	}
-
-	return attribute->get_initial_value();
 }
 
 float RuntimeAttribute::get_previous_value() const
@@ -1000,17 +1025,14 @@ void RuntimeAttribute::set_attribute(const Ref<AttributeBase> &p_value)
 
 void RuntimeAttribute::set_value(const float p_value)
 {
-	value = p_value;
 	previous_value = value;
+	value = p_value;
 }
 
 void RuntimeAttribute::set_buffs(const TypedArray<AttributeBuff> &p_value)
 {
 	buffs.clear();
-
-	for (int i = 0; i < p_value.size(); i++) {
-		buffs.push_back(RuntimeBuff::from_buff(p_value[i]));
-	}
+	add_buffs(p_value);
 }
 
 void RuntimeAttribute::set_attribute_set(const Ref<AttributeSet> &p_value)
