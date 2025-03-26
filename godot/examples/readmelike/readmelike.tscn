@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dc068a75iihd2"]
-
-[ext_resource type="Script" uid="uid://crnjj6jmw5ccx" path="res://examples/readmelike/readmelike.gd" id="1_6mbr0"]
-
-[node name="Readmelike" type="Node"]
-script = ExtResource("1_6mbr0")

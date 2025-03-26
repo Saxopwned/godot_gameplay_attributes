@@ -367,10 +367,11 @@ void AttributeBase::_bind_methods()
 
 	/// binds virtuals to godot
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
+	GDVIRTUAL_BIND(_compute_value, "_compute_value");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "buffs"), "set_buffs", "get_buffs");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "buffs", PROPERTY_HINT_RESOURCE_TYPE, "24/17:AttributeBuff"), "set_buffs", "get_buffs");
 }
 
 String AttributeBase::get_attribute_name() const
@@ -807,13 +808,11 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 	ERR_FAIL_COND_V_MSG(runtime_buff.is_null(), false, "Failed to create runtime buff from attribute buff.");
 
 	if (p_buff->get_transient()) {
-		const auto duration_merging = runtime_buff->buff->get_duration_merging();
-
-		if (duration_merging == AttributeBuff::DURATION_MERGE_ADD || duration_merging == AttributeBuff::DURATION_MERGE_RESTART) {
+		if (const auto duration_merging = runtime_buff->buff->get_duration_merging(); duration_merging == AttributeBuff::DURATION_MERGE_ADD || duration_merging == AttributeBuff::DURATION_MERGE_RESTART) {
 			auto buffs = get_buffs();
 
 			for (int i = 0; i < buffs.size(); i++) {
-				if (auto maybe_runtime_buff = cast_to<RuntimeBuff>(buffs[i]); maybe_runtime_buff && maybe_runtime_buff->buff == p_buff) {
+				if (const auto maybe_runtime_buff = cast_to<RuntimeBuff>(buffs[i]); maybe_runtime_buff && maybe_runtime_buff->buff == p_buff) {
 					if (duration_merging == AttributeBuff::DURATION_MERGE_ADD) {
 						maybe_runtime_buff->set_time_left(maybe_runtime_buff->get_time_left() + p_buff->get_duration());
 					} else {

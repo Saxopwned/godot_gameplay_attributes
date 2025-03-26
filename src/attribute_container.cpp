@@ -24,13 +24,14 @@ void AttributeContainer::_bind_methods()
 	ClassDB::bind_method(D_METHOD("_on_buff_dequeued", "p_buff"), &AttributeContainer::_on_buff_dequeued);
 	ClassDB::bind_method(D_METHOD("_on_buff_enqueued", "p_buff"), &AttributeContainer::_on_buff_enqueued);
 	ClassDB::bind_method(D_METHOD("_on_buff_removed", "p_buff"), &AttributeContainer::_on_buff_removed);
+	ClassDB::bind_method(D_METHOD("_on_buff_time_updated", "p_buff"), &AttributeContainer::_on_buff_time_updated);
 	ClassDB::bind_method(D_METHOD("add_attribute", "p_attribute"), &AttributeContainer::add_attribute);
 	ClassDB::bind_method(D_METHOD("apply_buff", "p_buff"), &AttributeContainer::apply_buff);
 	ClassDB::bind_method(D_METHOD("find", "p_predicate"), &AttributeContainer::find);
 	ClassDB::bind_method(D_METHOD("find_buffed_value", "p_predicate"), &AttributeContainer::find_buffed_value);
 	ClassDB::bind_method(D_METHOD("find_value", "p_predicate"), &AttributeContainer::find_value);
 	ClassDB::bind_method(D_METHOD("get_attribute_set"), &AttributeContainer::get_attribute_set);
-	ClassDB::bind_method(D_METHOD("get_attributes"), &AttributeContainer::get_attributes);
+	ClassDB::bind_method(D_METHOD("get_attributes"), &AttributeContainer::get_runtime_attributes);
 	ClassDB::bind_method(D_METHOD("get_attribute_by_name", "p_name"), &AttributeContainer::get_attribute_by_name);
 	ClassDB::bind_method(D_METHOD("get_attribute_buffed_value_by_name", "p_name"), &AttributeContainer::get_attribute_buffed_value_by_name);
 	ClassDB::bind_method(D_METHOD("get_attribute_value_by_name", "p_name"), &AttributeContainer::get_attribute_value_by_name);
@@ -51,6 +52,7 @@ void AttributeContainer::_bind_methods()
 	ADD_SIGNAL(MethodInfo("buff_dequed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_enqueued", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_removed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
+	ADD_SIGNAL(MethodInfo("buff_time_updated", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 }
 
 void AttributeContainer::_notification(const int p_what)
@@ -93,6 +95,11 @@ void AttributeContainer::_on_buff_removed(const Ref<RuntimeBuff> &p_buff)
 	emit_signal("buff_removed", p_buff);
 }
 
+void AttributeContainer::_on_buff_time_updated(const Ref<RuntimeBuff> &p_buff)
+{
+	emit_signal("buff_time_updated", p_buff);
+}
+
 bool AttributeContainer::has_attribute(const Ref<AttributeBase> &p_attribute) const
 {
 	return attributes.has(p_attribute->get_attribute_name());
@@ -113,13 +120,16 @@ void AttributeContainer::notify_derived_attributes(const Ref<RuntimeAttribute> &
 		}
 	}
 }
-
-void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
+void AttributeContainer::setup_attribute(const Ref<AttributeBase> &p_attribute)
 {
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
 	ERR_FAIL_COND_MSG(has_attribute(p_attribute), "Attribute already exists in the container.");
 
 	RuntimeAttribute *runtime_attribute = memnew(RuntimeAttribute);
+
+	runtime_attribute->attribute_container = this;
+	runtime_attribute->set_attribute(p_attribute);
+	runtime_attribute->set_attribute_set(attribute_set);
 
 	if (TypedArray<AttributeBase> base_attributes = runtime_attribute->get_derived_from(); base_attributes.size() > 0) {
 		for (int i = 0; i < base_attributes.size(); i++) {
@@ -134,11 +144,6 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 		}
 	}
 
-	runtime_attribute->attribute_container = this;
-	runtime_attribute->add_buffs(p_attribute->get_buffs());
-	runtime_attribute->set_attribute(p_attribute);
-	runtime_attribute->set_attribute_set(attribute_set);
-
 	const Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
 	const Callable buff_applied_callable = Callable::create(this, "_on_buff_applied");
 	const Callable buff_removed_callable = Callable::create(this, "_on_buff_removed");
@@ -148,6 +153,15 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 	runtime_attribute->connect("buff_removed", buff_removed_callable);
 
 	attributes[p_attribute->get_attribute_name()] = runtime_attribute;
+}
+
+void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
+{
+	setup_attribute(p_attribute);
+
+	if (const Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_attribute_name()); runtime_attribute.is_valid()) {
+		runtime_attribute->add_buffs(p_attribute->get_buffs());
+	}
 }
 
 void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
@@ -249,7 +263,17 @@ void AttributeContainer::setup()
 
 	if (attribute_set.is_valid()) {
 		for (int i = 0; i < attribute_set->count(); i++) {
-			add_attribute(attribute_set->get_at(i));
+			setup_attribute(attribute_set->get_at(i));
+		}
+
+		TypedArray<RuntimeAttribute> runtime_attributes = get_runtime_attributes();
+
+		for (int i = 0; i < runtime_attributes.size(); i++) {
+			const Ref<RuntimeAttribute> runtime_attribute = runtime_attributes[i];
+
+			if (TypedArray<AttributeBuff> buffs = runtime_attribute->get_attribute()->get_buffs(); buffs.size() > 0) {
+				runtime_attribute->add_buffs(buffs);
+			}
 		}
 	}
 }
@@ -284,7 +308,7 @@ Ref<AttributeSet> AttributeContainer::get_attribute_set() const
 	return attribute_set;
 }
 
-TypedArray<RuntimeAttribute> AttributeContainer::get_attributes() const
+TypedArray<RuntimeAttribute> AttributeContainer::get_runtime_attributes() const
 {
 	return attributes.values();
 }
