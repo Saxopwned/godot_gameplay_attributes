@@ -15,7 +15,7 @@
 
 using namespace godot;
 
-namespace gga
+namespace octod::gameplay::attributes
 {
 	class AttributeBuff;
 	class RuntimeBuff;
@@ -23,16 +23,6 @@ namespace gga
 	class BuffPoolQueue : public Node
 	{
 		GDCLASS(BuffPoolQueue, Node);
-
-	protected:
-		/// @brief Binds methods to Godot.
-		static void _bind_methods();
-		/// @brief The current tick.
-		double tick;
-		/// @brief The queue of buffs.
-		TypedArray<RuntimeBuff> queue;
-		/// @brief Whether the queue is server authoritative.
-		bool server_authoritative;
 
 	public:
 		BuffPoolQueue();
@@ -43,16 +33,18 @@ namespace gga
 		void _physics_process(double p_delta) override;
 		/// @brief Adds a buff to the queue.
 		void enqueue(const Ref<RuntimeBuff> &p_buff);
-		/// @brief Returns if the queue is server authoritative.
-		/// @return Whether the queue is server authoritative.
-		[[nodiscard]] bool get_server_authoritative() const;
 		/// @brief Clears the queue.
 		void clear();
 		/// @brief Processes the items in the queue.
 		void process_items(const double &p_discarded);
-		/// @brief Sets the server an authoritative flag.
-		/// @param p_server_authoritative The server authoritative flag.
-		void set_server_authoritative(const bool &p_server_authoritative);
+
+	protected:
+		/// @brief Binds methods to Godot.
+		static void _bind_methods();
+		/// @brief The current tick.
+		double tick;
+		/// @brief The queue of buffs.
+		TypedArray<RuntimeBuff> queue;
 	};
 } //namespace gga
 

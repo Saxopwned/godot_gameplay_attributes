@@ -11,7 +11,7 @@
 #include "attribute.hpp"
 #include "attribute_container.hpp"
 
-using namespace gga;
+using namespace octod::gameplay::attributes;
 
 #pragma region AttributeOperation
 
@@ -307,6 +307,11 @@ void AttributeBuff::set_unique(const bool p_value)
 
 #pragma region AttributeComputationArgument
 
+AttributeContainer *AttributeComputationArgument::get_attribute_container() const
+{
+	return attribute_container;
+}
+
 AttributeBuff *AttributeComputationArgument::get_buff() const
 {
 	return buff;
@@ -336,10 +341,15 @@ void AttributeComputationArgument::set_runtime_attribute(RuntimeAttribute *p_run
 {
 	runtime_attribute = p_runtime_attribute;
 }
+void AttributeComputationArgument::set_attribute_container(AttributeContainer *p_attribute_container)
+{
+	attribute_container = p_attribute_container;
+}
 
 void AttributeComputationArgument::_bind_methods()
 {
 	/// binds methods to godot
+	ClassDB::bind_method(D_METHOD("get_attribute_container"), &AttributeComputationArgument::get_attribute_container);
 	ClassDB::bind_method(D_METHOD("get_buff"), &AttributeComputationArgument::get_buff);
 	ClassDB::bind_method(D_METHOD("get_operated_value"), &AttributeComputationArgument::get_operated_value);
 	ClassDB::bind_method(D_METHOD("get_runtime_attribute"), &AttributeComputationArgument::get_runtime_attribute);
@@ -361,9 +371,7 @@ void AttributeBase::_bind_methods()
 {
 	/// binds methods to godot
 	ClassDB::bind_method(D_METHOD("get_attribute_name"), &AttributeBase::get_attribute_name);
-	ClassDB::bind_method(D_METHOD("get_buffs"), &AttributeBase::get_buffs);
 	ClassDB::bind_method(D_METHOD("set_attribute_name", "p_value"), &AttributeBase::set_attribute_name);
-	ClassDB::bind_method(D_METHOD("set_buffs", "p_buffs"), &AttributeBase::set_buffs);
 
 	/// binds virtuals to godot
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
@@ -371,7 +379,6 @@ void AttributeBase::_bind_methods()
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "buffs", PROPERTY_HINT_RESOURCE_TYPE, "24/17:AttributeBuff"), "set_buffs", "get_buffs");
 }
 
 String AttributeBase::get_attribute_name() const
@@ -383,19 +390,9 @@ String AttributeBase::get_attribute_name() const
 	return attribute_name;
 }
 
-TypedArray<AttributeBuff> AttributeBase::get_buffs() const
-{
-	return buffs;
-}
-
 void AttributeBase::set_attribute_name(const String &p_value)
 {
 	attribute_name = p_value;
-}
-
-void AttributeBase::set_buffs(const TypedArray<AttributeBuff> &p_buffs)
-{
-	buffs = p_buffs;
 }
 
 #pragma endregion
@@ -404,16 +401,6 @@ void AttributeBase::set_buffs(const TypedArray<AttributeBuff> &p_buffs)
 
 void Attribute::_bind_methods()
 {
-	/// static methods to bind to godot
-	ClassDB::bind_static_method("Attribute", D_METHOD("create", "attribute_name", "attribute_buffs"), &Attribute::create);
-}
-
-Ref<Attribute> Attribute::create(const String &p_attribute_name, const TypedArray<AttributeBuff> &p_buffs)
-{
-	Ref attribute = memnew(Attribute);
-	attribute->buffs = p_buffs;
-	attribute->set_attribute_name(p_attribute_name);
-	return attribute;
 }
 
 #pragma endregion
@@ -664,7 +651,7 @@ bool RuntimeBuff::equals_to(const Ref<AttributeBuff> &p_buff) const
 
 Ref<RuntimeAttribute> RuntimeBuff::applies_to(const AttributeContainer *p_attribute_container) const
 {
-	Ref<RuntimeAttribute> attribute = p_attribute_container->get_attribute_by_name(buff->get_attribute_name());
+	Ref<RuntimeAttribute> attribute = p_attribute_container->get_runtime_attribute_by_name(buff->get_attribute_name());
 
 	ERR_FAIL_COND_V_MSG(attribute.is_null(), attribute, "Attribute not found in attribute set.");
 	ERR_FAIL_COND_V_MSG(!attribute.is_valid(), attribute, "Attribute reference is not valid.");
@@ -835,6 +822,7 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 		if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _compute_value)) {
 			AttributeComputationArgument *argument = memnew(AttributeComputationArgument);
 
+			argument->set_attribute_container(attribute_container);
 			argument->set_buff(p_buff.ptr());
 			argument->set_operated_value(runtime_buff->operate(this));
 			argument->set_runtime_attribute(this);
@@ -886,6 +874,20 @@ bool RuntimeAttribute::can_receive_buff(const Ref<AttributeBuff> &p_buff) const
 	return p_buff->get_attribute_name() == attribute->get_attribute_name();
 }
 
+void RuntimeAttribute::compute_value()
+{
+	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _compute_value)) {
+		AttributeComputationArgument *argument = memnew(AttributeComputationArgument);
+
+		argument->set_attribute_container(attribute_container);
+		argument->set_buff(nullptr);
+		argument->set_operated_value(value);
+		argument->set_runtime_attribute(this);
+
+		GDVIRTUAL_CALL_PTR(attribute, _compute_value, argument, value);
+	}
+}
+
 void RuntimeAttribute::clear_buffs()
 {
 	buffs.clear();
@@ -898,7 +900,7 @@ TypedArray<RuntimeAttribute> RuntimeAttribute::get_parent_runtime_attributes() c
 
 		for (int i = 0; i < derived.size(); i++) {
 			if (Ref attribute_base = cast_to<AttributeBase>(derived[i]); attribute_base.is_valid() && !attribute_base.is_null()) {
-				if (const auto parent_attribute = attribute_container->get_attribute_by_name(attribute_base->get_attribute_name()); !parent_attribute.is_null() && parent_attribute.is_valid()) {
+				if (const auto parent_attribute = attribute_container->get_runtime_attribute_by_name(attribute_base->get_attribute_name()); !parent_attribute.is_null() && parent_attribute.is_valid()) {
 					parent_attributes.push_back(parent_attribute);
 				}
 			}

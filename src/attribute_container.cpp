@@ -14,7 +14,7 @@
 #include "buff_pool_queue.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
-using namespace gga;
+using namespace octod::gameplay::attributes;
 
 void AttributeContainer::_bind_methods()
 {
@@ -32,19 +32,16 @@ void AttributeContainer::_bind_methods()
 	ClassDB::bind_method(D_METHOD("find_value", "p_predicate"), &AttributeContainer::find_value);
 	ClassDB::bind_method(D_METHOD("get_attribute_set"), &AttributeContainer::get_attribute_set);
 	ClassDB::bind_method(D_METHOD("get_attributes"), &AttributeContainer::get_runtime_attributes);
-	ClassDB::bind_method(D_METHOD("get_attribute_by_name", "p_name"), &AttributeContainer::get_attribute_by_name);
+	ClassDB::bind_method(D_METHOD("get_attribute_by_name", "p_name"), &AttributeContainer::get_runtime_attribute_by_name);
 	ClassDB::bind_method(D_METHOD("get_attribute_buffed_value_by_name", "p_name"), &AttributeContainer::get_attribute_buffed_value_by_name);
 	ClassDB::bind_method(D_METHOD("get_attribute_value_by_name", "p_name"), &AttributeContainer::get_attribute_value_by_name);
-	ClassDB::bind_method(D_METHOD("get_server_authoritative"), &AttributeContainer::get_server_authoritative);
 	ClassDB::bind_method(D_METHOD("remove_attribute", "p_attribute"), &AttributeContainer::remove_attribute);
 	ClassDB::bind_method(D_METHOD("remove_buff", "p_buff"), &AttributeContainer::remove_buff);
 	ClassDB::bind_method(D_METHOD("set_attribute_set", "p_attribute_set"), &AttributeContainer::set_attribute_set);
-	ClassDB::bind_method(D_METHOD("set_server_authoritative", "p_server_authoritative"), &AttributeContainer::set_server_authoritative);
 	ClassDB::bind_method(D_METHOD("setup"), &AttributeContainer::setup);
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "attribute_set", PROPERTY_HINT_RESOURCE_TYPE, "AttributeSet"), "set_attribute_set", "get_attribute_set");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "server_authoritative"), "set_server_authoritative", "get_server_authoritative");
 
 	/// signals binding
 	ADD_SIGNAL(MethodInfo("attribute_changed", PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeAttributeBase"), PropertyInfo(Variant::FLOAT, "previous_value"), PropertyInfo(Variant::FLOAT, "new_value")));
@@ -59,7 +56,6 @@ void AttributeContainer::_notification(const int p_what)
 {
 	if (p_what == NOTIFICATION_READY) {
 		buff_pool_queue = memnew(BuffPoolQueue);
-		buff_pool_queue->set_server_authoritative(server_authoritative);
 		buff_pool_queue->connect("attribute_buff_dequeued", Callable::create(this, "_on_buff_dequeued"));
 		buff_pool_queue->connect("attribute_buff_enqueued", Callable::create(this, "_on_buff_enqueued"));
 
@@ -77,6 +73,10 @@ void AttributeContainer::_on_attribute_changed(const Ref<RuntimeAttribute> &p_at
 void AttributeContainer::_on_buff_applied(const Ref<RuntimeBuff> &p_buff)
 {
 	emit_signal("buff_applied", p_buff);
+
+	if (const auto attribute = get_runtime_attribute_by_name(p_buff->get_attribute_name()); attribute.is_valid() && !attribute.is_null()) {
+		notify_derived_attributes(attribute);
+	}
 }
 
 void AttributeContainer::_on_buff_dequeued(const Ref<RuntimeBuff> &p_buff)
@@ -93,6 +93,10 @@ void AttributeContainer::_on_buff_enqueued(const Ref<RuntimeBuff> &p_buff)
 void AttributeContainer::_on_buff_removed(const Ref<RuntimeBuff> &p_buff)
 {
 	emit_signal("buff_removed", p_buff);
+
+	if (const auto attribute = get_runtime_attribute_by_name(p_buff->get_attribute_name()); attribute.is_valid() && !attribute.is_null()) {
+		notify_derived_attributes(attribute);
+	}
 }
 
 void AttributeContainer::_on_buff_time_updated(const Ref<RuntimeBuff> &p_buff)
@@ -105,22 +109,19 @@ bool AttributeContainer::has_attribute(const Ref<AttributeBase> &p_attribute) co
 	return attributes.has(p_attribute->get_attribute_name());
 }
 
-void AttributeContainer::notify_derived_attributes(const Ref<RuntimeAttribute> &p_runtime_attribute)
+void AttributeContainer::notify_derived_attributes(const Ref<RuntimeAttribute> &p_base_runtime_attribute)
 {
-	if (derived_attributes.has(p_runtime_attribute->get_attribute()->get_attribute_name())) {
-		TypedArray<RuntimeAttribute> derived = derived_attributes[p_runtime_attribute->get_attribute()->get_attribute_name()];
+	if (derived_attributes.has(p_base_runtime_attribute->get_attribute()->get_attribute_name())) {
+		TypedArray<RuntimeAttribute> derived = derived_attributes[p_base_runtime_attribute->get_attribute()->get_attribute_name()];
 
 		for (int i = 0; i < derived.size(); i++) {
-			Ref<RuntimeAttribute> derived_attribute = derived[i];
-			float previous_value = derived_attribute->get_value();
-
-			if (float current_value = derived_attribute->get_buffed_value(); !Math::is_equal_approx(previous_value, current_value)) {
-				derived_attribute->emit_signal("attribute_changed", derived_attribute, previous_value, current_value);
-			}
+			const Ref<RuntimeAttribute> derived_attribute = derived[i];
+			derived_attribute->compute_value();
 		}
 	}
 }
-void AttributeContainer::setup_attribute(const Ref<AttributeBase> &p_attribute)
+
+void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 {
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
 	ERR_FAIL_COND_MSG(has_attribute(p_attribute), "Attribute already exists in the container.");
@@ -155,15 +156,6 @@ void AttributeContainer::setup_attribute(const Ref<AttributeBase> &p_attribute)
 	attributes[p_attribute->get_attribute_name()] = runtime_attribute;
 }
 
-void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
-{
-	setup_attribute(p_attribute);
-
-	if (const Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_attribute_name()); runtime_attribute.is_valid()) {
-		runtime_attribute->add_buffs(p_attribute->get_buffs());
-	}
-}
-
 void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 {
 	ERR_FAIL_NULL_MSG(p_buff, "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
@@ -178,7 +170,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 
 		for (int i = 0; i < _attributes.size(); i++) {
 			const Ref<AttributeBase> attribute_base = _attributes[i];
-			Ref<RuntimeAttribute> attribute = get_attribute_by_name(attribute_base->get_attribute_name());
+			Ref<RuntimeAttribute> attribute = get_runtime_attribute_by_name(attribute_base->get_attribute_name());
 
 			ERR_FAIL_NULL_MSG(attribute, "Attribute not found in attribute set.");
 
@@ -214,7 +206,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 			}
 		}
 	} else {
-		const Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_buff->get_attribute_name());
+		const Ref<RuntimeAttribute> runtime_attribute = get_runtime_attribute_by_name(p_buff->get_attribute_name());
 
 		ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute '" + p_buff->get_attribute_name() + "' not found in the container.");
 		ERR_FAIL_COND_MSG(runtime_attribute.is_null(), "Attribute reference is not valid.");
@@ -230,7 +222,7 @@ void AttributeContainer::remove_attribute(const Ref<AttributeBase> &p_attribute)
 	ERR_FAIL_NULL_MSG(p_attribute, "Attribute cannot be null, it must be an instance of a class inheriting from AttributeBase abstract class.");
 	ERR_FAIL_COND_MSG(!has_attribute(p_attribute), "Attribute not found in the container.");
 
-	const Ref<RuntimeAttribute> runtime_attribute = get_attribute_by_name(p_attribute->get_name());
+	const Ref<RuntimeAttribute> runtime_attribute = get_runtime_attribute_by_name(p_attribute->get_name());
 
 	ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute not valid.");
 
@@ -263,18 +255,10 @@ void AttributeContainer::setup()
 
 	if (attribute_set.is_valid()) {
 		for (int i = 0; i < attribute_set->count(); i++) {
-			setup_attribute(attribute_set->get_at(i));
+			add_attribute(attribute_set->get_at(i));
 		}
 
 		TypedArray<RuntimeAttribute> runtime_attributes = get_runtime_attributes();
-
-		for (int i = 0; i < runtime_attributes.size(); i++) {
-			const Ref<RuntimeAttribute> runtime_attribute = runtime_attributes[i];
-
-			if (TypedArray<AttributeBuff> buffs = runtime_attribute->get_attribute()->get_buffs(); buffs.size() > 0) {
-				runtime_attribute->add_buffs(buffs);
-			}
-		}
 	}
 }
 
@@ -313,7 +297,7 @@ TypedArray<RuntimeAttribute> AttributeContainer::get_runtime_attributes() const
 	return attributes.values();
 }
 
-Ref<RuntimeAttribute> AttributeContainer::get_attribute_by_name(const String &p_name) const
+Ref<RuntimeAttribute> AttributeContainer::get_runtime_attribute_by_name(const String &p_name) const
 {
 	if (attributes.has(p_name)) {
 		return attributes[p_name];
@@ -324,38 +308,24 @@ Ref<RuntimeAttribute> AttributeContainer::get_attribute_by_name(const String &p_
 
 float AttributeContainer::get_attribute_buffed_value_by_name(const String &p_name) const
 {
-	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_runtime_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_buffed_value() : 0.0f;
 }
 
 float AttributeContainer::get_attribute_previous_value_by_name(const String &p_name) const
 {
-	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_runtime_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_previous_value() : 0.0f;
 }
 
 float AttributeContainer::get_attribute_value_by_name(const String &p_name) const
 {
-	const Ref<RuntimeAttribute> attribute = get_attribute_by_name(p_name);
+	const Ref<RuntimeAttribute> attribute = get_runtime_attribute_by_name(p_name);
 	return attribute.is_valid() && !attribute.is_null() ? attribute->get_value() : 0.0f;
-}
-
-bool AttributeContainer::get_server_authoritative() const
-{
-	return server_authoritative;
 }
 
 void AttributeContainer::set_attribute_set(const Ref<AttributeSet> &p_attribute_set)
 {
 	attribute_set = p_attribute_set;
 	setup();
-}
-
-void AttributeContainer::set_server_authoritative(const bool p_server_authoritative)
-{
-	server_authoritative = p_server_authoritative;
-
-	if (buff_pool_queue != nullptr) {
-		buff_pool_queue->set_server_authoritative(server_authoritative);
-	}
 }

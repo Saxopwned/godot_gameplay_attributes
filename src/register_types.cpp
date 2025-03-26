@@ -33,24 +33,25 @@
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
+using namespace octod::gameplay::attributes;
 
 void gdextension_initialize(ModuleInitializationLevel p_level)
 {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		/// attributes, resources and operations
-		ClassDB::register_class<gga::AttributeOperation>();
-		ClassDB::register_abstract_class<gga::AttributeBuffBase>();
-		ClassDB::register_class<gga::AttributeBuff>();
-		ClassDB::register_abstract_class<gga::AttributeBase>();
-		ClassDB::register_class<gga::Attribute>();
-		ClassDB::register_class<gga::AttributeSet>();
+		ClassDB::register_class<AttributeOperation>();
+		ClassDB::register_abstract_class<AttributeBuffBase>();
+		ClassDB::register_class<AttributeBuff>();
+		ClassDB::register_abstract_class<AttributeBase>();
+		ClassDB::register_class<Attribute>();
+		ClassDB::register_class<AttributeSet>();
 		/// nodes
-		ClassDB::register_runtime_class<gga::AttributeContainer>();
-		ClassDB::register_runtime_class<gga::AttributeComputationArgument>();
-		ClassDB::register_runtime_class<gga::BuffPoolQueue>();
+		ClassDB::register_runtime_class<AttributeContainer>();
+		ClassDB::register_runtime_class<AttributeComputationArgument>();
+		ClassDB::register_runtime_class<BuffPoolQueue>();
 		/// runtime classes
-		ClassDB::register_runtime_class<gga::RuntimeBuff>();
-		ClassDB::register_runtime_class<gga::RuntimeAttribute>();
+		ClassDB::register_runtime_class<RuntimeBuff>();
+		ClassDB::register_runtime_class<RuntimeAttribute>();
 	}
 }
 

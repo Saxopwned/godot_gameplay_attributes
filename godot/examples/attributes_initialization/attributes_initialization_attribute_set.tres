@@ -1,43 +1,8 @@
-[gd_resource type="AttributeSet" load_steps=10 format=3 uid="uid://bm14sn6sj3pnn"]
+[gd_resource type="AttributeSet" load_steps=3 format=3 uid="uid://bm14sn6sj3pnn"]
 
-[ext_resource type="Script" uid="uid://cf5fy10qb4rg4" path="res://gameplay/attributes/scripts/derived_stats/HealthAttribute.gd" id="1_k37o2"]
-[ext_resource type="Script" uid="uid://c2gk2r7luu5nx" path="res://gameplay/attributes/scripts/clamping_stats/MaxHealthAttribute.gd" id="2_my3d6"]
-
-[sub_resource type="AttributeOperation" id="AttributeOperation_k37o2"]
-operand = 5
-value = 10.0
-
-[sub_resource type="GDScript" id="GDScript_my3d6"]
-script/source = "class_name SetInitialValueBuff
-extends AttributeBuff
-"
-
-[sub_resource type="AttributeBuff" id="AttributeBuff_il4y6"]
-attribute_name = "HealthAttribute"
-operation = SubResource("AttributeOperation_k37o2")
-queue_execution = 160
-script = SubResource("GDScript_my3d6")
-metadata/_custom_type_script = "uid://d0vvuykkbaxpi"
-
-[sub_resource type="Attribute" id="Attribute_il4y6"]
-buffs = Array[AttributeBuff]([SubResource("AttributeBuff_il4y6")])
-script = ExtResource("1_k37o2")
-metadata/_custom_type_script = "uid://cf5fy10qb4rg4"
-
-[sub_resource type="AttributeOperation" id="AttributeOperation_l3pam"]
-operand = 5
-value = 10.0
-
-[sub_resource type="AttributeBuff" id="AttributeBuff_y4gcc"]
-attribute_name = "MaxHealthAttribute"
-operation = SubResource("AttributeOperation_l3pam")
-queue_execution = 112
-
-[sub_resource type="Attribute" id="Attribute_l3pam"]
-buffs = Array[AttributeBuff]([SubResource("AttributeBuff_y4gcc")])
-script = ExtResource("2_my3d6")
-metadata/_custom_type_script = "uid://c2gk2r7luu5nx"
+[ext_resource type="Attribute" uid="uid://ycgjkjx2alpy" path="res://gameplay/attributes/resources/clamping_stats/max_health_attribute.tres" id="1_k37o2"]
+[ext_resource type="Attribute" uid="uid://qv58hj03342v" path="res://gameplay/attributes/resources/derived_stats/health_attribute.tres" id="2_my3d6"]
 
 [resource]
-attributes = Array[AttributeBase]([SubResource("Attribute_il4y6"), SubResource("Attribute_l3pam")])
+attributes = Array[AttributeBase]([ExtResource("1_k37o2"), ExtResource("2_my3d6")])
 set_name = "AttributesInitializationAttributeSet"

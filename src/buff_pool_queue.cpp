@@ -11,7 +11,7 @@
 #include "buff_pool_queue.hpp"
 #include "attribute.hpp"
 
-using namespace gga;
+using namespace octod::gameplay::attributes;
 
 void BuffPoolQueue::_bind_methods()
 {
@@ -23,7 +23,6 @@ void BuffPoolQueue::_bind_methods()
 BuffPoolQueue::BuffPoolQueue()
 {
 	tick = 0.0f;
-	server_authoritative = false;
 }
 
 void BuffPoolQueue::_exit_tree()
@@ -44,17 +43,8 @@ void BuffPoolQueue::_physics_process(const double p_delta)
 
 void BuffPoolQueue::enqueue(const Ref<RuntimeBuff> &p_buff)
 {
-	if (server_authoritative && !is_multiplayer_authority()) {
-		return;
-	}
-
 	queue.push_back(p_buff);
 	emit_signal("attribute_buff_enqueued", p_buff);
-}
-
-bool BuffPoolQueue::get_server_authoritative() const
-{
-	return server_authoritative;
 }
 
 void BuffPoolQueue::clear()
@@ -64,10 +54,6 @@ void BuffPoolQueue::clear()
 
 void BuffPoolQueue::process_items(const double &p_discarded)
 {
-	if (server_authoritative && !is_multiplayer_authority()) {
-		return;
-	}
-
 	const float discarded_float = static_cast<float>(p_discarded) + 1.0f;
 
 	for (int64_t i = queue.size() - 1; i >= 0; i--) {
@@ -79,9 +65,4 @@ void BuffPoolQueue::process_items(const double &p_discarded)
 			emit_signal("attribute_buff_dequeued", buff);
 		}
 	}
-}
-
-void BuffPoolQueue::set_server_authoritative(const bool &p_server_authoritative)
-{
-	server_authoritative = p_server_authoritative;
 }

@@ -9,8 +9,8 @@
 /**************************************************************************/
 
 // ReSharper disable CppClassCanBeFinal
-#ifndef GODOT_GAMEPLAY_ATTRIBUTES_ATTRIBUTE_HPP
-#define GODOT_GAMEPLAY_ATTRIBUTES_ATTRIBUTE_HPP
+#ifndef OCTOD_GAMEPLAY_ATTRIBUTES_ATTRIBUTE_H
+#define OCTOD_GAMEPLAY_ATTRIBUTES_ATTRIBUTE_H
 
 #include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/core/binder_common.hpp>
@@ -18,7 +18,7 @@
 
 using namespace godot;
 
-namespace gga
+namespace octod::gameplay::attributes
 {
 	class AttributeBase;
 	class AttributeContainer;
@@ -336,6 +336,10 @@ namespace gga
 		GDCLASS(AttributeComputationArgument, RefCounted)
 
 	public:
+		/// @brief Get the attribute container.
+		/// @return The attribute container.
+		[[nodiscard]] AttributeContainer *get_attribute_container() const;
+
 		/// @brief The attribute buff, if any.
 		[[nodiscard]] AttributeBuff *get_buff() const;
 
@@ -357,9 +361,16 @@ namespace gga
 		/// @param p_runtime_attribute The runtime attribute.
 		void set_runtime_attribute(RuntimeAttribute *p_runtime_attribute);
 
+		/// @brief Sets the attribute container.
+		/// @param attribute_container The attribute container.
+		void set_attribute_container(AttributeContainer *attribute_container);
+
 	protected:
 		/// @brief Bind methods to Godot.
 		static void _bind_methods();
+
+		/// @brief The attribute container pointer.
+		AttributeContainer *attribute_container;
 
 		/// @brief The attribute buff.
 		AttributeBuff *buff = nullptr;
@@ -381,8 +392,6 @@ namespace gga
 		static void _bind_methods();
 		/// @brief The attribute name.
 		String attribute_name;
-		/// @brief The buffs affecting the attribute.
-		TypedArray<AttributeBuff> buffs;
 
 	public:
 		/// @brief Get the attribute name.
@@ -391,18 +400,13 @@ namespace gga
 
 		/// @brief Compute the value of the attribute.
 		GDVIRTUAL1RC(float, _compute_value, Ref<AttributeComputationArgument>); // NOLINT(*-unnecessary-value-param)
+
 		/// @brief Subscribes to some attributes
 		GDVIRTUAL1RC(TypedArray<AttributeBase>, _derived_from, Ref<AttributeSet>); // NOLINT(*-unnecessary-value-param)
 
-		/// @brief Get the buffs affecting the attribute.
-		/// @return The buffs affecting the attribute.
-		[[nodiscard]] TypedArray<AttributeBuff> get_buffs() const;
 		/// @brief Set the attribute name.
 		/// @param p_value The attribute name.
 		void set_attribute_name(const String &p_value);
-		/// @brief Set the buffs affecting the attribute.
-		/// @param p_buffs The buffs affecting the attribute.
-		void set_buffs(const TypedArray<AttributeBuff> &p_buffs);
 	};
 
 	/// @brief Attribute.
@@ -415,13 +419,6 @@ namespace gga
 	protected:
 		/// @brief Bind methods to Godot.
 		static void _bind_methods();
-
-	public:
-		/// @brief Create an attribute from some parameters.
-		/// @param p_attribute_name The attribute name.
-		/// @param p_buffs The buffs affecting the attribute.
-		/// @return The new instance of Attribute.
-		static Ref<Attribute> create(const String &p_attribute_name, const TypedArray<AttributeBuff> &p_buffs);
 	};
 
 	/// @brief Runtime buff.
@@ -504,6 +501,98 @@ namespace gga
 	{
 		GDCLASS(RuntimeAttribute, RefCounted);
 
+	public:
+		/// @brief Add a buff to the attribute.
+		/// @param p_buff The buff to add.
+		/// @return True if the buff was added, false otherwise.
+		bool add_buff(const Ref<AttributeBuff> &p_buff);
+
+		/// @brief Add buffs to the attribute.
+		/// @param p_buffs The buffs to add.
+		/// @return The number of buffs added.
+		int add_buffs(const TypedArray<AttributeBuff> &p_buffs);
+
+		/// @brief Check if the attribute can receive a buff.
+		/// @param p_buff The buff to check.
+		/// @return True if the attribute can receive the buff, false otherwise.
+		[[nodiscard]] bool can_receive_buff(const Ref<AttributeBuff> &p_buff) const;
+
+		/// @brief Compute the value of the attribute.
+		void compute_value();
+
+		/// @brief Clear the buffs from the attribute.
+		void clear_buffs();
+
+		/// @brief Get the parent runtime attributes.
+		/// @return An array of runtime attributes.
+		[[nodiscard]] TypedArray<RuntimeAttribute> get_parent_runtime_attributes() const;
+
+		/// @brief Check if the attribute has a buff.
+		/// @param p_buff The buff to check.
+		/// @return True if the attribute has the buff, false otherwise.
+		[[nodiscard]] bool has_buff(const Ref<AttributeBuff> &p_buff) const;
+
+		/// @brief Check if the attribute has ongoing buffs.
+		/// @return True if the attribute has ongoing buffs, false otherwise.
+		[[nodiscard]] bool has_ongoing_buffs() const;
+
+		/// @brief Check if the attribute is computable.
+		/// @return True if the attribute _compute_value is overridden.
+		[[nodiscard]] bool is_computable() const;
+
+		/// @brief Remove a buff from the attribute.
+		/// @param p_buff The buff to remove.
+		/// @return True if the buff was removed, false otherwise.
+		bool remove_buff(const Ref<AttributeBuff> &p_buff);
+
+		/// @brief Remove buffs from the attribute.
+		/// @param p_buffs The buffs to remove.
+		/// @return The number of buffs removed.
+		int remove_buffs(const TypedArray<AttributeBuff> &p_buffs);
+
+		/// @brief Get the attribute.
+		/// @return The attribute.
+		[[nodiscard]] Ref<Attribute> get_attribute() const;
+
+		/// @brief Get the attribute set.
+		/// @return The attribute set.
+		[[nodiscard]] Ref<AttributeSet> get_attribute_set() const;
+
+		/// @brief Get the buffed value of the attribute.
+		/// @return The buffed value.
+		[[nodiscard]] float get_buffed_value() const;
+
+		/// @brief Get the attributes the attribute derives from.
+		/// @return The attributes the attribute derives from.
+		[[nodiscard]] TypedArray<AttributeBase> get_derived_from() const;
+
+		/// @brief Get the previous value of the attribute.
+		/// @return The previous value of the attribute.
+		[[nodiscard]] float get_previous_value() const;
+
+		/// @brief Gets the value of the attribute.
+		/// @return The value of the attribute.
+		[[nodiscard]] float get_value() const;
+
+		/// @brief Get the buffs affecting the attribute.
+		[[nodiscard]] TypedArray<RuntimeBuff> get_buffs() const;
+
+		/// @brief Set the attribute.
+		/// @param p_value The attribute.
+		void set_attribute(const Ref<AttributeBase> &p_value);
+
+		/// @brief Set the attribute set.w
+		/// @param p_value The attribute set.
+		void set_attribute_set(const Ref<AttributeSet> &p_value);
+
+		/// @brief Sets the buffs affecting the attribute.
+		/// @param p_value The buffs affecting the attribute.
+		void set_buffs(const TypedArray<AttributeBuff> &p_value);
+
+		/// @brief Sets the value of the attribute.
+		/// @param p_value The value of the attribute.
+		void set_value(float p_value);
+
 	protected:
 		friend class AttributeContainer;
 		friend class RuntimeBuff;
@@ -521,80 +610,11 @@ namespace gga
 		float value = 0.0f;
 		/// @brief The attribute buffs.
 		TypedArray<RuntimeBuff> buffs;
-
-	public:
-		/// @brief Add a buff to the attribute.
-		/// @param p_buff The buff to add.
-		/// @return True if the buff was added, false otherwise.
-		bool add_buff(const Ref<AttributeBuff> &p_buff);
-		/// @brief Add buffs to the attribute.
-		/// @param p_buffs The buffs to add.
-		/// @return The number of buffs added.
-		int add_buffs(const TypedArray<AttributeBuff> &p_buffs);
-		/// @brief Check if the attribute can receive a buff.
-		/// @param p_buff The buff to check.
-		/// @return True if the attribute can receive the buff, false otherwise.
-		[[nodiscard]] bool can_receive_buff(const Ref<AttributeBuff> &p_buff) const;
-		/// @brief Clear the buffs from the attribute.
-		void clear_buffs();
-		/// @brief Get the parent runtime attributes.
-		/// @return An array of runtime attributes.
-		[[nodiscard]] TypedArray<RuntimeAttribute> get_parent_runtime_attributes() const;
-		/// @brief Check if the attribute has a buff.
-		/// @param p_buff The buff to check.
-		/// @return True if the attribute has the buff, false otherwise.
-		[[nodiscard]] bool has_buff(const Ref<AttributeBuff> &p_buff) const;
-		/// @brief Check if the attribute has ongoing buffs.
-		/// @return True if the attribute has ongoing buffs, false otherwise.
-		[[nodiscard]] bool has_ongoing_buffs() const;
-		/// @brief Check if the attribute is computable.
-		/// @return True if the attribute _compute_value is overridden.
-		[[nodiscard]] bool is_computable() const;
-		/// @brief Remove a buff from the attribute.
-		/// @param p_buff The buff to remove.
-		/// @return True if the buff was removed, false otherwise.
-		bool remove_buff(const Ref<AttributeBuff> &p_buff);
-		/// @brief Remove buffs from the attribute.
-		/// @param p_buffs The buffs to remove.
-		/// @return The number of buffs removed.
-		int remove_buffs(const TypedArray<AttributeBuff> &p_buffs);
-		/// @brief Get the attribute.
-		/// @return The attribute.
-		[[nodiscard]] Ref<Attribute> get_attribute() const;
-		/// @brief Get the attribute set.
-		/// @return The attribute set.
-		[[nodiscard]] Ref<AttributeSet> get_attribute_set() const;
-		/// @brief Get the buffed value of the attribute.
-		/// @return The buffed value.
-		[[nodiscard]] float get_buffed_value() const;
-		/// @brief Get the attributes the attribute derives from.
-		/// @return The attributes the attribute derives from.
-		[[nodiscard]] TypedArray<AttributeBase> get_derived_from() const;
-		/// @brief Get the previous value of the attribute.
-		/// @return The previous value of the attribute.
-		[[nodiscard]] float get_previous_value() const;
-		/// @brief Gets the value of the attribute.
-		/// @return The value of the attribute.
-		[[nodiscard]] float get_value() const;
-		/// @brief Get the buffs affecting the attribute.
-		[[nodiscard]] TypedArray<RuntimeBuff> get_buffs() const;
-		/// @brief Set the attribute.
-		/// @param p_value The attribute.
-		void set_attribute(const Ref<AttributeBase> &p_value);
-		/// @brief Set the attribute set.w
-		/// @param p_value The attribute set.
-		void set_attribute_set(const Ref<AttributeSet> &p_value);
-		/// @brief Sets the buffs affecting the attribute.
-		/// @param p_value The buffs affecting the attribute.
-		void set_buffs(const TypedArray<AttributeBuff> &p_value);
-		/// @brief Sets the value of the attribute.
-		/// @param p_value The value of the attribute.
-		void set_value(float p_value);
 	};
-} //namespace gga
+} //namespace octod::gameplay::attributes
 
-VARIANT_ENUM_CAST(gga::AttributeBuff::QueueExecution);
-VARIANT_ENUM_CAST(gga::AttributeBuff::DurationMerging);
-VARIANT_ENUM_CAST(gga::OperationType);
+VARIANT_ENUM_CAST(octod::gameplay::attributes::AttributeBuff::QueueExecution);
+VARIANT_ENUM_CAST(octod::gameplay::attributes::AttributeBuff::DurationMerging);
+VARIANT_ENUM_CAST(octod::gameplay::attributes::OperationType);
 
 #endif

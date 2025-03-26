@@ -8,14 +8,14 @@
 /* Read the license file in this repo.						              */
 /**************************************************************************/
 
-#ifndef GGA_ATTRIBUTE_CONTAINER_HPP
-#define GGA_ATTRIBUTE_CONTAINER_HPP
+#ifndef OCTOD_GAMEPLAY_ATTRIBUTES_ATTRIBUTE_CONTAINER_H
+#define OCTOD_GAMEPLAY_ATTRIBUTES_ATTRIBUTE_CONTAINER_H
 
 #include <godot_cpp/classes/node.hpp>
 
 using namespace godot;
 
-namespace gga
+namespace octod::gameplay::attributes
 {
 	class AttributeBase;
 	class AttributeBuff;
@@ -76,7 +76,7 @@ namespace gga
 		/// @brief Gets an attribute by name.
 		/// @param p_name The name of the attribute to get.
 		/// @return The attribute with the given name.
-		[[nodiscard]] Ref<RuntimeAttribute> get_attribute_by_name(const String &p_name) const;
+		[[nodiscard]] Ref<RuntimeAttribute> get_runtime_attribute_by_name(const String &p_name) const;
 
 		/// @brief Gets the buffed value of an attribute by name. It returns 0.0f if the attribute is not found. Or if the actual value is 0.0f.
 		/// @param p_name The name of the attribute to get.
@@ -93,17 +93,9 @@ namespace gga
 		/// @return The base value of the attribute with the given name.
 		[[nodiscard]] float get_attribute_value_by_name(const String &p_name) const;
 
-		/// @brief Returns the server authoritative value.
-		/// @return The server authoritative value.
-		[[nodiscard]] bool get_server_authoritative() const;
-
 		/// @brief Sets the attributes of the container.
 		/// @param p_attribute_set The attributes to set.
 		void set_attribute_set(const Ref<AttributeSet> &p_attribute_set);
-
-		/// @brief Sets the server authoritative value.
-		/// @param p_server_authoritative The server authoritative value to set.
-		void set_server_authoritative(bool p_server_authoritative);
 
 	protected:
 		/// @brief Bind methods to Godot.
@@ -117,8 +109,6 @@ namespace gga
 		BuffPoolQueue *buff_pool_queue;
 		/// @brief Derived attributes. These are attributes that are calculated from other attributes.
 		Dictionary derived_attributes;
-		/// @brief Server authoritative. If set to true, the container will only process buffs on the server.
-		bool server_authoritative;
 
 		/// @brief Receives a notification.
 		/// @param p_what The notification.
@@ -155,12 +145,9 @@ namespace gga
 		[[nodiscard]] bool has_attribute(const Ref<AttributeBase> &p_attribute) const;
 
 		/// @brief Notifies derived attributes that an attribute has changed.
-		/// @param p_runtime_attribute The attribute that changed.
-		void notify_derived_attributes(const Ref<RuntimeAttribute> &p_runtime_attribute);
-
-		/// @brief Prepares an attribute to be added to the container.
-		void setup_attribute(const Ref<AttributeBase> &p_attribute);
+		/// @param p_base_runtime_attribute The attribute that changed.
+		void notify_derived_attributes(const Ref<RuntimeAttribute> &p_base_runtime_attribute);
 	};
-} //namespace gga
+}
 
 #endif
