@@ -24,6 +24,6 @@ func on_attribute_changed(p_attribute: RuntimeAttribute, previous_value: float, 
 func render(p_attribute: Attribute) -> void:
 	stat_name.text 	= p_attribute.attribute_name.replace("Attribute", "").to_snake_case().replace("_", " ").capitalize()
 	stat_value.text = String.num(attribute_container.get_attribute_buffed_value_by_name(p_attribute.attribute_name), decimals)
-	
+
 	if decimals > 0:
 		stat_value.text += "%"

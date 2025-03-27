@@ -322,6 +322,15 @@ float AttributeComputationArgument::get_operated_value() const
 	return operated_value;
 }
 
+TypedArray<RuntimeAttribute> AttributeComputationArgument::get_parent_attributes() const
+{
+	if (runtime_attribute) {
+		return runtime_attribute->get_parent_runtime_attributes();
+	}
+
+	return {};
+}
+
 RuntimeAttribute *AttributeComputationArgument::get_runtime_attribute() const
 {
 	return runtime_attribute;
@@ -352,6 +361,7 @@ void AttributeComputationArgument::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_attribute_container"), &AttributeComputationArgument::get_attribute_container);
 	ClassDB::bind_method(D_METHOD("get_buff"), &AttributeComputationArgument::get_buff);
 	ClassDB::bind_method(D_METHOD("get_operated_value"), &AttributeComputationArgument::get_operated_value);
+	ClassDB::bind_method(D_METHOD("get_parent_attributes"), &AttributeComputationArgument::get_parent_attributes);
 	ClassDB::bind_method(D_METHOD("get_runtime_attribute"), &AttributeComputationArgument::get_runtime_attribute);
 	ClassDB::bind_method(D_METHOD("set_buff", "p_buff"), &AttributeComputationArgument::set_buff);
 	ClassDB::bind_method(D_METHOD("set_operated_value", "p_value"), &AttributeComputationArgument::set_operated_value);
@@ -375,7 +385,7 @@ void AttributeBase::_bind_methods()
 
 	/// binds virtuals to godot
 	GDVIRTUAL_BIND(_derived_from, "attribute_set");
-	GDVIRTUAL_BIND(_compute_value, "_compute_value");
+	GDVIRTUAL_BIND(_compute_value, "attribute_computation");
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "attribute_name"), "set_attribute_name", "get_attribute_name");
@@ -879,12 +889,19 @@ void RuntimeAttribute::compute_value()
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _compute_value)) {
 		AttributeComputationArgument *argument = memnew(AttributeComputationArgument);
 
+		float _previous_value = value;
+
 		argument->set_attribute_container(attribute_container);
 		argument->set_buff(nullptr);
 		argument->set_operated_value(value);
 		argument->set_runtime_attribute(this);
 
 		GDVIRTUAL_CALL_PTR(attribute, _compute_value, argument, value);
+
+		if (!Math::is_equal_approx(_previous_value, value)) {
+			previous_value = _previous_value;
+			emit_signal("attribute_changed", this, previous_value, value);
+		}
 	}
 }
 

@@ -346,6 +346,9 @@ namespace octod::gameplay::attributes
 		/// @brief The operation value.
 		[[nodiscard]] float get_operated_value() const;
 
+		/// @brief Gets the runtime attribute's parent attributes.
+		[[nodiscard]] TypedArray<RuntimeAttribute> get_parent_attributes() const;
+
 		/// @brief The runtime attribute.
 		[[nodiscard]] RuntimeAttribute *get_runtime_attribute() const;
 

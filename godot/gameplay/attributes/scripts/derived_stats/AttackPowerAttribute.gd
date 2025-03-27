@@ -19,8 +19,10 @@ func _compute_value(_compute_value: AttributeComputationArgument) -> float:
 	var base = 1.0  # it would be hilarious to allow negative values. I cast a fireball to you, you gain health. 
 	var weapon_damage 	= parent_attributes[4].get_buffed_value()
 	var weapon_speed	= parent_attributes[5].get_buffed_value()
+	var critical_change	= parent_attributes[6].get_buffed_value()
+	var attack_power = (base + (weapon_damage * weapon_speed)) + floorf(main_attribute / 10.0)
 
-	return (base + (weapon_damage * weapon_speed)) + floorf(main_attribute / 10.0)
+	return attack_power + ((attack_power / 100) * critical_change)
 
 
 func _derived_from(attribute_set: AttributeSet) -> Array[AttributeBase]:
@@ -31,4 +33,5 @@ func _derived_from(attribute_set: AttributeSet) -> Array[AttributeBase]:
 		attribute_set.find_by_name(StrengthAttribute.ATTRIBUTE_NAME),
 		attribute_set.find_by_name(WeaponDamageAttribute.ATTRIBUTE_NAME),
 		attribute_set.find_by_name(WeaponSpeedAttribute.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(CriticalChanceAttribute.ATTRIBUTE_NAME),
 	]

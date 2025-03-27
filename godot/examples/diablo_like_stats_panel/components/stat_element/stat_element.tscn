@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ctiy78onfgqru" path="res://examples/diablo_like_stats_panel/components/stat_element/stat_element.gd" id="1_g31f6"]
 
 [sub_resource type="FontVariation" id="FontVariation_g31f6"]
-variation_embolden = -0.5
+variation_embolden = -0.25
 
 [node name="StatElement" type="HBoxContainer"]
 anchors_preset = 10

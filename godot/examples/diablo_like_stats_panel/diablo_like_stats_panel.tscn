@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://bgal27tj5kfb5"]
+[gd_scene load_steps=26 format=3 uid="uid://bgal27tj5kfb5"]
 
 [ext_resource type="PackedScene" uid="uid://c087pyfjwtiot" path="res://examples/diablo_like_stats_panel/components/stat_group_name/stat_group_name.tscn" id="1_0na5u"]
 [ext_resource type="Script" uid="uid://b4u82r8u0k82w" path="res://examples/diablo_like_stats_panel/diablo_like_stats_panel.gd" id="1_fg1kq"]
@@ -6,133 +6,235 @@
 [ext_resource type="Attribute" uid="uid://cygpwvidnwb4r" path="res://gameplay/attributes/resources/derived_stats/critical_chance_attribute.tres" id="3_qw60i"]
 [ext_resource type="Attribute" uid="uid://chflikwoscdd4" path="res://gameplay/attributes/resources/base_stats/weapon_damage_attribute.tres" id="4_i50f2"]
 [ext_resource type="Attribute" uid="uid://1amikj7jssm" path="res://gameplay/attributes/resources/base_stats/dexterity_attribute.tres" id="4_qjbdy"]
+[ext_resource type="Attribute" uid="uid://ceuy411jav5x6" path="res://gameplay/attributes/resources/base_stats/level_attribute.tres" id="4_snfor"]
+[ext_resource type="Attribute" uid="uid://c5p5llkc6w0k8" path="res://gameplay/attributes/resources/derived_stats/next_level_attribute.tres" id="5_70t7r"]
 [ext_resource type="Attribute" uid="uid://c1uyi5q3bg8tk" path="res://gameplay/attributes/resources/base_stats/intelligence_attribute.tres" id="5_dokl1"]
-[ext_resource type="Attribute" uid="uid://cyujanpykro6b" path="res://gameplay/attributes/resources/base_stats/weapon_speed_attribute.tres" id="5_h66a5"]
 [ext_resource type="Attribute" uid="uid://thh4pqruvh3u" path="res://gameplay/attributes/resources/derived_stats/armor_attribute.tres" id="6_60jw6"]
+[ext_resource type="Attribute" uid="uid://c17rjrfhgankh" path="res://gameplay/attributes/resources/derived_stats/next_level_experience.tres" id="6_508xd"]
+[ext_resource type="Attribute" uid="uid://bni3doj26llee" path="res://gameplay/attributes/resources/base_stats/experience_attribute.tres" id="6_fk780"]
 [ext_resource type="Attribute" uid="uid://mnay87w5wtsl" path="res://gameplay/attributes/resources/base_stats/strength_attribute.tres" id="6_i50f2"]
 [ext_resource type="Attribute" uid="uid://ycgjkjx2alpy" path="res://gameplay/attributes/resources/clamping_stats/max_health_attribute.tres" id="7_dku7d"]
 [ext_resource type="Attribute" uid="uid://c1p5v5qaawljl" path="res://gameplay/attributes/resources/base_stats/willpower_attribute.tres" id="7_h66a5"]
 [ext_resource type="Attribute" uid="uid://ckv1dr0mavapc" path="res://gameplay/attributes/resources/derived_stats/evasion_attribute.tres" id="7_sjt8f"]
 [ext_resource type="Attribute" uid="uid://b3cr7xyst32io" path="res://gameplay/attributes/resources/clamping_stats/max_resource_attribute.tres" id="8_sjt8f"]
+[ext_resource type="Script" uid="uid://b2djvxmp3yvsr" path="res://gameplay/attributes/scripts/base_stats/WeaponSpeedAttribute.gd" id="10_fk780"]
 [ext_resource type="Attribute" uid="uid://bdhmewo36hlny" path="res://gameplay/attributes/resources/derived_stats/attack_power_attribute.tres" id="10_sjt8f"]
 [ext_resource type="Attribute" uid="uid://qv58hj03342v" path="res://gameplay/attributes/resources/derived_stats/health_attribute.tres" id="11_b2n5x"]
 [ext_resource type="Attribute" uid="uid://dhg6xpmri4f5v" path="res://gameplay/attributes/resources/derived_stats/resource_attribute.tres" id="12_fg1kq"]
 [ext_resource type="AttributeSet" uid="uid://bwhjuw1lmci26" path="res://examples/diablo_like_stats_panel/diablo_like_stats_panel_attribute_set.tres" id="18_j5axe"]
 
-[node name="DiabloLikeStatsPanel" type="HBoxContainer"]
+[sub_resource type="Attribute" id="Attribute_qgvpp"]
+script = ExtResource("10_fk780")
+metadata/_custom_type_script = "uid://b2djvxmp3yvsr"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fk780"]
+bg_color = Color(0.165213, 0.145808, 0.103521, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qgvpp"]
+bg_color = Color(0.660811, 0.506793, 0.196016, 1)
+
+[node name="DiabloLikeStatsPanel" type="VBoxContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 64
 alignment = 1
 script = ExtResource("1_fg1kq")
 
-[node name="FullStatsVBoxContainer" type="VBoxContainer" parent="."]
+[node name="StatsHBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 48
+alignment = 1
+
+[node name="FullStatsVBoxContainer" type="VBoxContainer" parent="StatsHBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="OffensiveStats" parent="FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+[node name="Level" parent="StatsHBoxContainer/FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+layout_mode = 2
+text = "Level Stats"
+
+[node name="CurrentLevelStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("4_snfor")
+attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
+
+[node name="NextLevelStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("5_70t7r")
+attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
+
+[node name="ExperienceStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("6_fk780")
+attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
+
+[node name="NextLevelExperienceStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("6_508xd")
+attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
+
+[node name="OffensiveStats" parent="StatsHBoxContainer/FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
 layout_mode = 2
 text = "Offensive Stats"
 
-[node name="CriticalChanceStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="CriticalChanceStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("3_qw60i")
 attribute_container = NodePath("../../AttributeContainer")
 
-[node name="WeaponDamageStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="WeaponDamageStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("4_i50f2")
 attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
 
-[node name="WeaponSpeedStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="WeaponSpeedStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
-attribute = ExtResource("5_h66a5")
+attribute = SubResource("Attribute_qgvpp")
 attribute_container = NodePath("../../AttributeContainer")
+decimals = 1
 
-[node name="DefensiveStats" parent="FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+[node name="DefensiveStats" parent="StatsHBoxContainer/FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
 layout_mode = 2
 text = "Defensive Stats"
 
-[node name="ArmourStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="ArmourStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("6_60jw6")
 attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
 
-[node name="EvasionStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="EvasionStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("7_sjt8f")
 attribute_container = NodePath("../../AttributeContainer")
 
-[node name="MaxHealthStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="MaxHealthStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("7_dku7d")
 attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
 
-[node name="ResourceStats" parent="FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+[node name="ResourceStats" parent="StatsHBoxContainer/FullStatsVBoxContainer" instance=ExtResource("1_0na5u")]
 layout_mode = 2
 text = "Resources Stats"
 
-[node name="MaxResourceStat" parent="FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="MaxResourceStat" parent="StatsHBoxContainer/FullStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("8_sjt8f")
 attribute_container = NodePath("../../AttributeContainer")
+decimals = 0
 
-[node name="BaseStatsVBoxContainer" type="VBoxContainer" parent="."]
+[node name="BaseStatsVBoxContainer" type="VBoxContainer" parent="StatsHBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AttackStatsGroup" parent="BaseStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+[node name="AttackStatsGroup" parent="StatsHBoxContainer/BaseStatsVBoxContainer" instance=ExtResource("1_0na5u")]
 layout_mode = 2
 text = "Attack Stats"
 
-[node name="AttackPowerStat" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="AttackPowerStat" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("10_sjt8f")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="HealthStat" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="HealthStat" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("11_b2n5x")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="ResourceStat" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="ResourceStat" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("12_fg1kq")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="BaseStatsGroup" parent="BaseStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+[node name="BaseStatsGroup" parent="StatsHBoxContainer/BaseStatsVBoxContainer" instance=ExtResource("1_0na5u")]
 layout_mode = 2
 text = "Base Stats"
 
-[node name="Dexterity" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="Dexterity" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("4_qjbdy")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="Intelligence" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="Intelligence" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("5_dokl1")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="Strength" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="Strength" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("6_i50f2")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="Willpower" parent="BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+[node name="Willpower" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
 layout_mode = 2
 attribute = ExtResource("7_h66a5")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
-[node name="AttributeContainer" type="AttributeContainer" parent="."]
+[node name="AttributeContainer" type="AttributeContainer" parent="StatsHBoxContainer"]
 attribute_set = ExtResource("18_j5axe")
+unique_name_in_owner = true
+
+[node name="ActionsHBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="WeaponSelectionOptionButton" type="OptionButton" parent="ActionsHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+selected = 0
+item_count = 4
+popup/item_0/text = "Unarmed (0dmg)"
+popup/item_0/id = 1
+popup/item_1/text = "Knife (+5dmg)"
+popup/item_1/id = 0
+popup/item_2/text = "Sword (+10dmg) + buckler (+10armor)"
+popup/item_2/id = 2
+popup/item_3/text = "2H Sword (+20dmg)"
+popup/item_3/id = 3
+
+[node name="MainStatOptionButton" type="OptionButton" parent="ActionsHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Dexterity"
+popup/item_0/id = 0
+popup/item_1/text = "Intelligence"
+popup/item_1/id = 1
+popup/item_2/text = "Strength"
+popup/item_2/id = 2
+
+[node name="VSeparator" type="VSeparator" parent="ActionsHBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="GainXpButton" type="Button" parent="ActionsHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Gain XP!"
+
+[node name="CurrentLevelBar" type="ProgressBar" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_fk780")
+theme_override_styles/fill = SubResource("StyleBoxFlat_qgvpp")
+show_percentage = false

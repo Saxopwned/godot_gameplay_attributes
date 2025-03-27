@@ -7,9 +7,9 @@ func _init(_attribute_name = ATTRIBUTE_NAME) -> void:
 	attribute_name = _attribute_name
 
 
-func _compute_value(_compute_value: AttributeComputationArgument) -> float:
+func _compute_value(computed_value: AttributeComputationArgument) -> float:
 	var base_value			:= 5.0
-	var parent_attributes	:= _compute_value.runtime_attribute.get_parent_runtime_attributes()
+	var parent_attributes	:= computed_value.runtime_attribute.get_parent_runtime_attributes()
 
 	## The maximum resource is the base value + 1 for each 5 points of intelligence.
 	## Flooring necessary because I am an asshole and I want you to sweat harder.

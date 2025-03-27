@@ -1,4 +1,4 @@
-[gd_resource type="AttributeSet" load_steps=18 format=3 uid="uid://bwhjuw1lmci26"]
+[gd_resource type="AttributeSet" load_steps=24 format=3 uid="uid://bwhjuw1lmci26"]
 
 [ext_resource type="Attribute" uid="uid://cdep438qx4g0w" path="res://gameplay/attributes/resources/base_stats/base_critical_chance_attribute.tres" id="1_x6sk8"]
 [ext_resource type="Attribute" uid="uid://buieobay5s5r" path="res://gameplay/attributes/resources/base_stats/base_critical_damage_attribute.tres" id="2_q1qkp"]
@@ -17,6 +17,12 @@
 [ext_resource type="Attribute" uid="uid://ckv1dr0mavapc" path="res://gameplay/attributes/resources/derived_stats/evasion_attribute.tres" id="15_8d8gv"]
 [ext_resource type="Attribute" uid="uid://qv58hj03342v" path="res://gameplay/attributes/resources/derived_stats/health_attribute.tres" id="16_4l2bx"]
 [ext_resource type="Attribute" uid="uid://dhg6xpmri4f5v" path="res://gameplay/attributes/resources/derived_stats/resource_attribute.tres" id="17_7haqq"]
+[ext_resource type="Attribute" uid="uid://ceuy411jav5x6" path="res://gameplay/attributes/resources/base_stats/level_attribute.tres" id="18_dkkxn"]
+[ext_resource type="Attribute" uid="uid://bni3doj26llee" path="res://gameplay/attributes/resources/base_stats/experience_attribute.tres" id="19_k0718"]
+[ext_resource type="Attribute" uid="uid://c5p5llkc6w0k8" path="res://gameplay/attributes/resources/derived_stats/next_level_attribute.tres" id="20_7gylt"]
+[ext_resource type="Attribute" uid="uid://c17rjrfhgankh" path="res://gameplay/attributes/resources/derived_stats/next_level_experience.tres" id="21_arg67"]
+[ext_resource type="Attribute" uid="uid://c7flnm68108ms" path="res://gameplay/attributes/resources/base_stats/base_armour_attribute.tres" id="22_k0718"]
+[ext_resource type="Attribute" uid="uid://csf78laddj2rm" path="res://gameplay/attributes/resources/derived_stats/to_next_level_attribute.tres" id="23_7gylt"]
 
 [resource]
-attributes = Array[AttributeBase]([ExtResource("1_x6sk8"), ExtResource("2_q1qkp"), ExtResource("3_2k7q7"), ExtResource("4_piqlx"), ExtResource("5_dkkxn"), ExtResource("6_k0718"), ExtResource("7_7gylt"), ExtResource("8_arg67"), ExtResource("9_jmiki"), ExtResource("10_t7e2k"), ExtResource("11_uqf7x"), ExtResource("12_8nw2b"), ExtResource("13_cbe0v"), ExtResource("14_2ckxg"), ExtResource("15_8d8gv"), ExtResource("16_4l2bx"), ExtResource("17_7haqq")])
+attributes = Array[AttributeBase]([ExtResource("1_x6sk8"), ExtResource("2_q1qkp"), ExtResource("3_2k7q7"), ExtResource("4_piqlx"), ExtResource("5_dkkxn"), ExtResource("6_k0718"), ExtResource("7_7gylt"), ExtResource("8_arg67"), ExtResource("9_jmiki"), ExtResource("10_t7e2k"), ExtResource("11_uqf7x"), ExtResource("12_8nw2b"), ExtResource("13_cbe0v"), ExtResource("14_2ckxg"), ExtResource("15_8d8gv"), ExtResource("16_4l2bx"), ExtResource("17_7haqq"), ExtResource("18_dkkxn"), ExtResource("19_k0718"), ExtResource("20_7gylt"), ExtResource("21_arg67"), ExtResource("22_k0718"), ExtResource("23_7gylt")])
