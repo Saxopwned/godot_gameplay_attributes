@@ -13,6 +13,7 @@ func _applies_to(attribute_set: AttributeSet) -> Array[AttributeBase]:
 		attribute_set.find_by_name(ResourceAttribute.ATTRIBUTE_NAME),
 		attribute_set.find_by_name(MaxResourceAttribute.ATTRIBUTE_NAME),
 		attribute_set.find_by_name(HealthAttribute.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(LevelCap.ATTRIBUTE_NAME),
 	]
 
 
@@ -27,7 +28,8 @@ func _operate(_values: Array[float], _attribute_set: AttributeSet) -> Array[Attr
 		AttributeOperation.forcefully_set_value(5.0),
 		AttributeOperation.forcefully_set_value(5.0),
 		AttributeOperation.forcefully_set_value(10.0),
-		AttributeOperation.forcefully_set_value(5.0),
+		AttributeOperation.forcefully_set_value(10000000.0),
 		AttributeOperation.forcefully_set_value(10.0),
-		AttributeOperation.forcefully_set_value(5.0),
+		AttributeOperation.forcefully_set_value(10.0),
+		AttributeOperation.forcefully_set_value(100.0),
 	]

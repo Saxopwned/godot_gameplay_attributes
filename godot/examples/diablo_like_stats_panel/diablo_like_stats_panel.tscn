@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://bgal27tj5kfb5"]
+[gd_scene load_steps=30 format=3 uid="uid://bgal27tj5kfb5"]
 
 [ext_resource type="PackedScene" uid="uid://c087pyfjwtiot" path="res://examples/diablo_like_stats_panel/components/stat_group_name/stat_group_name.tscn" id="1_0na5u"]
 [ext_resource type="Script" uid="uid://b4u82r8u0k82w" path="res://examples/diablo_like_stats_panel/diablo_like_stats_panel.gd" id="1_fg1kq"]
@@ -16,10 +16,14 @@
 [ext_resource type="Attribute" uid="uid://ycgjkjx2alpy" path="res://gameplay/attributes/resources/clamping_stats/max_health_attribute.tres" id="7_dku7d"]
 [ext_resource type="Attribute" uid="uid://c1p5v5qaawljl" path="res://gameplay/attributes/resources/base_stats/willpower_attribute.tres" id="7_h66a5"]
 [ext_resource type="Attribute" uid="uid://ckv1dr0mavapc" path="res://gameplay/attributes/resources/derived_stats/evasion_attribute.tres" id="7_sjt8f"]
+[ext_resource type="Attribute" uid="uid://cjrg4ymt4kt8j" path="res://gameplay/attributes/resources/derived_stats/resistance_fire.tres" id="8_cqoto"]
 [ext_resource type="Attribute" uid="uid://b3cr7xyst32io" path="res://gameplay/attributes/resources/clamping_stats/max_resource_attribute.tres" id="8_sjt8f"]
+[ext_resource type="Attribute" uid="uid://crertq4syy8bw" path="res://gameplay/attributes/resources/derived_stats/resitance_darkness.tres" id="9_12vi7"]
 [ext_resource type="Script" uid="uid://b2djvxmp3yvsr" path="res://gameplay/attributes/scripts/base_stats/WeaponSpeedAttribute.gd" id="10_fk780"]
+[ext_resource type="Attribute" uid="uid://d0tm8msd2qmgb" path="res://gameplay/attributes/resources/derived_stats/resistance_lightning.tres" id="10_oms1s"]
 [ext_resource type="Attribute" uid="uid://bdhmewo36hlny" path="res://gameplay/attributes/resources/derived_stats/attack_power_attribute.tres" id="10_sjt8f"]
 [ext_resource type="Attribute" uid="uid://qv58hj03342v" path="res://gameplay/attributes/resources/derived_stats/health_attribute.tres" id="11_b2n5x"]
+[ext_resource type="Attribute" uid="uid://cpqnukvcgvp8c" path="res://gameplay/attributes/resources/derived_stats/resistance_poison.tres" id="11_d3dwm"]
 [ext_resource type="Attribute" uid="uid://dhg6xpmri4f5v" path="res://gameplay/attributes/resources/derived_stats/resource_attribute.tres" id="12_fg1kq"]
 [ext_resource type="AttributeSet" uid="uid://bwhjuw1lmci26" path="res://examples/diablo_like_stats_panel/diablo_like_stats_panel_attribute_set.tres" id="18_j5axe"]
 
@@ -187,6 +191,30 @@ attribute = ExtResource("7_h66a5")
 attribute_container = NodePath("../../AttributeContainer")
 decimals = 0
 
+[node name="ResistanceStats" parent="StatsHBoxContainer/BaseStatsVBoxContainer" instance=ExtResource("1_0na5u")]
+layout_mode = 2
+text = "Resistance"
+
+[node name="FireResistanceStat" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("8_cqoto")
+attribute_container = NodePath("../../AttributeContainer")
+
+[node name="DarknessResistanceStat" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("9_12vi7")
+attribute_container = NodePath("../../AttributeContainer")
+
+[node name="LightningResistanceStat2" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("10_oms1s")
+attribute_container = NodePath("../../AttributeContainer")
+
+[node name="PoisonResistanceStat" parent="StatsHBoxContainer/BaseStatsVBoxContainer" node_paths=PackedStringArray("attribute_container") instance=ExtResource("2_d0734")]
+layout_mode = 2
+attribute = ExtResource("11_d3dwm")
+attribute_container = NodePath("../../AttributeContainer")
+
 [node name="AttributeContainer" type="AttributeContainer" parent="StatsHBoxContainer"]
 attribute_set = ExtResource("18_j5axe")
 unique_name_in_owner = true
@@ -205,7 +233,7 @@ popup/item_0/text = "Unarmed (0dmg)"
 popup/item_0/id = 1
 popup/item_1/text = "Knife (+5dmg)"
 popup/item_1/id = 0
-popup/item_2/text = "Sword (+10dmg) + buckler (+10armor)"
+popup/item_2/text = "Sword (+10dmg)"
 popup/item_2/id = 2
 popup/item_3/text = "2H Sword (+20dmg)"
 popup/item_3/id = 3
@@ -230,6 +258,11 @@ theme_override_constants/separation = 24
 unique_name_in_owner = true
 layout_mode = 2
 text = "Gain XP!"
+
+[node name="GainXPOverTimeCheckBox" type="CheckBox" parent="ActionsHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Gain XP over time"
 
 [node name="CurrentLevelBar" type="ProgressBar" parent="."]
 unique_name_in_owner = true

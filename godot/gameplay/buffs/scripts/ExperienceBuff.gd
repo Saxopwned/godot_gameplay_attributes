@@ -5,7 +5,7 @@ extends AttributeBuff
 
 
 @export var minimum_experience: float = 1.0
-@export var maximum_experience: float = 3.0
+@export var maximum_experience: float = 5.0
 
 
 func _applies_to(attribute_set: AttributeSet) -> Array[AttributeBase]:
@@ -21,6 +21,8 @@ func _applies_to(attribute_set: AttributeSet) -> Array[AttributeBase]:
 		attribute_set.find_by_name(DexterityAttribute.ATTRIBUTE_NAME),
 		attribute_set.find_by_name(IntelligenceAttribute.ATTRIBUTE_NAME),
 		attribute_set.find_by_name(StrengthAttribute.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(LevelCap.ATTRIBUTE_NAME),
+		attribute_set.find_by_name(LevelAttribute.ATTRIBUTE_NAME),
 	]
 
 
@@ -32,17 +34,25 @@ func _operate(values: Array[float], _attribute_set: AttributeSet)	-> Array[Attri
 	var dex_stat				= values[4]
 	var int_stat				= values[5]
 	var str_stat				= values[6]
-	var new_exp					= round(current_level * randf_range(minimum_experience, maximum_experience))
+	var level_cap				= values[7]
+	var level					= values[8]
+	var new_exp					= round(current_level + (current_level * randf_range(minimum_experience, maximum_experience)))
 	var experience_operation 	= AttributeOperation.add(new_exp)
 	var boosted_experience		= experience_operation.operate(current_experience)
 	var ret: Array[AttributeOperation] = []
 	var level_up := false
 
-	if boosted_experience >= next_level_experience:
+	if boosted_experience >= next_level_experience && level_cap >= level + 1:
 		level_up = true
 		ret = [
 			AttributeOperation.add(1),
 			AttributeOperation.forcefully_set_value(maxf(abs(boosted_experience - next_level_experience), 0.0)),
+			AttributeOperation.add(0),
+		]
+	elif level_cap == level:
+		ret = [
+			AttributeOperation.add(0),
+			AttributeOperation.add(0),
 			AttributeOperation.add(0),
 		]
 	else:

@@ -5,6 +5,7 @@ extends VBoxContainer
 @onready var gain_xp_button: Button = %GainXpButton
 @onready var weapon_selection_option_button: OptionButton = %WeaponSelectionOptionButton
 @onready var main_stat_option_button: OptionButton = %MainStatOptionButton
+@onready var gain_xp_over_time_check_box: CheckBox = %GainXPOverTimeCheckBox
 
 
 func _ready() -> void:
@@ -23,6 +24,15 @@ func _ready() -> void:
 	weapon_selection_option_button.item_selected.connect(func (item_index: int) -> void:
 		attribute_container.apply_buff(WeaponDamageBuff.new(item_index))
 	)
+	
+	var timer := Timer.new()
+	timer.wait_time = .1
+	timer.timeout.connect(func ():
+		if gain_xp_over_time_check_box.button_pressed:
+			attribute_container.apply_buff(ExperienceBuff.new())	
+	)
+	add_child(timer)
+	timer.start()
 
 
 func update_ui(runtime_attribute: RuntimeAttribute, old_value: float, new_value: float) -> void:

@@ -13,7 +13,7 @@ func _compute_value(_compute_value: AttributeComputationArgument) -> float:
 	var dexterity			= parent_attributes[1]
 	
 	### base chance + 2% of dexterity
-	return base_chance.get_buffed_value() + (dexterity.get_buffed_value() * 0.2)
+	return base_chance.get_buffed_value() + (dexterity.get_buffed_value() * 0.01)
 	
 	
 func _derived_from(attribute_set: AttributeSet) -> Array[AttributeBase]:
