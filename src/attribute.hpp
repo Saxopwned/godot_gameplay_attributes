@@ -373,7 +373,7 @@ namespace octod::gameplay::attributes
 		static void _bind_methods();
 
 		/// @brief The attribute container pointer.
-		AttributeContainer *attribute_container;
+		AttributeContainer *attribute_container = nullptr;
 
 		/// @brief The attribute buff.
 		AttributeBuff *buff = nullptr;
