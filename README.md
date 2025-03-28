@@ -60,12 +60,15 @@ An `Attribute` has a name,
 an initial value,
 and optionally it can define
 how it derives from other attributes
-and how other attributes can apply constraints to it.
+and how it's value can be computed.
 
 The best way
 to define your attributes is
 to create your own custom resources as scripts
 that inherit from the `Attribute` base class.
+
+> If you plan to have many attributes, I would suggest you to instance them as `.tres` files.
+
 This way,
 you can define your attribute
 and use it later in your attribute sets.
@@ -101,104 +104,12 @@ func _init(_attribute_name = ATTRIBUTE_NAME) -> void:
 	attribute_name = _attribute_name
 
 
-func _get_buffed_value(values: PackedFloat32Array) -> float:
-	return values[0] * 6
-
-
 func _derived_from(attribute_set: AttributeSet) -> Array[AttributeBase]:
-	return [attribute_set.find_by_name(ConstitutionAttribute.ATTRIBUTE_NAME)]
+	return [attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME)]
 	
 	
-func _get_initial_value(values: PackedFloat32Array) -> float:
-	return values[0] * 6
-```
-
-You must override the `_get_buffed_value` method to define how the attribute value is calculated based on the values of the attributes that it depends on. You must override the `_derived_from` method to define which attributes the derived attribute depends on and the `_get_initial_value` method to define the initial value of the attribute.
-
-## Attributes constraints
-
-Some attributes
-(like health,
-mana,
-stamina,
-etc.)
-could potentially have constraints,
-like a maximum value,
-a minimum value,
-or a value
-that can be calculated based on other attributes.
-
-To achieve this is quite straightforward. You have to create a script that inherits from `Attribute` base class as your main attribute, one for the minimum value, one for the maximum value, and one for the derived value.
-
-Example:
-
-#### Defining the minimum and maximum constraints
-
-The minimum health attribute should look similar to this:
-
-```gdscript
-class_name MinHealthAttribute
-extends Attribute
-
-const ATTRIBUTE_NAME := "MinHealthAttribute"
-
-func _init(_attribute_name := ATTRIBUTE_NAME):
-	attribute_name = _attribute_name
-
-
-func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
-	return [
-		attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME)
-	]
-	
-	
-func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
-	return minf(buffed_value, buffed_values[0]) # we don't want to exceed the value of the MaxHealthAttribute
-```
-
-While the maximum health attribute should look like this:
-
-```gdscript
-class_name MaxHealthAttribute
-extends Attribute
-
-const ATTRIBUTE_NAME := "MaxHealthAttribute"
-
-func _init(_attribute_name := ATTRIBUTE_NAME):
-	attribute_name = _attribute_name
-
-
-func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
-	return [
-		attribute_set.find_by_name(MinHealthConstraintAttribute.ATTRIBUTE_NAME)
-	]
-	
-	
-func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
-	return maxf(buffed_value, buffed_values[0])
-```
-
-#### Applying the constraints to the main attribute
-
-```gdscript
-class_name Health
-extends Attribute
-
-const ATTRIBUTE_NAME := "Health"
-
-func _init(_attribute_name := ATTRIBUTE_NAME):
-	attribute_name = _attribute_name
-	
-	
-func _constrained_by(attribute_set: AttributeSet) -> Array[AttributeBase]:
-	return [
-		attribute_set.find_by_name(MinHealthAttribute.ATTRIBUTE_NAME),
-		attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME),
-	]
-	
-	
-func _get_constrained_value(buffed_value: float, buffed_values: PackedFloat32Array, previous_values: PackedFloat32Array) -> float:
-	return clampf(buffed_value, buffed_values[0], buffed_values[1]) # tada!
+func _compute_value(compute_value: AttributeComputationArgument) -> float:
+	return clampf(compute_value.operated_value, 0, compute_value.get_parent_attributes()[0].get_buffed_value())
 ```
 
 ## Custom attribute buff/debuff
