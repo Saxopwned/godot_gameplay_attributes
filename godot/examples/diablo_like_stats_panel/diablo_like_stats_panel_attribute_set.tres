@@ -25,7 +25,7 @@
 [ext_resource type="Attribute" uid="uid://csf78laddj2rm" path="res://gameplay/attributes/resources/derived_stats/to_next_level_attribute.tres" id="23_7gylt"]
 [ext_resource type="Attribute" uid="uid://bs6rc4n107b8f" path="res://gameplay/attributes/resources/base_stats/level_cap_attribute.tres" id="24_arg67"]
 [ext_resource type="Attribute" uid="uid://cjrg4ymt4kt8j" path="res://gameplay/attributes/resources/derived_stats/resistance_fire.tres" id="25_8nw2b"]
-[ext_resource type="Attribute" uid="uid://crertq4syy8bw" path="res://gameplay/attributes/resources/derived_stats/resitance_darkness.tres" id="26_cbe0v"]
+[ext_resource type="Attribute" uid="uid://crertq4syy8bw" path="res://gameplay/attributes/resources/derived_stats/resistance_darkness.tres" id="26_cbe0v"]
 [ext_resource type="Attribute" uid="uid://d0tm8msd2qmgb" path="res://gameplay/attributes/resources/derived_stats/resistance_lightning.tres" id="27_2ckxg"]
 [ext_resource type="Attribute" uid="uid://cpqnukvcgvp8c" path="res://gameplay/attributes/resources/derived_stats/resistance_poison.tres" id="28_8d8gv"]
 
