@@ -4,31 +4,26 @@
 		Base class for Attributes.
 	</brief_description>
 	<description>
-		This is an abstract base class for Attributes. You should not use this class directly, but rather use one of its derived classes.
-		A good practice consist in overriding the [Attribute] class to create your own attributes.
+		This is an abstract base class for Attributes.
+		You should not use this class directly, but rather use one of its derived classes.
+		A good practice consists of overriding the [Attribute] class to create your own attributes.
 
 		In certain scenarios, you could also create attributes from other [Attribute] classes by overriding three methods:
-		- [method _constrained_by] Subscribes to some attributes which will constrain this attribute. Like min/max health on a health attribute.
-		- [method _derived_from] Subscribes to some attributes which will define how this attribute is derived. Like strength and dexterity on a damage attribute.
-		- [method _get_buffed_value] Gets the buffed attribute value. The function argument is an array of buffed values of the base attributes defining the derived attribute.
-		- [method _get_constrained_value] Gets the constrained value of the attribute. The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed by the attribute _constrained_by virtual method. NOTE: this is called AFTER that all the buffs are applied to an attribute.
-		- [method _get_initial_value] Get the initial value of the attribute.
+		— [method _compute_value] Handles value computation.
+		- [method _derived_from] Subscribes to some attributes that will define how this attribute is derived. Like strength and dexterity on a damage attribute.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="_constrained_by" qualifiers="virtual const">
-			<return type="AttributeBase[]" />
-			<param index="0" name="attribute_set" type="AttributeSet" />
+		<method name="_compute_value" qualifiers="virtual const">
+			<return type="float" />
+			<param index="0" name="attribute_computation" type="AttributeComputationArgument" />
 			<description>
-				Subscribes to some attributes which will constrain this attribute. Like min/max health on a health attribute.
+				Computes the value of the attribute.
 				[codeblock]
 				[gdscript]
-				func _constrained_by(attribute_set: AttributeSet) -> Array:
-				    return [
-				        attribute_set.find_attribute_by_name("MyAttributeName_1"),
-				        attribute_set.find_attribute_by_name("MyAttributeName_2")
-				    ]
+				func _compute_value(argument: AttributeComputationArgument) -> Array:
+				    return clampf(argument.operated_value, 0, 100.0)
 				[/gdscript]
 				[/codeblock]
 			</description>
@@ -37,10 +32,14 @@
 			<return type="AttributeBase[]" />
 			<param index="0" name="attribute_set" type="AttributeSet" />
 			<description>
-				Subscribes to some attributes which will define how this attribute is derived. Like strength and dexterity on a damage attribute.
+				Subscribes to some attributes
+				that will define
+				how this attribute is derived.
+				Like strength and dexterity on a damage attribute.
 				[codeblock]
 				[gdscript]
-				func _derived_from(attribute_set: AttributeSet) -> Array:
+				func _derived_from(attribute_set:
+				AttributeSet) -> Array:
 				    return [
 				        attribute_set.find_attribute_by_name("MyAttributeName_1"),
 				        attribute_set.find_attribute_by_name("MyAttributeName_2")
@@ -49,72 +48,10 @@
 				[/codeblock]
 			</description>
 		</method>
-		<method name="_get_buffed_value" qualifiers="virtual const">
-			<return type="float" />
-			<param index="0" name="values" type="PackedFloat32Array" />
-			<description>
-				Gets the buffed attribute value. The array passed as argument is the array of RuntimeAttribute instances buffed values.
-				[codeblock]
-				[gdscript]
-				func _get_buffed_value(values: PackedFloat32Array) -> float:
-				    var my_buffed_attribute_value_1 = values[0]
-				    var my_buffed_attribute_value_2 = values[1]
-
-				    return my_attribute_value_1 + my_attribute_value_2 + 1
-				[/gdscript]
-				[/codeblock]
-
-				[b]Note:[/b] This method is called only if the [AttributeBase._derived_from] is overridden.
-			</description>
-		</method>
-		<method name="_get_constrained_value" qualifiers="virtual const">
-			<return type="float" />
-			<param index="0" name="values" type="PackedFloat32Array" />
-			<description>
-				Gets the constrained value of the attribute.
-
-				The array passed as argument is the array of RuntimeAttribute instances buffed value of the attributes subscribed by the attribute _constrained_by virtual method.
-
-				[codeblock]
-				[gdscript]
-				func _get_constrained_value(my_attribute_value: float, current_buffed_values: PackedFloat32Array, previous_buffed_values: PackedFloat32Array) -> float:
-				    var min_health = values[0]
-				    var max_health = values[1]
-
-				    return clampf(my_attribute_value, min_health, max_health)
-				[/gdscript]
-				[/codeblock]
-
-				[b]Note:[/b] This method is called only if the [AttributeBase._constrained_by] is overridden.
-				[b]Note:[/b] this is called AFTER that all the buffs are applied to an attribute.
-			</description>
-		</method>
-		<method name="_get_initial_value" qualifiers="virtual const">
-			<return type="float" />
-			<param index="0" name="attribute_set" type="PackedFloat32Array" />
-			<description>
-				Override this method to calculate the initial value of the attribute.
-				[codeblock]
-				[gdscript]
-				func _get_initial_value(attribute_set: AttributeSet) -> float:
-				    var my_attribute_value_1 = values[0]
-				    var my_attribute_value_2 = values[1]
-						
-				    return my_attribute_value_1 + my_attribute_value_2 + 1
-				[/gdscript]
-				[/codeblock]
-
-				[b]Note:[/b] This method is called only if the attribute is a derived one.
-				[b]Note:[/b] This method is required for derived attributes.
-			</description>
-		</method>
 	</methods>
 	<members>
 		<member name="attribute_name" type="String" setter="set_attribute_name" getter="get_attribute_name" default="&quot;AttributeBase&quot;">
 			The name of the attribute.
-		</member>
-		<member name="buffs" type="AttributeBuff[]" setter="set_buffs" getter="get_buffs" default="[]">
-			The initial buffs assigned to the attribute. This array comes in handy when you want to apply buffs to the attribute before the game starts (e.g. when the player is creating a character, after a load etc).
 		</member>
 	</members>
 </class>
