@@ -1,7 +1,7 @@
 extends Control
 
 @onready var attribute_container: AttributeContainer = $AttributeContainer
-@onready var label: Label = $CenterContainer/Label
+@onready var label: Label = $CenterContainer/VBoxContainer/Label
 
 
 func _ready() -> void:
