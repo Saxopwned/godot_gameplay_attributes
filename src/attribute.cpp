@@ -635,7 +635,7 @@ int AttributeSet::count() const
 
 #pragma endregion
 
-#pragma region BuffPoolQueueItem
+#pragma region RuntimeBuff
 
 void RuntimeBuff::_bind_methods()
 {
