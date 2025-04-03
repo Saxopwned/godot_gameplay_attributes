@@ -55,13 +55,30 @@ func _compute_value(argument: AttributeComputationArgument) -> float:
     return clamp(value, 0, max_health_attribute.get_buffed_value()) ## we asked for the buffed value, so if the max health increases, the maximum value of health will be able to increase too.
 ```
 
+It's time
+to create an instance of these attributes.
+
+To do that,
+right-click on the FileSystem panel
+to create a new resource
+(one for each attribute).
+
 After that, we need to create a new `AttributeSet` to hold our attributes. 
 
 To do that, open the file explorer in godot, click with the right button of the mouse in the folder where you want to create the new file and select `New Resource...`. 
 Then select `AttributeSet` and click `Create`.
 
-Once saved the resource, double click on it and:
-- In the top of the inspector, click the |+| button twice to increase the number of values.
-- Then click to quick load the `MaxHealthAttribute` and `HealthAttribute` classes.
+Once saved the resource,
+double-click on it and:
+- At the top of the inspector, click the |+| button twice to increase the number of values.
+- Then drag and drop the `MaxHealthAttribute` and `HealthAttribute` resource.
 
-todo: continue here
+Now save the resource and back to the scene.
+
+Add a node to your scene, select the `AttributeContainer`
+
+Double-click on it and at the top of the inspector,
+drag and drop the new `AttributeSet` resource
+you just created.
+
+In your code

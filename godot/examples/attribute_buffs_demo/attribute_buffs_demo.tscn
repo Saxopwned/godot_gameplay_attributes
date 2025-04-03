@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://83oaet2m3mx1"]
 
-[ext_resource type="Script" uid="uid://b6gn85xmbaqyd" path="res://examples/attribute_buffs_demo/attribute_buffs_demo.gd" id="1_o458e"]
+[ext_resource type="Script" uid="uid://b7vuspnkfvcqw" path="res://examples/attribute_buffs_demo/attribute_buffs_demo.gd" id="1_o458e"]
 [ext_resource type="AttributeSet" uid="uid://en06khsjql3a" path="res://examples/attribute_buffs_demo/attribute_buffs_attribute_set.tres" id="2_6ufkv"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_6ufkv"]
