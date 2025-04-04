@@ -5,6 +5,8 @@ This is a simple guide to get you started with the Godot Gameplay Attributes plu
 
 This example is really simple but should cover the basics.
 
+## Creating a new attribute
+
 First thing first, let's create two attributes: `HealthAttribute` and `MaxHealthAttribute`.
 
 When creating a new attribute, it's recommended to 
@@ -55,6 +57,8 @@ func _compute_value(argument: AttributeComputationArgument) -> float:
     return clamp(value, 0, max_health_attribute.get_buffed_value()) ## we asked for the buffed value, so if the max health increases, the maximum value of health will be able to increase too.
 ```
 
+## Instancing the attributes as resources
+
 It's time
 to create an instance of these attributes.
 
@@ -75,10 +79,53 @@ double-click on it and:
 
 Now save the resource and back to the scene.
 
+## Assigning the attributes to an AttributeContainer node
+
 Add a node to your scene, select the `AttributeContainer`
 
 Double-click on it and at the top of the inspector,
 drag and drop the new `AttributeSet` resource
 you just created.
 
-In your code
+Now, how do we set a starting value? 
+
+To set an initial value to the attributes, we need to run an AttributeBuff on them when the
+AttributeContainer come in game.
+
+## Initializing attributes values
+
+To do that, we need to create our first [`AttributeBuff`](../classes/AttributeBuff.md).
+
+Let's create a new script called `InitializeAttributesBuff.gd` and add the following code:
+
+```gdscript
+class_name InitializeAttributesBuff
+extends AttributeBuff
+
+@export var max_health: float = 100.0
+@export var health: float = 100.0
+
+func _applies_to(attribute_set: AttributeSet) -> Array[Attribute]:
+    # note: remember to apply a buff to "base" attributes first and to "derived" later
+    return [
+        attribute_set.find_by_name(MaxHealthAttribute.ATTRIBUTE_NAME),
+        attribute_set.find_by_name(HealthAttribute.ATTRIBUTE_NAME),
+    ]
+
+
+func _operate(_values, _attribute_set: AttributeSet) -> void:
+    # note: the order must be the same as  the one in _applies_to
+    return [
+        AttributeOperation.forcefully_set_value(max_health),
+        AttributeOperation.forcefully_set_value(health),
+    ]
+```
+
+Now, into our scene's scrit, we have to instance and apply this buff
+
+```gdscript
+func _ready() -> void:
+    attribute_container.apply_buff(InitializeAttributesBuff.new())
+```
+
+Done! 
