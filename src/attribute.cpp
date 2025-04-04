@@ -656,7 +656,7 @@ void RuntimeBuff::_bind_methods()
 
 bool RuntimeBuff::equals_to(const Ref<AttributeBuff> &p_buff) const
 {
-	return buff == p_buff;
+	return buff->buff_name == p_buff->buff_name;
 }
 
 Ref<RuntimeAttribute> RuntimeBuff::applies_to(const AttributeContainer *p_attribute_container) const
@@ -822,10 +822,10 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 			}
 
 			runtime_buff->time_left = p_buff->get_duration();
-		} else {
-			buffs.push_back(runtime_buff);
-			emit_signal("buff_added", runtime_buff);
 		}
+
+		buffs.push_back(runtime_buff);
+		emit_signal("buff_added", runtime_buff);
 	} else {
 		previous_value = value;
 
