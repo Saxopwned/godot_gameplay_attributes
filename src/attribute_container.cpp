@@ -11,7 +11,6 @@
 #include "attribute_container.hpp"
 
 #include "attribute.hpp"
-#include "buff_pool_queue.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
 using namespace octod::gameplay::attributes;
@@ -49,18 +48,49 @@ void AttributeContainer::_bind_methods()
 	ADD_SIGNAL(MethodInfo("buff_dequed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_enqueued", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_removed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
+	ADD_SIGNAL(MethodInfo("buff_time_elapsed", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 	ADD_SIGNAL(MethodInfo("buff_time_updated", PropertyInfo(Variant::OBJECT, "buff", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeBuff")));
 }
 
 void AttributeContainer::_notification(const int p_what)
 {
 	if (p_what == NOTIFICATION_READY) {
-		buff_pool_queue = memnew(BuffPoolQueue);
-		buff_pool_queue->connect("attribute_buff_dequeued", Callable::create(this, "_on_buff_dequeued"));
-		buff_pool_queue->connect("attribute_buff_enqueued", Callable::create(this, "_on_buff_enqueued"));
-
-		add_child(buff_pool_queue);
 		setup();
+		set_physics_process(true);
+	} else if (p_what == NOTIFICATION_PHYSICS_PROCESS) {
+		const TypedArray<RuntimeAttribute> &runtime_attributes = attributes.values();
+		const float phy_time = static_cast<float>(get_physics_process_delta_time());
+
+		for (int64_t i = 0; i < runtime_attributes.size(); i++) {
+			const Ref<RuntimeAttribute> &attribute = runtime_attributes[i];
+
+			if (!attribute.is_valid()) {
+				continue;
+			}
+
+			TypedArray<RuntimeBuff> buffs = attribute->get_buffs();
+
+			for (int64_t j = buffs.size() - 1; j >= 0; j--) {
+				Ref<RuntimeBuff> buff = buffs[j];
+
+				if (!buff.is_valid() || buff.is_null()) {
+					continue;
+				}
+
+				if (buff->is_transient() && buff->has_duration()) {
+					buff->set_time_left(buff->get_time_left() - phy_time);
+
+					emit_signal("buff_time_elapsed", buff);
+
+					if (buff->can_dequeue()) {
+						emit_signal("buff_dequed", buff);
+						attribute->remove_buff(buff);
+						WARN_PRINT("Buff " + buff->get_buff_name() + " expired.");
+						buffs.remove_at(j);
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -148,10 +178,12 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 	const Callable attribute_changed_callable = Callable::create(this, "_on_attribute_changed");
 	const Callable buff_applied_callable = Callable::create(this, "_on_buff_applied");
 	const Callable buff_removed_callable = Callable::create(this, "_on_buff_removed");
+	const Callable buff_time_updated_callable = Callable::create(this, "_on_buff_time_updated");
 
 	runtime_attribute->connect("attribute_changed", attribute_changed_callable);
 	runtime_attribute->connect("buff_added", buff_applied_callable);
 	runtime_attribute->connect("buff_removed", buff_removed_callable);
+	runtime_attribute->connect("buff_time_updated", buff_time_updated_callable);
 
 	attributes[p_attribute->get_attribute_name()] = runtime_attribute;
 }
@@ -200,10 +232,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 			derived_buff->set_transient(p_buff->get_transient());
 
 			derived_buff->set_operation(operations[i]);
-
-			if (runtime_attribute->add_buff(derived_buff) && !Math::is_zero_approx(p_buff->get_duration())) {
-				buff_pool_queue->enqueue(derived_buff);
-			}
+			runtime_attribute->add_buff(derived_buff);
 		}
 	} else {
 		const Ref<RuntimeAttribute> runtime_attribute = get_runtime_attribute_by_name(p_buff->get_attribute_name());
@@ -211,9 +240,7 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 		ERR_FAIL_COND_MSG(!runtime_attribute.is_valid(), "Attribute '" + p_buff->get_attribute_name() + "' not found in the container.");
 		ERR_FAIL_COND_MSG(runtime_attribute.is_null(), "Attribute reference is not valid.");
 
-		if (runtime_attribute->add_buff(p_buff) && !Math::is_zero_approx(p_buff->get_duration())) {
-			buff_pool_queue->enqueue(RuntimeBuff::from_buff(p_buff));
-		}
+		runtime_attribute->add_buff(p_buff);
 	}
 }
 

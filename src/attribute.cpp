@@ -193,6 +193,15 @@ bool AttributeBuff::operator==(const Ref<AttributeBuff> &buff) const
 	return buff->attribute_name == attribute_name && buff->buff_name == buff_name && buff->duration == duration && buff->operation == operation;
 }
 
+bool AttributeBuff::equals_to(const Ref<AttributeBuff> &buff) const
+{
+	if (buff == nullptr || buff.is_null() || !buff.is_valid()) {
+		return false;
+	}
+
+	return buff->attribute_name == attribute_name && buff->buff_name == buff_name && buff->duration == duration && buff->operation == operation && buff->max_stacking == max_stacking && buff->queue_execution == queue_execution;
+}
+
 float AttributeBuff::operate(const float base_value) const
 {
 	ERR_FAIL_COND_V_MSG(operation.is_null(), 0.0f, "AttributeBuff operation is null, cannot operate on base value.");
@@ -656,7 +665,7 @@ void RuntimeBuff::_bind_methods()
 
 bool RuntimeBuff::equals_to(const Ref<AttributeBuff> &p_buff) const
 {
-	return buff->buff_name == p_buff->buff_name;
+	return buff->equals_to(p_buff);
 }
 
 Ref<RuntimeAttribute> RuntimeBuff::applies_to(const AttributeContainer *p_attribute_container) const
@@ -740,9 +749,20 @@ float RuntimeBuff::get_time_left() const
 	return time_left;
 }
 
+bool RuntimeBuff::has_duration() const
+{
+	return !Math::is_zero_approx(buff->duration);
+}
+
 bool RuntimeBuff::is_operate_overridden() const
 {
 	return GDVIRTUAL_IS_OVERRIDDEN_PTR(buff, _operate);
+}
+
+bool RuntimeBuff::is_transient() const
+{
+	ERR_FAIL_COND_V_MSG(!buff.is_valid(), false, "AttributeBuff is not valid.");
+	return buff->transient;
 }
 
 void RuntimeBuff::set_buff(const Ref<AttributeBuff> &p_value)
@@ -752,7 +772,7 @@ void RuntimeBuff::set_buff(const Ref<AttributeBuff> &p_value)
 
 void RuntimeBuff::set_time_left(const float p_value)
 {
-	time_left = p_value;
+	time_left = Math::clamp(p_value, 0.0f, buff->get_duration());
 }
 
 #pragma endregion
@@ -763,7 +783,6 @@ void RuntimeAttribute::_bind_methods()
 {
 	/// binds methods to godot
 	ClassDB::bind_method(D_METHOD("add_buff", "p_buff"), &RuntimeAttribute::add_buff);
-	ClassDB::bind_method(D_METHOD("add_buffs", "p_buffs"), &RuntimeAttribute::add_buffs);
 	ClassDB::bind_method(D_METHOD("can_receive_buff", "p_buff"), &RuntimeAttribute::can_receive_buff);
 	ClassDB::bind_method(D_METHOD("clear_buffs"), &RuntimeAttribute::clear_buffs);
 	ClassDB::bind_method(D_METHOD("get_attribute"), &RuntimeAttribute::get_attribute);
@@ -775,16 +794,13 @@ void RuntimeAttribute::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_value"), &RuntimeAttribute::get_value);
 	ClassDB::bind_method(D_METHOD("has_ongoing_buffs"), &RuntimeAttribute::has_ongoing_buffs);
 	ClassDB::bind_method(D_METHOD("remove_buff", "p_buff"), &RuntimeAttribute::remove_buff);
-	ClassDB::bind_method(D_METHOD("remove_buffs", "p_buffs"), &RuntimeAttribute::remove_buffs);
 	ClassDB::bind_method(D_METHOD("set_attribute", "p_value"), &RuntimeAttribute::set_attribute);
 	ClassDB::bind_method(D_METHOD("set_attribute_set", "p_value"), &RuntimeAttribute::set_attribute_set);
-	ClassDB::bind_method(D_METHOD("set_buffs", "p_buffs"), &RuntimeAttribute::set_buffs);
 	ClassDB::bind_method(D_METHOD("set_value", "p_value"), &RuntimeAttribute::set_value);
 
 	/// binds properties to godot
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "AttributeBase"), "set_attribute", "get_attribute");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "set_value", "get_value");
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "buffs"), "set_buffs", "get_buffs");
 
 	/// adds signals to godot
 	ADD_SIGNAL(MethodInfo("attribute_changed", PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "RuntimeAttributeBase"), PropertyInfo(Variant::FLOAT, "previous_value"), PropertyInfo(Variant::FLOAT, "new_value")));
@@ -806,10 +822,8 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 
 	if (p_buff->get_transient()) {
 		if (const auto duration_merging = runtime_buff->buff->get_duration_merging(); duration_merging == AttributeBuff::DURATION_MERGE_ADD || duration_merging == AttributeBuff::DURATION_MERGE_RESTART) {
-			auto buffs = get_buffs();
-
 			for (int i = 0; i < buffs.size(); i++) {
-				if (const auto maybe_runtime_buff = cast_to<RuntimeBuff>(buffs[i]); maybe_runtime_buff && maybe_runtime_buff->buff == p_buff) {
+				if (const auto maybe_runtime_buff = cast_to<RuntimeBuff>(buffs[i]); maybe_runtime_buff && maybe_runtime_buff->buff->equals_to(p_buff)) {
 					if (duration_merging == AttributeBuff::DURATION_MERGE_ADD) {
 						maybe_runtime_buff->set_time_left(maybe_runtime_buff->get_time_left() + p_buff->get_duration());
 					} else {
@@ -817,11 +831,11 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 					}
 
 					emit_signal("buff_time_updated", maybe_runtime_buff);
-					break;
+					return true;
 				}
 			}
 
-			runtime_buff->time_left = p_buff->get_duration();
+			runtime_buff->set_time_left(p_buff->get_duration());
 		}
 
 		buffs.push_back(runtime_buff);
@@ -848,19 +862,6 @@ bool RuntimeAttribute::add_buff(const Ref<AttributeBuff> &p_buff)
 	}
 
 	return true;
-}
-
-int RuntimeAttribute::add_buffs(const TypedArray<AttributeBuff> &p_buffs)
-{
-	int count = 0;
-
-	for (int i = 0; i < p_buffs.size(); i++) {
-		if (add_buff(p_buffs[i])) {
-			count++;
-		}
-	}
-
-	return count;
 }
 
 bool RuntimeAttribute::can_receive_buff(const Ref<AttributeBuff> &p_buff) const
@@ -968,23 +969,6 @@ bool RuntimeAttribute::remove_buff(const Ref<AttributeBuff> &p_buff)
 	return false;
 }
 
-int RuntimeAttribute::remove_buffs(const TypedArray<AttributeBuff> &p_buffs)
-{
-	int count = 0;
-
-	for (int64_t i = p_buffs.size() - 1; i >= 0; i--) {
-		if (remove_buff(buffs[i])) {
-			count++;
-		}
-	}
-
-	if (count > 0) {
-		emit_signal("buffs_cleared");
-	}
-
-	return count;
-}
-
 Ref<Attribute> RuntimeAttribute::get_attribute() const
 {
 	return attribute;
@@ -1045,12 +1029,6 @@ void RuntimeAttribute::set_value(const float p_value)
 {
 	previous_value = value;
 	value = p_value;
-}
-
-void RuntimeAttribute::set_buffs(const TypedArray<AttributeBuff> &p_value)
-{
-	buffs.clear();
-	add_buffs(p_value);
 }
 
 void RuntimeAttribute::set_attribute_set(const Ref<AttributeSet> &p_value)

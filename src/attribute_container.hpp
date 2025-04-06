@@ -20,7 +20,6 @@ namespace octod::gameplay::attributes
 	class AttributeBase;
 	class AttributeBuff;
 	class AttributeSet;
-	class BuffPoolQueue;
 	class RuntimeAttribute;
 	class RuntimeBuff;
 
@@ -104,9 +103,6 @@ namespace octod::gameplay::attributes
 		Ref<AttributeSet> attribute_set;
 		/// @brief TypedArray of attributes.
 		Dictionary attributes;
-		/// @brief Buff pool queue is used
-		/// // to store buffs that have a limited duration.
-		BuffPoolQueue *buff_pool_queue;
 		/// @brief Derived attributes. These are attributes that are calculated from other attributes.
 		Dictionary derived_attributes;
 
@@ -148,6 +144,6 @@ namespace octod::gameplay::attributes
 		/// @param p_base_runtime_attribute The attribute that changed.
 		void notify_derived_attributes(const Ref<RuntimeAttribute> &p_base_runtime_attribute);
 	};
-}
+} //namespace octod::gameplay::attributes
 
 #endif

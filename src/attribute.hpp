@@ -236,6 +236,9 @@ namespace octod::gameplay::attributes
 		// equal operator overload
 		bool operator==(const Ref<AttributeBuff> &buff) const;
 
+		/// @brief Checks if the buff is equal to another buff.
+		/// @return True if the buff is equal, false otherwise.
+		[[nodiscard]] bool equals_to(const Ref<AttributeBuff> &buff) const;
 		/// @brief Returns the result of the operation on the base value.
 		/// @param base_value The base value to operate on. It is the attribute underlying value.
 		/// @return The result of the operation.
@@ -429,27 +432,6 @@ namespace octod::gameplay::attributes
 	{
 		GDCLASS(RuntimeBuff, RefCounted);
 
-	protected:
-		friend class AttributeContainer;
-		friend class RuntimeAttribute;
-
-		static void _bind_methods();
-		/// @brief The attribute buff reference.
-		Ref<AttributeBuff> buff;
-		/// @brief The time the buff was added.
-		float time_left = 0.0f;
-		/// @brief If the buff is unique.
-		bool unique = false;
-
-		/// @brief Returns the attributes the buff applies to.
-		/// @param p_attribute_container The attribute container set to check.
-		/// @return The attributes the buff applies to.
-		Ref<RuntimeAttribute> applies_to(const AttributeContainer *p_attribute_container) const;
-		/// @brief Operate on the runtime attributes.
-		/// @param p_runtime_attributes The runtime attributes to operate on.
-		/// @return The operated runtime values.
-		[[nodiscard]] float operate(const Ref<RuntimeAttribute> &p_runtime_attributes) const;
-
 	public:
 		static Ref<RuntimeBuff> from_buff(const Ref<AttributeBuff> &p_buff);
 		static Ref<AttributeBuff> to_buff(const Ref<RuntimeBuff> &p_buff);
@@ -489,15 +471,44 @@ namespace octod::gameplay::attributes
 		/// @brief Get the time left for the buff to expire.
 		/// @return The time left for the buff to expire.
 		[[nodiscard]] float get_time_left() const;
+		/// @brief Returns if the buff has a duration.
+		/// @return True if the buff has a duration, false otherwise.
+		[[nodiscard]] bool has_duration() const;
 		/// @brief Returns if the _operate method is overridden.
 		/// @return True if the _operate method is overridden, false otherwise.
 		[[nodiscard]] bool is_operate_overridden() const;
+		/// @brief Returns if the buff is transient.
+		/// @return True if the buff is transient, false otherwise.
+		[[nodiscard]] bool is_transient() const;
 		/// @brief Set the buff.
 		/// @param p_value The buff.
 		void set_buff(const Ref<AttributeBuff> &p_value);
 		/// @brief Set the duration of the buff.
 		/// @param p_value The duration of the buff.
 		void set_time_left(float p_value);
+
+	protected:
+		friend class AttributeContainer;
+		friend class RuntimeAttribute;
+
+		/// @brief Bind methods to Godot.
+		static void _bind_methods();
+
+		/// @brief The attribute buff reference.
+		Ref<AttributeBuff> buff;
+		/// @brief The time the buff was added.
+		float time_left = 0.0f;
+		/// @brief If the buff is unique.
+		bool unique = false;
+
+		/// @brief Returns the attributes the buff applies to.
+		/// @param p_attribute_container The attribute container set to check.
+		/// @return The attributes the buff applies to.
+		Ref<RuntimeAttribute> applies_to(const AttributeContainer *p_attribute_container) const;
+		/// @brief Operate on the runtime attributes.
+		/// @param p_runtime_attributes The runtime attributes to operate on.
+		/// @return The operated runtime values.
+		[[nodiscard]] float operate(const Ref<RuntimeAttribute> &p_runtime_attributes) const;
 	};
 
 	class RuntimeAttribute : public RefCounted
@@ -509,11 +520,6 @@ namespace octod::gameplay::attributes
 		/// @param p_buff The buff to add.
 		/// @return True if the buff was added, false otherwise.
 		bool add_buff(const Ref<AttributeBuff> &p_buff);
-
-		/// @brief Add buffs to the attribute.
-		/// @param p_buffs The buffs to add.
-		/// @return The number of buffs added.
-		int add_buffs(const TypedArray<AttributeBuff> &p_buffs);
 
 		/// @brief Check if the attribute can receive a buff.
 		/// @param p_buff The buff to check.
@@ -547,11 +553,6 @@ namespace octod::gameplay::attributes
 		/// @param p_buff The buff to remove.
 		/// @return True if the buff was removed, false otherwise.
 		bool remove_buff(const Ref<AttributeBuff> &p_buff);
-
-		/// @brief Remove buffs from the attribute.
-		/// @param p_buffs The buffs to remove.
-		/// @return The number of buffs removed.
-		int remove_buffs(const TypedArray<AttributeBuff> &p_buffs);
 
 		/// @brief Get the attribute.
 		/// @return The attribute.
@@ -587,10 +588,6 @@ namespace octod::gameplay::attributes
 		/// @brief Set the attribute set.w
 		/// @param p_value The attribute set.
 		void set_attribute_set(const Ref<AttributeSet> &p_value);
-
-		/// @brief Sets the buffs affecting the attribute.
-		/// @param p_value The buffs affecting the attribute.
-		void set_buffs(const TypedArray<AttributeBuff> &p_value);
 
 		/// @brief Sets the value of the attribute.
 		/// @param p_value The value of the attribute.

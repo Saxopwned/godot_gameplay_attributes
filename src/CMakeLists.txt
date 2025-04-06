@@ -17,8 +17,6 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES}
         attribute.hpp
         attribute_container.cpp
         attribute_container.hpp
-        buff_pool_queue.cpp
-        buff_pool_queue.hpp
         register_types.cpp
         register_types.hpp
 )

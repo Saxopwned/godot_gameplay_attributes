@@ -29,7 +29,6 @@
 
 #include "attribute.hpp"
 #include "attribute_container.hpp"
-#include "buff_pool_queue.hpp"
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
@@ -48,7 +47,6 @@ void gdextension_initialize(ModuleInitializationLevel p_level)
 		/// nodes
 		ClassDB::register_runtime_class<AttributeContainer>();
 		ClassDB::register_runtime_class<AttributeComputationArgument>();
-		ClassDB::register_runtime_class<BuffPoolQueue>();
 		/// runtime classes
 		ClassDB::register_runtime_class<RuntimeBuff>();
 		ClassDB::register_runtime_class<RuntimeAttribute>();
