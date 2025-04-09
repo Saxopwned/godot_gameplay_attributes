@@ -27,9 +27,9 @@ func _operate(_values: Array[float], _attribute_set: AttributeSet) -> Array[Attr
 		AttributeOperation.forcefully_set_value(5.0),
 		AttributeOperation.forcefully_set_value(5.0),
 		AttributeOperation.forcefully_set_value(5.0),
-		AttributeOperation.forcefully_set_value(10.0),
+		AttributeOperation.forcefully_set_value(100.0),
 		AttributeOperation.forcefully_set_value(10000000.0),
-		AttributeOperation.forcefully_set_value(10.0),
-		AttributeOperation.forcefully_set_value(10.0),
+		AttributeOperation.forcefully_set_value(100.0),
+		AttributeOperation.forcefully_set_value(100.0),
 		AttributeOperation.forcefully_set_value(100.0),
 	]

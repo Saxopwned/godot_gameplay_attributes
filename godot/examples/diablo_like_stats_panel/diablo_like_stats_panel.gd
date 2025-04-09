@@ -6,15 +6,19 @@ extends VBoxContainer
 @onready var weapon_selection_option_button: OptionButton = %WeaponSelectionOptionButton
 @onready var main_stat_option_button: OptionButton = %MainStatOptionButton
 @onready var gain_xp_over_time_check_box: CheckBox = %GainXPOverTimeCheckBox
+@onready var heal_me_button: Button = %HealMeButton
 
 
 func _ready() -> void:
 	attribute_container.apply_buff(InitializeAttributes.new())
-
 	attribute_container.attribute_changed.connect(update_ui)
 
 	gain_xp_button.pressed.connect(func () -> void:
 		attribute_container.apply_buff(ExperienceBuff.new())
+	)
+	
+	heal_me_button.pressed.connect(func () -> void:
+		attribute_container.apply_buff(PotionBuff.new())	
 	)
 	
 	main_stat_option_button.item_selected.connect(func (item_index: int) -> void:
@@ -38,3 +42,5 @@ func _ready() -> void:
 func update_ui(runtime_attribute: RuntimeAttribute, old_value: float, new_value: float) -> void:
 	if runtime_attribute.attribute is ToNextLevelPercentageAttribute:
 		current_level_bar.value = new_value
+	if runtime_attribute.attribute is DamageAttribute:
+		attribute_container.apply_buff(CalculateDamageBuff.new())
