@@ -324,9 +324,9 @@ namespace octod::gameplay::attributes
 		/// it means infinite.
 		int max_stacking = 0;
 		/// @brief The operation to apply.
-		Ref<AttributeOperation> operation;
+		Ref<AttributeOperation> operation = nullptr;
 		/// @brief The queue execution.
-		QueueExecution queue_execution;
+		QueueExecution queue_execution = QUEUE_EXECUTION_PARALLEL;
 		/// @brief The buff is transient and will be not affect the attribute value directly.
 		bool transient = false;
 		/// @brief If the buff is unique and only one can be applied.
