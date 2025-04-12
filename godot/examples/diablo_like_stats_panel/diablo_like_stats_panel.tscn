@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=4 uid="uid://bgal27tj5kfb5"]
+[gd_scene load_steps=55 format=4 uid="uid://bgal27tj5kfb5"]
 
 [ext_resource type="PackedScene" uid="uid://c087pyfjwtiot" path="res://examples/diablo_like_stats_panel/components/stat_group_name/stat_group_name.tscn" id="1_0na5u"]
 [ext_resource type="Script" uid="uid://b4u82r8u0k82w" path="res://examples/diablo_like_stats_panel/diablo_like_stats_panel.gd" id="1_fg1kq"]
@@ -2190,31 +2190,56 @@ ProgressBar/styles/fill = SubResource("StyleBoxFlat_oms1s")
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cqoto"]
 bg_color = Color(0.0973895, 0.0847923, 0.0617763, 1)
 
+[sub_resource type="AttributeOperation" id="AttributeOperation_oms1s"]
+value = 1.0
+
 [sub_resource type="AttributeBuff" id="AttributeBuff_oms1s"]
+attribute_name = "DamageDarknessAttribute"
+operation = SubResource("AttributeOperation_oms1s")
 script = ExtResource("4_d3dwm")
 damage_type = 0
 damage_range = 1.0
 metadata/_custom_type_script = "uid://dl3hlrtn1grdh"
 
+[sub_resource type="AttributeOperation" id="AttributeOperation_d3dwm"]
+value = 1.0
+
 [sub_resource type="AttributeBuff" id="AttributeBuff_d3dwm"]
+attribute_name = "DamageFireAttribute"
+operation = SubResource("AttributeOperation_d3dwm")
 script = ExtResource("4_d3dwm")
 damage_type = 1
 damage_range = 1.0
 metadata/_custom_type_script = "uid://dl3hlrtn1grdh"
 
+[sub_resource type="AttributeOperation" id="AttributeOperation_bli6e"]
+value = 1.0
+
 [sub_resource type="AttributeBuff" id="AttributeBuff_bli6e"]
+attribute_name = "DamageLightningAttribute"
+operation = SubResource("AttributeOperation_bli6e")
 script = ExtResource("4_d3dwm")
 damage_type = 2
 damage_range = 1.0
 metadata/_custom_type_script = "uid://dl3hlrtn1grdh"
 
+[sub_resource type="AttributeOperation" id="AttributeOperation_buj84"]
+value = 1.0
+
 [sub_resource type="AttributeBuff" id="AttributeBuff_buj84"]
+attribute_name = "DamagePhysicalAttribute"
+operation = SubResource("AttributeOperation_buj84")
 script = ExtResource("4_d3dwm")
 damage_type = 3
 damage_range = 1.0
 metadata/_custom_type_script = "uid://dl3hlrtn1grdh"
 
+[sub_resource type="AttributeOperation" id="AttributeOperation_oolmw"]
+value = 1.0
+
 [sub_resource type="AttributeBuff" id="AttributeBuff_oolmw"]
+attribute_name = "DamagePoisonAttribute"
+operation = SubResource("AttributeOperation_oolmw")
 script = ExtResource("4_d3dwm")
 damage_type = 4
 damage_range = 1.0
