@@ -158,6 +158,10 @@ void AttributeContainer::add_attribute(const Ref<AttributeBase> &p_attribute)
 
 	RuntimeAttribute *runtime_attribute = memnew(RuntimeAttribute);
 
+	if (attribute_set.is_null() || !attribute_set.is_valid()) {
+		attribute_set.instantiate();
+	}
+
 	if (!attribute_set->has_attribute(p_attribute)) {
 		attribute_set->add_attribute(p_attribute);
 	}
