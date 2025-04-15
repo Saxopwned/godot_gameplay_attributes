@@ -3,7 +3,8 @@ extends Control
 enum ExampleBuffType {
 	MaxStackCount,
 	InfiniteStack,
-	TimeReset
+	TimeReset,
+	UniqueBuff
 }
 
 
@@ -16,6 +17,9 @@ enum ExampleBuffType {
 @onready var stack_count_label: Label = %StackCountLabel
 @onready var time_left_label: Label = %TimeLeftLabel
 @onready var time_reset_button: Button = %TimeResetButton
+@onready var unique_buff_count_label: Label = %UniqueBuffCountLabel
+@onready var unique_buff_button: Button = %UniqueBuffButton
+@onready var remove_unique_buff_button: Button = %RemoveUniqueBuffButton
 
 
 func _ready() -> void:
@@ -37,6 +41,14 @@ func _ready() -> void:
 	
 	time_reset_button.pressed.connect(func ():
 		attribute_container.apply_buff(make_buff(ExampleBuffType.TimeReset))
+	)
+	
+	unique_buff_button.pressed.connect(func ():
+		attribute_container.apply_buff(make_buff(ExampleBuffType.UniqueBuff))	
+	)
+	
+	remove_unique_buff_button.pressed.connect(func ():
+		attribute_container.remove_buff(make_buff(ExampleBuffType.UniqueBuff))	
 	)
 	
 	attribute_container.buff_applied.connect(make_draw_buff("Buff applied: "))
@@ -66,11 +78,13 @@ func make_draw_buff(buff_message: String) -> Callable:
 
 		match buff.get_buff_name():
 			"MaxStackCount": 
-				max_stack_count_label.text = String.num(buffs.size(), 0)
+				max_stack_count_label.text = String.num(buffs.size(), 0) + "/" + String.num(make_buff(ExampleBuffType.MaxStackCount).stack_size, 0)
 			"InfiniteStack": 
 				stack_count_label.text = String.num(buffs.size(), 0)
 			"TimeReset":
 				time_left_label.text = String.num(buff.get_time_left(), 2)
+			"UniqueBuff":
+				unique_buff_count_label.text = String.num(buffs.size(), 0) + "/1"
 
 
 func make_buff(buff_type: ExampleBuffType) -> AttributeBuff:
@@ -89,5 +103,8 @@ func make_buff(buff_type: ExampleBuffType) -> AttributeBuff:
 			buff.buff_name = "TimeReset"
 			buff.duration = 3.0 # three seconds should be enough
 			buff.duration_merging = AttributeBuff.DURATION_MERGE_RESTART
+		ExampleBuffType.UniqueBuff:
+			buff.buff_name = "UniqueBuff"
+			buff.unique = true
 	
 	return buff
