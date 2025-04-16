@@ -53,11 +53,6 @@ Ref<AttributeOperation> AttributeOperation::create(const OperationType p_operand
 	return operation;
 }
 
-bool AttributeOperation::operator==(const Ref<AttributeOperation> &buff) const
-{
-	return operand == buff->operand && value == buff->value;
-}
-
 Ref<AttributeOperation> AttributeOperation::add(const float p_value)
 {
 	return create(OP_ADD, p_value);
@@ -86,6 +81,15 @@ Ref<AttributeOperation> AttributeOperation::subtract(const float p_value)
 Ref<AttributeOperation> AttributeOperation::forcefully_set_value(const float p_value)
 {
 	return create(OP_SET, p_value);
+}
+
+bool AttributeOperation::equals_to(const Ref<AttributeOperation> &other) const
+{
+	if (other == nullptr) {
+		return false;
+	}
+
+	return operand == other->operand && Math::is_equal_approx(value, other->value);
 }
 
 int AttributeOperation::get_operand() const
@@ -188,18 +192,26 @@ void AttributeBuff::_bind_methods()
 	BIND_ENUM_CONSTANT(QUEUE_EXECUTION_WATERFALL)
 }
 
-bool AttributeBuff::operator==(const Ref<AttributeBuff> &buff) const
-{
-	return buff->attribute_name == attribute_name && buff->buff_name == buff_name && buff->duration == duration && buff->operation == operation;
-}
-
 bool AttributeBuff::equals_to(const Ref<AttributeBuff> &buff) const
 {
-	if (buff == nullptr || buff.is_null() || !buff.is_valid()) {
+	if (buff == nullptr) {
 		return false;
 	}
 
-	return buff->attribute_name == attribute_name && buff->buff_name == buff_name && buff->duration == duration && buff->operation == operation && buff->max_stacking == max_stacking && buff->queue_execution == queue_execution;
+	ERR_FAIL_COND_V_MSG(buff.is_null(), false, "Cannot compare to null AttributeBuff. This is a bug, please report it.");
+	ERR_FAIL_COND_V_MSG(!buff.is_valid(), false, "Cannot compare to invalid AttributeBuff. This is a bug, please report it.");
+
+	return (
+			Math::is_equal_approx(buff->duration, duration)
+			&& attribute_name == buff->attribute_name
+			&& buff_name == buff->buff_name
+			&& duration_merging == buff->duration_merging
+			&& max_stacking == buff->max_stacking
+			// && operation->equals_to(buff->operation)
+			&& queue_execution == buff->queue_execution
+			&& transient == buff->transient
+			&& unique == buff->unique
+	);
 }
 
 float AttributeBuff::operate(const float base_value) const
@@ -449,25 +461,6 @@ void AttributeSet::_bind_methods()
 	/// adds signals to godot
 	ADD_SIGNAL(MethodInfo("attribute_added", PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "AttributeBase")));
 	ADD_SIGNAL(MethodInfo("attribute_removed", PropertyInfo(Variant::OBJECT, "attribute", PROPERTY_HINT_RESOURCE_TYPE, "AttributeBase")));
-}
-
-bool AttributeSet::operator==(const Ref<AttributeSet> &set) const
-{
-	if (attributes.size() != set->attributes.size()) {
-		return false;
-	}
-
-	if (set_name != set->set_name) {
-		return false;
-	}
-
-	for (int i = 0; i < attributes.size(); i++) {
-		if (attributes[i] != set->attributes[i]) {
-			return false;
-		}
-	}
-
-	return true;
 }
 
 AttributeSet::AttributeSet()
@@ -933,7 +926,7 @@ TypedArray<RuntimeAttribute> RuntimeAttribute::get_parent_runtime_attributes() c
 bool RuntimeAttribute::has_buff(const Ref<AttributeBuff> &p_buff) const
 {
 	for (int i = 0; i < buffs.size(); i++) {
-		if (const Ref<RuntimeBuff> buff = buffs[i]; buff->equals_to(p_buff)) {
+		if (cast_to<RuntimeBuff>(buffs[i])->equals_to(p_buff)) {
 			return true;
 		}
 	}

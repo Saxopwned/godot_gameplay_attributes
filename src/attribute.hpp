@@ -61,8 +61,6 @@ namespace octod::gameplay::attributes
 		float value = 0.0f;
 
 	public:
-		bool operator==(const Ref<AttributeOperation> &buff) const;
-
 		/// @brief Returns a new instance of AttributeOperation with the add operation.
 		/// @param p_value The value to add.
 		/// @return The new instance of AttributeOperation.
@@ -87,6 +85,9 @@ namespace octod::gameplay::attributes
 		/// @param p_value The value to set.
 		/// @return The new instance of AttributeOperation.
 		static Ref<AttributeOperation> forcefully_set_value(float p_value);
+
+		/// @brief Checks for equality
+		[[nodiscard]] bool equals_to(const Ref<AttributeOperation> &other) const;
 
 		/// @brief Get the operand.
 		/// @return The operand.
@@ -116,11 +117,6 @@ namespace octod::gameplay::attributes
 		String set_name;
 
 	public:
-		/// @brief Equal operator overload.
-		/// @param set The AttributeSet to compare.
-		/// @return True if the AttributeSet is equal, false otherwise.
-		bool operator==(const Ref<AttributeSet> &set) const;
-
 		/// @brief Create an attribute set.
 		AttributeSet();
 		/// @brief Create an attribute set.
@@ -233,9 +229,6 @@ namespace octod::gameplay::attributes
 			QUEUE_EXECUTION_WATERFALL,
 		};
 
-		// equal operator overload
-		bool operator==(const Ref<AttributeBuff> &buff) const;
-
 		/// @brief Checks if the buff is equal to another buff.
 		/// @return True if the buff is equal, false otherwise.
 		[[nodiscard]] bool equals_to(const Ref<AttributeBuff> &buff) const;
@@ -324,7 +317,7 @@ namespace octod::gameplay::attributes
 		/// it means infinite.
 		int max_stacking = 0;
 		/// @brief The operation to apply.
-		Ref<AttributeOperation> operation = nullptr;
+		Ref<AttributeOperation> operation = AttributeOperation::add(0);
 		/// @brief The queue execution.
 		QueueExecution queue_execution = QUEUE_EXECUTION_PARALLEL;
 		/// @brief The buff is transient and will be not affect the attribute value directly.

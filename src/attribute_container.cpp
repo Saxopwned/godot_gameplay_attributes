@@ -85,7 +85,6 @@ void AttributeContainer::_notification(const int p_what)
 					if (buff->can_dequeue()) {
 						emit_signal("buff_dequed", buff);
 						attribute->remove_buff(buff);
-						WARN_PRINT("Buff " + buff->get_buff_name() + " expired.");
 						buffs.remove_at(j);
 					}
 				}
@@ -238,12 +237,13 @@ void AttributeContainer::apply_buff(const Ref<AttributeBuff> &p_buff) const
 			derived_buff->set_attribute_name(runtime_attribute->get_attribute()->get_attribute_name());
 			derived_buff->set_buff_name(p_buff->get_buff_name());
 			derived_buff->set_duration(p_buff->get_duration());
-			/// since it's a derived operation, we must multiply the max_applies by the number of derived attributes
-			/// affected.
-			derived_buff->set_stack_size(static_cast<int>(operations.size()) * p_buff->get_stack_size());
+			derived_buff->set_duration_merging(p_buff->get_duration_merging());
+			derived_buff->set_queue_execution(p_buff->get_queue_execution());
+			derived_buff->set_unique(p_buff->get_unique());
+			derived_buff->set_stack_size(p_buff->get_stack_size());
 			derived_buff->set_transient(p_buff->get_transient());
-
 			derived_buff->set_operation(operations[i]);
+
 			runtime_attribute->add_buff(derived_buff);
 		}
 	} else {
@@ -279,12 +279,13 @@ void AttributeContainer::remove_attribute(const Ref<AttributeBase> &p_attribute)
 void AttributeContainer::remove_buff(const Ref<AttributeBuff> &p_buff) const
 {
 	ERR_FAIL_NULL_MSG(p_buff, "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
+	ERR_FAIL_COND_MSG(p_buff.is_null(), "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
+	ERR_FAIL_COND_MSG(!p_buff.is_valid(), "Buff reference not valid.");
 
 	Array _attributes = attributes.values();
 
 	for (int i = 0; i < _attributes.size(); i++) {
-		const Ref<RuntimeAttribute> attribute = _attributes[i];
-		attribute->remove_buff(p_buff);
+		cast_to<RuntimeAttribute>(_attributes[i])->remove_buff(p_buff);
 	}
 }
 
@@ -296,8 +297,6 @@ void AttributeContainer::setup()
 		for (int i = 0; i < attribute_set->count(); i++) {
 			add_attribute(attribute_set->get_at(i));
 		}
-
-		TypedArray<RuntimeAttribute> runtime_attributes = get_runtime_attributes();
 	}
 }
 

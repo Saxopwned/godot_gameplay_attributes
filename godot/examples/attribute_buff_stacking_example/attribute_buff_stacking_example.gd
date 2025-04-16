@@ -1,13 +1,5 @@
 extends Control
 
-enum ExampleBuffType {
-	MaxStackCount,
-	InfiniteStack,
-	TimeReset,
-	UniqueBuff
-}
-
-
 @onready var attribute_container: AttributeContainer = $AttributeContainer
 @onready var infinite_stack_button: Button = %InfiniteStackButton
 @onready var max_stack_count_label: Label = %MaxStackCountLabel
@@ -24,31 +16,31 @@ enum ExampleBuffType {
 
 func _ready() -> void:
 	max_stack_button.pressed.connect(func ():
-		attribute_container.apply_buff(make_buff(ExampleBuffType.MaxStackCount))
+		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount))
 	)
 	
 	remove_max_stack_button.pressed.connect(func ():
-		attribute_container.remove_buff(make_buff(ExampleBuffType.MaxStackCount))	
+		attribute_container.remove_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount))	
 	)
 	
 	infinite_stack_button.pressed.connect(func ():
-		attribute_container.apply_buff(make_buff(ExampleBuffType.InfiniteStack))
+		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.InfiniteStack))
 	)
 	
 	remove_infinite_stack_button.pressed.connect(func ():
-		attribute_container.remove_buff(make_buff(ExampleBuffType.InfiniteStack))
+		attribute_container.remove_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.InfiniteStack))
 	)
 	
 	time_reset_button.pressed.connect(func ():
-		attribute_container.apply_buff(make_buff(ExampleBuffType.TimeReset))
+		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.TimeReset))
 	)
 	
 	unique_buff_button.pressed.connect(func ():
-		attribute_container.apply_buff(make_buff(ExampleBuffType.UniqueBuff))	
+		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.UniqueBuff))	
 	)
 	
 	remove_unique_buff_button.pressed.connect(func ():
-		attribute_container.remove_buff(make_buff(ExampleBuffType.UniqueBuff))	
+		attribute_container.remove_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.UniqueBuff))	
 	)
 	
 	attribute_container.buff_applied.connect(make_draw_buff("Buff applied: "))
@@ -56,7 +48,6 @@ func _ready() -> void:
 	
 	attribute_container.buff_enqueued.connect(func (buff: RuntimeBuff):
 		time_left_label.text = String.num(buff.get_time_left(), 2) + "s"
-		print(attribute_container.get_queue())
 	)
 	
 	attribute_container.buff_time_elapsed.connect(func (buff: RuntimeBuff):
@@ -77,34 +68,11 @@ func make_draw_buff(buff_message: String) -> Callable:
 		print("{0} {1}".format({0: buff_message, 1: buff.get_buff_name()}))
 
 		match buff.get_buff_name():
-			"MaxStackCount": 
-				max_stack_count_label.text = String.num(buffs.size(), 0) + "/" + String.num(make_buff(ExampleBuffType.MaxStackCount).stack_size, 0)
-			"InfiniteStack": 
+			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.MaxStackCount]:
+				max_stack_count_label.text = String.num(buffs.size(), 0) + "/" + String.num(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount).stack_size, 0)
+			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.InfiniteStack]:
 				stack_count_label.text = String.num(buffs.size(), 0)
-			"TimeReset":
+			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.TimeReset]:
 				time_left_label.text = String.num(buff.get_time_left(), 2)
-			"UniqueBuff":
+			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.UniqueBuff]:
 				unique_buff_count_label.text = String.num(buffs.size(), 0) + "/1"
-
-
-func make_buff(buff_type: ExampleBuffType) -> AttributeBuff:
-	var buff := AttributeBuff.new()
-
-	buff.attribute_name = HealthAttribute.ATTRIBUTE_NAME
-	buff.transient = true
-	
-	match buff_type:
-		ExampleBuffType.MaxStackCount: 
-			buff.buff_name = "MaxStackCount"
-			buff.stack_size = 5
-		ExampleBuffType.InfiniteStack: 
-			buff.buff_name = "InfiniteStack"
-		ExampleBuffType.TimeReset: 
-			buff.buff_name = "TimeReset"
-			buff.duration = 3.0 # three seconds should be enough
-			buff.duration_merging = AttributeBuff.DURATION_MERGE_RESTART
-		ExampleBuffType.UniqueBuff:
-			buff.buff_name = "UniqueBuff"
-			buff.unique = true
-	
-	return buff
