@@ -282,10 +282,26 @@ void AttributeContainer::remove_buff(const Ref<AttributeBuff> &p_buff) const
 	ERR_FAIL_COND_MSG(p_buff.is_null(), "Buff cannot be null, it must be an instance of a class inheriting from AttributeBuff abstract class.");
 	ERR_FAIL_COND_MSG(!p_buff.is_valid(), "Buff reference not valid.");
 
-	Array _attributes = attributes.values();
+	if (p_buff->is_operate_overridden()) {
+		TypedArray<AttributeBase> _attributes;
 
-	for (int i = 0; i < _attributes.size(); i++) {
-		cast_to<RuntimeAttribute>(_attributes[i])->remove_buff(p_buff);
+		ERR_FAIL_COND_MSG(!GDVIRTUAL_IS_OVERRIDDEN_PTR(p_buff, _applies_to), "Buff must override the _applies_to method to apply to derived attributes.");
+		ERR_FAIL_COND_MSG(!GDVIRTUAL_CALL_PTR(p_buff, _applies_to, attribute_set, _attributes), "An error occurred calling the overridden _applies_to method.");
+
+		for (int i = 0; i < _attributes.size(); i++) {
+			Ref<AttributeBuff> buff_copy = p_buff->duplicate();
+			Ref<RuntimeAttribute> runtime_attribute = get_runtime_attribute_by_name(cast_to<Attribute>(_attributes[i])->get_attribute_name());
+
+			buff_copy->set_attribute_name(runtime_attribute->attribute->get_attribute_name());
+
+			runtime_attribute->remove_buff(buff_copy);
+		}
+	} else {
+		Array _attributes = attributes.values();
+
+		for (int i = 0; i < _attributes.size(); i++) {
+			cast_to<RuntimeAttribute>(_attributes[i])->remove_buff(p_buff);
+		}
 	}
 }
 

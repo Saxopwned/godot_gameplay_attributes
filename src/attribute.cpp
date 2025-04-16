@@ -883,7 +883,7 @@ void RuntimeAttribute::compute_value()
 	if (GDVIRTUAL_IS_OVERRIDDEN_PTR(attribute, _compute_value)) {
 		AttributeComputationArgument *argument = memnew(AttributeComputationArgument);
 
-		float _previous_value = value;
+		const float _previous_value = value;
 
 		argument->set_attribute_container(attribute_container);
 		argument->set_buff(nullptr);

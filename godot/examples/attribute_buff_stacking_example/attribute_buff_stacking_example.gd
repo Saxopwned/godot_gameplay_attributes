@@ -16,31 +16,31 @@ extends Control
 
 func _ready() -> void:
 	max_stack_button.pressed.connect(func ():
-		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount))
+		attribute_container.apply_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount))
 	)
 	
 	remove_max_stack_button.pressed.connect(func ():
-		attribute_container.remove_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount))	
+		attribute_container.remove_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount))	
 	)
 	
 	infinite_stack_button.pressed.connect(func ():
-		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.InfiniteStack))
+		attribute_container.apply_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.InfiniteStack))
 	)
 	
 	remove_infinite_stack_button.pressed.connect(func ():
-		attribute_container.remove_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.InfiniteStack))
+		attribute_container.remove_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.InfiniteStack))
 	)
 	
 	time_reset_button.pressed.connect(func ():
-		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.TimeReset))
+		attribute_container.apply_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.TimeReset))
 	)
 	
 	unique_buff_button.pressed.connect(func ():
-		attribute_container.apply_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.UniqueBuff))	
+		attribute_container.apply_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.UniqueBuff))	
 	)
 	
 	remove_unique_buff_button.pressed.connect(func ():
-		attribute_container.remove_buff(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.UniqueBuff))	
+		attribute_container.remove_buff(make_buff(AttributeBuffStackingExample.ExampleBuffType.UniqueBuff))	
 	)
 	
 	attribute_container.buff_applied.connect(make_draw_buff("Buff applied: "))
@@ -69,10 +69,16 @@ func make_draw_buff(buff_message: String) -> Callable:
 
 		match buff.get_buff_name():
 			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.MaxStackCount]:
-				max_stack_count_label.text = String.num(buffs.size(), 0) + "/" + String.num(AttributeBuffStackingExample.new(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount).stack_size, 0)
+				max_stack_count_label.text = String.num(buffs.size(), 0) + "/" + String.num(make_buff(AttributeBuffStackingExample.ExampleBuffType.MaxStackCount).stack_size, 0)
 			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.InfiniteStack]:
 				stack_count_label.text = String.num(buffs.size(), 0)
 			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.TimeReset]:
 				time_left_label.text = String.num(buff.get_time_left(), 2)
 			AttributeBuffStackingExample.names[AttributeBuffStackingExample.ExampleBuffType.UniqueBuff]:
 				unique_buff_count_label.text = String.num(buffs.size(), 0) + "/1"
+
+
+func make_buff(type: AttributeBuffStackingExample.ExampleBuffType):
+	var buff = AttributeBuffStackingExample.new()
+	buff.buff_type = type
+	return buff
