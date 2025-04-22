@@ -55,11 +55,11 @@ jobs:
             target-type: template_debug
             os: ubuntu-24.04
 
-          - platform: web
-            float-precision: single
-            arch: wasm32
-            target-type: template_debug
-            os: ubuntu-24.04
+#          - platform: web
+#            float-precision: single
+#            arch: wasm32
+#            target-type: template_debug
+#            os: ubuntu-24.04
 
         # Release templates
           - platform: linux
@@ -112,11 +112,11 @@ jobs:
             target-type: template_debug
             os: ubuntu-24.04
 
-          - platform: web
-            float-precision: double
-            arch: wasm32
-            target-type: template_debug
-            os: ubuntu-24.04
+#          - platform: web
+#            float-precision: double
+#            arch: wasm32
+#            target-type: template_debug
+#            os: ubuntu-24.04
 
         # Double precision release templates
           - platform: linux
