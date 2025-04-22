@@ -52,6 +52,13 @@ By contributing to this project, you agree that your contributions will be licen
 
 We appreciate your contributions and look forward to your involvement in our project!
 
+## Code guidelines (c++)
+
+- 4 spaces tab indentation
+- curly braces on a new line for functions and classes
+- write code for human beings, not for machines
+- have fun!
+
 ## Code Review Process
 To ensure the quality and maintainability of the codebase, we have a code review process in place. Follow these steps when submitting your changes for review:
 

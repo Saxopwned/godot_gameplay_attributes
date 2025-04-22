@@ -57,24 +57,6 @@
 				Gets the attributes this attribute is derived from.
 			</description>
 		</method>
-		<method name="get_initial_value" qualifiers="const">
-			<return type="float" />
-			<description>
-				Gets the initial value of the attribute.
-			</description>
-		</method>
-		<method name="get_max_value" qualifiers="const">
-			<return type="float" />
-			<description>
-				Gets the maximum value of the attribute.
-			</description>
-		</method>
-		<method name="get_min_value" qualifiers="const">
-			<return type="float" />
-			<description>
-				Gets the minimum value of the attribute.
-			</description>
-		</method>
 		<method name="remove_buff">
 			<return type="bool" />
 			<param index="0" name="p_buff" type="AttributeBuff" />

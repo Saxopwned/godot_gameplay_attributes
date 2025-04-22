@@ -8,19 +8,4 @@
 	</description>
 	<tutorials>
 	</tutorials>
-	<methods>
-		<method name="create" qualifiers="static">
-			<return type="Attribute" />
-			<param index="0" name="attribute_name" type="String" />
-			<param index="1" name="initial_value" type="float" />
-			<description>
-				Creates a new Attribute with the given initial value.
-			</description>
-		</method>
-	</methods>
-	<members>
-		<member name="initial_value" type="float" setter="set_initial_value" getter="get_initial_value" default="0.0">
-			The initial value of the attribute.
-		</member>
-	</members>
 </class>
